@@ -14,7 +14,7 @@ import cymbol.compiler.StructSymbol;
 import cymbol.compiler.SymbolTable;
 
 public class TestDefineWalk {
-    
+
     private SymbolTable define(String source) {
         ANTLRInputStream input = new ANTLRInputStream(source);
         CymbolLexer l = new CymbolLexer(input);
@@ -27,15 +27,15 @@ public class TestDefineWalk {
         CymbolDefineListener defl = new CymbolDefineListener(table);
         walker.walk(defl, t);
         // System.out.println(((Tree)r.getTree()).toStringTree());
-        
+
         return table;
     }
-    
+
     @Test
     public void testSimpleStruct() {
         String source = "struct A { int x; }";
         SymbolTable t = define(source);
         StructSymbol s = (StructSymbol) t.globals.resolve("A");
     }
-    
+
 }

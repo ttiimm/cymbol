@@ -7,13 +7,15 @@ package cymbol.compiler;
  * courses, books, articles, and the like. Contact us if you are in doubt.
  * We make no guarantees that this code is fit for any purpose. 
  * Visit http://www.pragmaticprogrammer.com/titles/tpdsl for more book information.
-***/
+ ***/
 /** A symbol to represent built in types such int, float primitive types */
 public class BuiltInTypeSymbol extends Symbol implements Type {
-    
+
     public static final String INT = "int";
     public static final String FLOAT = "float";
     public static final String VOID = "void";
-    
-    public BuiltInTypeSymbol(String name) { super(name); }
+
+    public BuiltInTypeSymbol(String name) {
+        super(name);
+    }
 }
