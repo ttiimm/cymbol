@@ -18,7 +18,7 @@ compilationUnit
 	;
 
 structDeclaration
-  : 'struct' ID '{' structMember+ '}' ';'
+  : 'struct' ID '{' structMember+ '}'
   ;
   
 structMember
@@ -58,6 +58,10 @@ varDeclaration
   | type ID '[]' ('=' expression)? ';'
   ;
 
+block
+  : '{' statement* '}'
+  ;
+
 statement
   : block
   | structDeclaration
@@ -66,10 +70,6 @@ statement
   | 'return' expression? ';'
   | lhs '=' expression ';'
   | postfixExpression ';' 
-  ;
-
-block
-  : '{' statement* '}'
   ;
 
 lhs 
