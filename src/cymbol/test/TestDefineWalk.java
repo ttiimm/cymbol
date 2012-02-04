@@ -10,6 +10,7 @@ import org.junit.Test;
 import cymbol.compiler.CymbolDefineListener;
 import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
+import cymbol.compiler.StructSymbol;
 import cymbol.compiler.SymbolTable;
 
 public class TestDefineWalk {
@@ -34,6 +35,7 @@ public class TestDefineWalk {
     public void testSimpleStruct() {
         String source = "struct A { int x; }";
         SymbolTable t = define(source);
+        StructSymbol s = (StructSymbol) t.globals.resolve("A");
     }
     
 }
