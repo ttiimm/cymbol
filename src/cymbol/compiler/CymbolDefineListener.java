@@ -5,9 +5,16 @@ package cymbol.compiler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
-public class DefineListener implements CymbolListener {
+
+public class CymbolDefineListener implements CymbolListener {
     
-	@Override public void enterRule(CymbolParser.expressionContext ctx) { }
+	private SymbolTable table;
+	
+    public CymbolDefineListener(SymbolTable table) {
+        this.table = table;
+    }
+	
+    @Override public void enterRule(CymbolParser.expressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.expressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
 	@Override public void exitRule(CymbolParser.compilationUnitContext ctx) { }

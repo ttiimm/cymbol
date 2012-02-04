@@ -19,9 +19,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import cymbol.compiler.CymbolDefineListener;
 import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
-import cymbol.compiler.DefineListener;
+import cymbol.compiler.SymbolTable;
 
 public class Runner {
     private static CharStream determineInput(String[] args) throws IOException {
@@ -42,7 +43,7 @@ public class Runner {
         // System.out.println("tree = "+t.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
-        DefineListener def = new DefineListener();
+        CymbolDefineListener def = new CymbolDefineListener(new SymbolTable());
         walker.walk(def, t);
         // System.out.println(t.getChild(0));
         // System.out.println("result from tree walk = "+ ectx.v);
