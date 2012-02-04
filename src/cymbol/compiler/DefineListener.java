@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 public class DefineListener implements CymbolListener {
+    
 	@Override public void enterRule(CymbolParser.expressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.expressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
