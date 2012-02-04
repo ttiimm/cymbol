@@ -117,8 +117,7 @@ unaryExpression
 postfixExpression
   :   primary
     (
-      ( '(' expressionList ')'
-      | '(' ')'
+      ( '(' expressionList? ')'
       | '[' expr ']'
       | '.' ID
       )
