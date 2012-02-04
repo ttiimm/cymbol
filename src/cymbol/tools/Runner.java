@@ -1,4 +1,4 @@
-package cymbol.test;
+package cymbol.tools;
 
 /***
  * Excerpted from "Language Implementation Patterns",
@@ -23,7 +23,7 @@ import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
 import cymbol.compiler.DefineListener;
 
-public class Test {
+public class Runner {
     private static CharStream determineInput(String[] args) throws IOException {
         if (args.length > 0) {
             return new ANTLRFileStream(args[0]);
@@ -42,12 +42,9 @@ public class Test {
         // System.out.println("tree = "+t.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
-        DefineListener dcl = new DefineListener();
-        walker.walk(dcl, t);
+        DefineListener def = new DefineListener();
+        walker.walk(def, t);
         // System.out.println(t.getChild(0));
         // System.out.println("result from tree walk = "+ ectx.v);
-//        DefRef def = new DefRef(nodes, symtab); // use custom constructor
-//        def.downup(t); // trigger symtab actions upon certain subtrees 
-//        System.out.println("globals: "+symtab.globals);
     }
 }
