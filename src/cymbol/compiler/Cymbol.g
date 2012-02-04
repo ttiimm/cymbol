@@ -18,7 +18,7 @@ compilationUnit
 	;
 
 structDeclaration
-  : 'struct' ID '{' structMember+ '}'
+  : 'struct' name=ID '{' structMember+ '}'
   ;
   
 structMember

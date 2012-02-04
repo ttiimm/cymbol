@@ -43,7 +43,7 @@ public class Runner {
         // System.out.println("tree = "+t.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
-        CymbolDefineListener def = new CymbolDefineListener(new SymbolTable());
+        CymbolDefineListener def = new CymbolDefineListener(new SymbolTable().globals);
         walker.walk(def, t);
         // System.out.println(t.getChild(0));
         // System.out.println("result from tree walk = "+ ectx.v);

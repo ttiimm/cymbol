@@ -12,12 +12,15 @@ import java.util.Map;
 
 import java.util.LinkedHashMap;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+
 public class StructSymbol extends ScopedSymbol implements Type, Scope {
 
     Map<String, Symbol> fields = new LinkedHashMap<String, Symbol>();
 
-    public StructSymbol(String name, Scope parent) {
-        super(name, parent);
+    public StructSymbol(String name, Scope parent, ParserRuleContext<Token> t) {
+        super(name, parent, t);
     }
 
     /** For a.b, only look in fields to resolve b, not up scope tree */

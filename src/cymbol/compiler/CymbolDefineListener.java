@@ -8,16 +8,25 @@ import org.antlr.v4.runtime.Token;
 
 public class CymbolDefineListener implements CymbolListener {
     
-	private SymbolTable table;
+	private Scope current;
 	
-    public CymbolDefineListener(SymbolTable table) {
-        this.table = table;
+    public CymbolDefineListener(Scope global) {
+        this.current = global;
     }
 	
+    @Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
+    @Override public void exitRule(CymbolParser.compilationUnitContext ctx) { }
+	
+    @Override public void enterRule(CymbolParser.structDeclarationContext ctx) {
+       StructSymbol struct = new StructSymbol(ctx.name.getText(), this.current, ctx);
+       current.define(struct);
+       this.current = struct;
+    }
+    
+    @Override public void exitRule(CymbolParser.structDeclarationContext ctx) { }
+    
     @Override public void enterRule(CymbolParser.expressionContext ctx) { }
-	@Override public void exitRule(CymbolParser.expressionContext ctx) { }
-	@Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
-	@Override public void exitRule(CymbolParser.compilationUnitContext ctx) { }
+    @Override public void exitRule(CymbolParser.expressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.expressionListContext ctx) { }
 	@Override public void exitRule(CymbolParser.expressionListContext ctx) { }
 	@Override public void enterRule(CymbolParser.unaryExpressionContext ctx) { }
@@ -50,8 +59,7 @@ public class CymbolDefineListener implements CymbolListener {
 	@Override public void exitRule(CymbolParser.primaryContext ctx) { }
 	@Override public void enterRule(CymbolParser.relationalExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.relationalExpressionContext ctx) { }
-	@Override public void enterRule(CymbolParser.structDeclarationContext ctx) { }
-	@Override public void exitRule(CymbolParser.structDeclarationContext ctx) { }
+
 	@Override public void enterRule(CymbolParser.multiplicativeExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.multiplicativeExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.methodDeclarationContext ctx) { }

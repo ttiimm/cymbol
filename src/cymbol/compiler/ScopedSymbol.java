@@ -10,17 +10,23 @@ package cymbol.compiler;
  ***/
 import java.util.Map;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+
 public abstract class ScopedSymbol extends Symbol implements Scope {
+    
     Scope enclosingScope;
+    ParserRuleContext<Token> token;
 
     public ScopedSymbol(String name, Type type, Scope enclosingScope) {
         super(name, type);
         this.enclosingScope = enclosingScope;
     }
 
-    public ScopedSymbol(String name, Scope enclosingScope) {
+    public ScopedSymbol(String name, Scope enclosingScope, ParserRuleContext<Token> t) {
         super(name);
         this.enclosingScope = enclosingScope;
+        this.token = t;
     }
 
     public Symbol resolve(String name) {
