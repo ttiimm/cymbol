@@ -18,7 +18,7 @@ import cymbol.symtab.StructSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.SymbolTable;
 
-public class TestDefineWalk {
+public class TestDefPhase {
     
     @Test
     public void testSimpleStruct() {
