@@ -11,11 +11,11 @@ import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
 
 
-public class CymbolDefineListener implements CymbolListener {
+public class ListenerDefPhase implements CymbolListener {
     
 	private Scope current;
 	
-    public CymbolDefineListener(Scope global) {
+    public ListenerDefPhase(Scope global) {
         this.current = global;
     }
 	
@@ -53,6 +53,7 @@ public class CymbolDefineListener implements CymbolListener {
     @Override public void enterRule(CymbolParser.blockContext ctx) { 
         LocalScope local = new LocalScope(this.current);
         this.current = local;
+        ctx.scope = local;
     }
     
     @Override public void exitRule(CymbolParser.blockContext ctx) { 
