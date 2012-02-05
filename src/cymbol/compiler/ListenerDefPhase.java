@@ -19,9 +19,6 @@ public class ListenerDefPhase implements CymbolListener {
         this.current = global;
     }
 	
-    @Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
-    @Override public void exitRule(CymbolParser.compilationUnitContext ctx) { }
-	
     @Override public void enterRule(CymbolParser.structDeclarationContext ctx) {
        StructSymbol struct = new StructSymbol(ctx.name.getText(), this.current, ctx);
        current.define(struct);
@@ -69,15 +66,14 @@ public class ListenerDefPhase implements CymbolListener {
     }
         
     
-
+    @Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
+    @Override public void exitRule(CymbolParser.compilationUnitContext ctx) { }
     @Override public void enterRule(CymbolParser.expressionContext ctx) { }
     @Override public void exitRule(CymbolParser.expressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.expressionListContext ctx) { }
 	@Override public void exitRule(CymbolParser.expressionListContext ctx) { }
 	@Override public void enterRule(CymbolParser.unaryExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.unaryExpressionContext ctx) { }
-
-
 	@Override public void enterRule(CymbolParser.additiveExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.additiveExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.exprContext ctx) { }
@@ -102,13 +98,10 @@ public class ListenerDefPhase implements CymbolListener {
 	@Override public void exitRule(CymbolParser.primaryContext ctx) { }
 	@Override public void enterRule(CymbolParser.relationalExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.relationalExpressionContext ctx) { }
-
 	@Override public void enterRule(CymbolParser.multiplicativeExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.multiplicativeExpressionContext ctx) { }
-
 	@Override public void enterRule(CymbolParser.varDeclarationContext ctx) { }
 	@Override public void exitRule(CymbolParser.varDeclarationContext ctx) { }
-
 	@Override public void enterEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void exitEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void visitTerminal(ParserRuleContext<Token > ctx, Token symbol) { }

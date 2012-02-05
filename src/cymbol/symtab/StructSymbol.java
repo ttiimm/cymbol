@@ -18,8 +18,8 @@ public class StructSymbol extends ScopedSymbol implements Type, Scope {
     Map<String, Symbol> fields = new LinkedHashMap<String, Symbol>();
 
     public StructSymbol(String name, Scope parent,
-            ParserRuleContext<Token> token) {
-        super(name, parent, token);
+            ParserRuleContext<Token> tree) {
+        super(name, parent, tree);
     }
 
     /** For a.b, only look in fields to resolve b, not up scope tree */

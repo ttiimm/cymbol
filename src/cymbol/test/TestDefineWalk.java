@@ -7,10 +7,11 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 
-import cymbol.compiler.CymbolDefineListener;
+import cymbol.compiler.ListenerDefPhase;
 import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
 import cymbol.symtab.MethodSymbol;
@@ -20,6 +21,11 @@ import cymbol.symtab.SymbolTable;
 
 public class TestDefineWalk {
 
+    @Test
+    public void testVariableDeclaration() {
+        
+    }
+    
     @Test
     public void testSimpleStruct() {
         String source = "struct A { int x; }";
@@ -60,6 +66,8 @@ public class TestDefineWalk {
         SymbolTable t = define(source);
         MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
         assertEquals("global.M()", m.toString());
+        CymbolParser.blockContext ctx = (CymbolParser.blockContext) m.tree.getChild(4);
+        assertEquals("local[A]", ctx.scope.toString());
     }
     
     private SymbolTable define(String source) {
@@ -72,7 +80,7 @@ public class TestDefineWalk {
         ParserRuleContext<Token> t = p.compilationUnit();
         ParseTreeWalker walker = new ParseTreeWalker();
         SymbolTable table = new SymbolTable();
-        CymbolDefineListener defl = new CymbolDefineListener(table.globals);
+        ListenerDefPhase defl = new ListenerDefPhase(table.globals);
         walker.walk(defl, t);
         // System.out.println(((Tree)r.getTree()).toStringTree());
 

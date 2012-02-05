@@ -19,6 +19,7 @@ public abstract class BaseScope implements Scope {
         this.enclosingScope = parent;
     }
 
+    @Override
     public Symbol resolve(String name) {
         Symbol s = symbols.get(name);
         if (s != null) return s;
@@ -27,16 +28,19 @@ public abstract class BaseScope implements Scope {
         return null; // not found
     }
 
+    @Override
     public void define(Symbol sym) {
         symbols.put(sym.name, sym);
         sym.scope = this; // track the scope in each symbol
     }
 
+    @Override
     public Scope getEnclosingScope() {
         return enclosingScope;
     }
     
+    @Override
     public String toString() {
-        return symbols.keySet().toString();
+        return getScopeName() + symbols.keySet().toString();
     }
 }

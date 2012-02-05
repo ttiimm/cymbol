@@ -5,6 +5,8 @@ grammar Cymbol;
 
 @header {
 package cymbol.compiler;
+
+import cymbol.symtab.Scope;
 }
 
 @lexer::header {
@@ -58,7 +60,8 @@ varDeclaration
   | type ID '[]' ('=' expression)? ';'
   ;
 
-block
+block 
+  locals [Scope scope]  
   : '{' statement* '}'
   ;
 

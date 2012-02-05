@@ -23,8 +23,8 @@ public class MethodSymbol extends ScopedSymbol {
     }
 
     public MethodSymbol(String name, Scope parent,
-            ParserRuleContext<Token> token) {
-        super(name, parent, token);
+            ParserRuleContext<Token> tree) {
+        super(name, parent, tree);
     }
 
     public Map<String, Symbol> getMembers() {

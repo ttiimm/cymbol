@@ -19,6 +19,7 @@ public class LocalScope extends BaseScope {
         super(parent);
     }
 
+    @Override
     public String getScopeName() {
         return "local";
     }

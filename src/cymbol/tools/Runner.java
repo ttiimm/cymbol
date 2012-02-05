@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import cymbol.compiler.CymbolDefineListener;
+import cymbol.compiler.ListenerDefPhase;
 import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
 import cymbol.symtab.SymbolTable;
@@ -43,7 +43,7 @@ public class Runner {
         // System.out.println("tree = "+t.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
-        CymbolDefineListener def = new CymbolDefineListener(new SymbolTable().globals);
+        ListenerDefPhase def = new ListenerDefPhase(new SymbolTable().globals);
         walker.walk(def, t);
         // System.out.println(t.getChild(0));
         // System.out.println("result from tree walk = "+ ectx.v);
