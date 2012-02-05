@@ -1,4 +1,7 @@
-package cymbol.compiler;
+package cymbol.symtab;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /***
  * Excerpted from "Language Implementation Patterns", published by The Pragmatic
@@ -8,13 +11,16 @@ package cymbol.compiler;
  * Visit http://www.pragmaticprogrammer.com/titles/tpdsl for more book
  * information.
  ***/
-public class GlobalScope extends BaseScope {
-
-    public GlobalScope() {
-        super(null);
+public class LocalScope extends BaseScope {
+    
+    List<LocalScope> nested = new ArrayList<LocalScope>();
+    
+    public LocalScope(Scope parent) {
+        super(parent);
     }
 
     public String getScopeName() {
-        return "global";
+        return "local";
     }
+
 }

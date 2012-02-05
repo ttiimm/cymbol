@@ -5,6 +5,11 @@ package cymbol.compiler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
+import cymbol.symtab.LocalScope;
+import cymbol.symtab.MethodSymbol;
+import cymbol.symtab.Scope;
+import cymbol.symtab.StructSymbol;
+
 
 public class CymbolDefineListener implements CymbolListener {
     
@@ -19,32 +24,59 @@ public class CymbolDefineListener implements CymbolListener {
 	
     @Override public void enterRule(CymbolParser.structDeclarationContext ctx) {
        StructSymbol struct = new StructSymbol(ctx.name.getText(), this.current, ctx);
-       pushScope(struct);
+       current.define(struct);
+       push(struct);
     }
-    
+
     @Override public void exitRule(CymbolParser.structDeclarationContext ctx) { 
-        popScope();
+        pop();
     }
     
     @Override public void enterRule(CymbolParser.methodDeclarationContext ctx) {
         MethodSymbol method = new MethodSymbol(ctx.name.getText(), this.current, ctx);
-        pushScope(method);
+        current.define(method);
+        push(method);
     }
     
     @Override public void exitRule(CymbolParser.methodDeclarationContext ctx) {
-        popScope();
+        pop();
     }
     
+    @Override public void enterRule(CymbolParser.structMemberContext ctx) {
+        if(ctx.name != null) {
+//            current.define(sym)
+        }
+    }
+    
+    @Override public void exitRule(CymbolParser.structMemberContext ctx) { }
+
+    @Override public void enterRule(CymbolParser.blockContext ctx) { 
+        LocalScope local = new LocalScope(this.current);
+        this.current = local;
+    }
+    
+    @Override public void exitRule(CymbolParser.blockContext ctx) { 
+        pop();
+    }
+    
+    private void push(Scope scope) {
+        this.current = scope;
+    }
+    
+    private void pop() {
+        this.current = current.getEnclosingScope();
+    }
+        
+    
+
     @Override public void enterRule(CymbolParser.expressionContext ctx) { }
     @Override public void exitRule(CymbolParser.expressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.expressionListContext ctx) { }
 	@Override public void exitRule(CymbolParser.expressionListContext ctx) { }
 	@Override public void enterRule(CymbolParser.unaryExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.unaryExpressionContext ctx) { }
-	@Override public void enterRule(CymbolParser.structMemberContext ctx) { }
-	@Override public void exitRule(CymbolParser.structMemberContext ctx) { }
-	@Override public void enterRule(CymbolParser.blockContext ctx) { }
-	@Override public void exitRule(CymbolParser.blockContext ctx) { }
+
+
 	@Override public void enterRule(CymbolParser.additiveExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.additiveExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.exprContext ctx) { }
@@ -79,13 +111,4 @@ public class CymbolDefineListener implements CymbolListener {
 	@Override public void enterEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void exitEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void visitTerminal(ParserRuleContext<Token > ctx, Token symbol) { }
-
-	private void pushScope(ScopedSymbol scope) {
-	    current.define(scope);
-	    this.current = scope;
-	}
-	
-	private void popScope() {
-	    this.current = current.getEnclosingScope();
-    }
 }

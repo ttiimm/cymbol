@@ -1,4 +1,4 @@
-package cymbol.compiler;
+package cymbol.symtab;
 
 /***
  * Excerpted from "Language Implementation Patterns", published by The Pragmatic
@@ -8,12 +8,16 @@ package cymbol.compiler;
  * Visit http://www.pragmaticprogrammer.com/titles/tpdsl for more book
  * information.
  ***/
-public class LocalScope extends BaseScope {
-    public LocalScope(Scope parent) {
-        super(parent);
-    }
+public interface Scope {
+    public String getScopeName();
 
-    public String getScopeName() {
-        return "local";
-    }
+    /** Where to look next for symbols; */
+    public Scope getEnclosingScope();
+
+    /** Define a symbol in the current scope */
+    public void define(Symbol sym);
+
+    /** Look up name in this scope or in enclosing scope if not here */
+    public Symbol resolve(String name);
+    
 }

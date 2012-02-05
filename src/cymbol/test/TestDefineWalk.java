@@ -13,9 +13,10 @@ import org.junit.Test;
 import cymbol.compiler.CymbolDefineListener;
 import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
-import cymbol.compiler.MethodSymbol;
-import cymbol.compiler.StructSymbol;
-import cymbol.compiler.SymbolTable;
+import cymbol.symtab.MethodSymbol;
+import cymbol.symtab.StructSymbol;
+import cymbol.symtab.Symbol;
+import cymbol.symtab.SymbolTable;
 
 public class TestDefineWalk {
 
@@ -23,8 +24,8 @@ public class TestDefineWalk {
     public void testSimpleStruct() {
         String source = "struct A { int x; }";
         SymbolTable t = define(source);
-        StructSymbol s = (StructSymbol) t.globals.resolve("A");
-        assertEquals("struct A:{\n}\n", s.toString());
+        Symbol s = t.globals.resolve("A");
+        assertEquals("struct A:{}", s.toString());
     }
 
     @Test
@@ -37,15 +38,25 @@ public class TestDefineWalk {
         
         SymbolTable t = define(source);
         StructSymbol a = (StructSymbol) t.globals.resolve("A");
-        assertEquals("struct A:{\nstruct B:{\n}\n}\n", a.toString());
+        assertEquals("struct A:{B}", a.toString());
         assertNull(t.globals.resolve("B"));
-        StructSymbol b = (StructSymbol) a.resolve("B");
-        assertEquals("struct B:{\n}\n", b.toString());
+        Symbol b = a.resolve("B");
+        assertEquals("struct B:{}", b.toString());
     }
 
     @Test
     public void testEmptyMethod() {
         String source = "void M(){ }";
+        SymbolTable t = define(source);
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
+        assertEquals("global.M()", m.toString());
+    }
+    
+    @Test
+    public void testMethodWithNestedStruct() {
+        String source = "void M(){" +
+        		        "    struct A { int x; } " +
+        		        "}";
         SymbolTable t = define(source);
         MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
         assertEquals("global.M()", m.toString());

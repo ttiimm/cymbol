@@ -1,4 +1,4 @@
-package cymbol.compiler;
+package cymbol.symtab;
 
 /***
  * Excerpted from "Language Implementation Patterns", published by The Pragmatic
@@ -28,10 +28,8 @@ public class Symbol { // A generic programming language symbol
 
     public String toString() {
         String s = "";
-        if (scope != null) {
-            s = scope.getScopeName() + ".";
-        }
-        if (type != null) { return '<' + s + getName() + ":" + type + '>'; }
+        if (scope != null) s = scope.getScopeName() + ".";
+        if (type != null) return '<' + s + getName() + ":" + type + '>';
         return s + getName();
     }
 

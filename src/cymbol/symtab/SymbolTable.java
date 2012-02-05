@@ -1,4 +1,4 @@
-package cymbol.compiler;
+package cymbol.symtab;
 
 /***
  * Excerpted from "Language Implementation Patterns", published by The Pragmatic
@@ -9,6 +9,7 @@ package cymbol.compiler;
  * information.
  ***/
 public class SymbolTable {
+    
     public GlobalScope globals = new GlobalScope();
 
     public SymbolTable() {
@@ -16,9 +17,9 @@ public class SymbolTable {
     }
 
     protected void initTypeSystem() {
-        globals.define(new BuiltInTypeSymbol(BuiltInTypeSymbol.INT));
-        globals.define(new BuiltInTypeSymbol(BuiltInTypeSymbol.FLOAT));
-        globals.define(new BuiltInTypeSymbol(BuiltInTypeSymbol.VOID)); // pseudo-type
+        globals.define(new BuiltInTypeSymbol("int"));
+        globals.define(new BuiltInTypeSymbol("float"));
+        globals.define(new BuiltInTypeSymbol("void")); // pseudo-type
     }
 
     public String toString() {

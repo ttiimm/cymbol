@@ -22,7 +22,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import cymbol.compiler.CymbolDefineListener;
 import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
-import cymbol.compiler.SymbolTable;
+import cymbol.symtab.SymbolTable;
 
 public class Runner {
     private static CharStream determineInput(String[] args) throws IOException {

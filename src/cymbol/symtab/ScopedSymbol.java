@@ -1,4 +1,4 @@
-package cymbol.compiler;
+package cymbol.symtab;
 
 /***
  * Excerpted from "Language Implementation Patterns",
@@ -14,22 +14,21 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 public abstract class ScopedSymbol extends Symbol implements Scope {
-    
     Scope enclosingScope;
-    ParserRuleContext<Token> token;
+    private ParserRuleContext<Token> token;
 
     public ScopedSymbol(String name, Type type, Scope enclosingScope) {
         super(name, type);
         this.enclosingScope = enclosingScope;
     }
 
-    public ScopedSymbol(String name, Scope enclosingScope, ParserRuleContext<Token> t) {
+    public ScopedSymbol(String name, Scope enclosingScope,
+            ParserRuleContext<Token> token) {
         super(name);
         this.enclosingScope = enclosingScope;
-        this.token = t;
+        this.token = token;
     }
 
-    @Override
     public Symbol resolve(String name) {
         Symbol s = getMembers().get(name);
         if (s != null) return s;
@@ -43,18 +42,15 @@ public abstract class ScopedSymbol extends Symbol implements Scope {
         return resolve(name);
     }
 
-    @Override
     public void define(Symbol sym) {
         getMembers().put(sym.name, sym);
         sym.scope = this; // track the scope in each symbol
     }
 
-    @Override
     public Scope getEnclosingScope() {
         return enclosingScope;
     }
 
-    @Override
     public String getScopeName() {
         return name;
     }

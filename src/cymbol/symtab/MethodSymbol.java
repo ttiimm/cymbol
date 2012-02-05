@@ -1,4 +1,4 @@
-package cymbol.compiler;
+package cymbol.symtab;
 
 /***
  * Excerpted from "Language Implementation Patterns",
@@ -17,17 +17,22 @@ import org.antlr.v4.runtime.Token;
 public class MethodSymbol extends ScopedSymbol {
     Map<String, Symbol> orderedArgs = new LinkedHashMap<String, Symbol>();
 
-    public MethodSymbol(String name, Scope parent, ParserRuleContext<Token> t) {
-        super(name, parent, t);
+    public MethodSymbol(String name, Type retType, Scope parent,
+            ParserRuleContext<Token> token) {
+        super(name, retType, parent);
     }
 
-    @Override
+    public MethodSymbol(String name, Scope parent,
+            ParserRuleContext<Token> token) {
+        super(name, parent, token);
+    }
+
     public Map<String, Symbol> getMembers() {
         return orderedArgs;
     }
 
-    @Override
     public String getName() {
-        return name + "(" + stripBrackets(orderedArgs.keySet().toString()) + ")";
+        return name + "(" + stripBrackets(orderedArgs.keySet().toString())
+                + ")";
     }
 }

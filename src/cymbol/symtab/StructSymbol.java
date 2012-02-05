@@ -1,4 +1,4 @@
-package cymbol.compiler;
+package cymbol.symtab;
 
 /***
  * Excerpted from "Language Implementation Patterns",
@@ -9,18 +9,17 @@ package cymbol.compiler;
  * Visit http://www.pragmaticprogrammer.com/titles/tpdsl for more book information.
  ***/
 import java.util.Map;
-
 import java.util.LinkedHashMap;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 public class StructSymbol extends ScopedSymbol implements Type, Scope {
-
     Map<String, Symbol> fields = new LinkedHashMap<String, Symbol>();
 
-    public StructSymbol(String name, Scope parent, ParserRuleContext<Token> t) {
-        super(name, parent, t);
+    public StructSymbol(String name, Scope parent,
+            ParserRuleContext<Token> token) {
+        super(name, parent, token);
     }
 
     /** For a.b, only look in fields to resolve b, not up scope tree */
@@ -28,15 +27,12 @@ public class StructSymbol extends ScopedSymbol implements Type, Scope {
         return fields.get(name);
     }
 
-    @Override
     public Map<String, Symbol> getMembers() {
         return fields;
     }
 
-    @Override
     public String toString() {
-        return "struct " + name + ":{\n"
-               + stripBrackets(fields.values().toString()) 
-               + "}\n";
+        return "struct " + name + ":{"
+                + stripBrackets(fields.keySet().toString()) + "}";
     }
 }

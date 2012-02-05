@@ -1,4 +1,4 @@
-package cymbol.compiler;
+package cymbol.symtab;
 
 /***
  * Excerpted from "Language Implementation Patterns",
@@ -19,27 +19,23 @@ public abstract class BaseScope implements Scope {
         this.enclosingScope = parent;
     }
 
-    @Override
     public Symbol resolve(String name) {
         Symbol s = symbols.get(name);
-        if (s != null) { return s; }
+        if (s != null) return s;
         // if not here, check any enclosing scope
-        if (enclosingScope != null) { return enclosingScope.resolve(name); }
+        if (enclosingScope != null) return enclosingScope.resolve(name);
         return null; // not found
     }
 
-    @Override
     public void define(Symbol sym) {
         symbols.put(sym.name, sym);
         sym.scope = this; // track the scope in each symbol
     }
 
-    @Override
     public Scope getEnclosingScope() {
         return enclosingScope;
     }
-
-    @Override
+    
     public String toString() {
         return symbols.keySet().toString();
     }
