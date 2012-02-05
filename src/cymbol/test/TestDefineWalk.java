@@ -70,6 +70,20 @@ public class TestDefineWalk {
         assertEquals("local[A]", ctx.scope.toString());
     }
     
+    @Test
+    public void testDoublyNestedStruct() {
+        String source = "void M(){" +
+        		        "    {" +
+        		        "         struct A { int x; }" +
+        		        "    }" +
+        		        "}";
+        SymbolTable t = define(source);
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
+        CymbolParser.blockContext first = (CymbolParser.blockContext) m.tree.getChild(4);
+        CymbolParser.blockContext second = (CymbolParser.blockContext) first.getChild(1).getChild(0);
+        assertEquals("local[A]", second.scope.toString());
+    }
+    
     private SymbolTable define(String source) {
         ANTLRInputStream input = new ANTLRInputStream(source);
         CymbolLexer l = new CymbolLexer(input);
