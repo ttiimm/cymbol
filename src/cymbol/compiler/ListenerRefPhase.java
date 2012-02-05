@@ -5,8 +5,17 @@ package cymbol.compiler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
+import cymbol.symtab.GlobalScope;
+
 public class ListenerRefPhase implements CymbolListener {
-	@Override public void enterRule(CymbolParser.expressionContext ctx) { }
+	
+    private GlobalScope current;
+    
+    public ListenerRefPhase(GlobalScope globals) {
+        this.current = globals;
+    }
+    
+    @Override public void enterRule(CymbolParser.expressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.expressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
 	@Override public void exitRule(CymbolParser.compilationUnitContext ctx) { }

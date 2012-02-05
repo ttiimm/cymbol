@@ -14,14 +14,11 @@ import java.io.IOException;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import cymbol.compiler.ListenerDefPhase;
-import cymbol.compiler.CymbolLexer;
-import cymbol.compiler.CymbolParser;
+import cymbol.compiler.Compiler;
 import cymbol.symtab.SymbolTable;
 
 public class Runner {
@@ -32,14 +29,11 @@ public class Runner {
             return new ANTLRInputStream(System.in);
         }
     }
-
+    
     public static void main(String[] args) throws IOException {
         CharStream in = determineInput(args);
-        CymbolLexer lexer = new CymbolLexer(in);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        CymbolParser parser = new CymbolParser(tokens);
-        parser.setBuildParseTree(true);
-        ParserRuleContext<Token> t = parser.compilationUnit();
+        Compiler c = new Compiler();
+        ParseTree t = c.constructParseTree(in);
         // System.out.println("tree = "+t.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
