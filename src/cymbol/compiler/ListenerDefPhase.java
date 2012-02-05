@@ -42,7 +42,8 @@ public class ListenerDefPhase implements CymbolListener {
     
     @Override public void enterRule(CymbolParser.structMemberContext ctx) {
         if(ctx.name != null) {
-//            current.define(sym)
+            VariableSymbol field = new VariableSymbol(ctx.name.getText());
+            current.define(field);
         }
     }
     

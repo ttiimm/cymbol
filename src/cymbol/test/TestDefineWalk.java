@@ -25,9 +25,9 @@ public class TestDefineWalk {
         String source = "struct A { int x; }";
         SymbolTable t = define(source);
         Symbol s = t.globals.resolve("A");
-        assertEquals("struct A:{}", s.toString());
+        assertEquals("struct A:{x}", s.toString());
     }
-
+    
     @Test
     public void testNestedStruct() {
         String source = "struct A {   " + 
@@ -41,7 +41,7 @@ public class TestDefineWalk {
         assertEquals("struct A:{B}", a.toString());
         assertNull(t.globals.resolve("B"));
         Symbol b = a.resolve("B");
-        assertEquals("struct B:{}", b.toString());
+        assertEquals("struct B:{x}", b.toString());
     }
 
     @Test
