@@ -56,8 +56,8 @@ primitiveType
   ;
 
 varDeclaration
-  : type ID ('=' expression)? ';'
-  | type ID '[]' ('=' expression)? ';'
+  : type name=ID ('=' expression)? ';'
+  | type name=ID '[]' ('=' expression)? ';'
   ;
 
 block 

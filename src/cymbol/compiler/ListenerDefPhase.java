@@ -9,6 +9,7 @@ import cymbol.symtab.LocalScope;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
+import cymbol.symtab.VariableSymbol;
 
 
 public class ListenerDefPhase implements CymbolListener {
@@ -65,7 +66,8 @@ public class ListenerDefPhase implements CymbolListener {
         this.current = current.getEnclosingScope();
     }
         
-    
+    @Override public void enterRule(CymbolParser.varDeclarationContext ctx) { }
+    @Override public void exitRule(CymbolParser.varDeclarationContext ctx) { }
     @Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
     @Override public void exitRule(CymbolParser.compilationUnitContext ctx) { }
     @Override public void enterRule(CymbolParser.expressionContext ctx) { }
@@ -100,8 +102,6 @@ public class ListenerDefPhase implements CymbolListener {
 	@Override public void exitRule(CymbolParser.relationalExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.multiplicativeExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.multiplicativeExpressionContext ctx) { }
-	@Override public void enterRule(CymbolParser.varDeclarationContext ctx) { }
-	@Override public void exitRule(CymbolParser.varDeclarationContext ctx) { }
 	@Override public void enterEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void exitEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void visitTerminal(ParserRuleContext<Token > ctx, Token symbol) { }

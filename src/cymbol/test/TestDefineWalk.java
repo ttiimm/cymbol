@@ -7,24 +7,18 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 
-import cymbol.compiler.ListenerDefPhase;
 import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
+import cymbol.compiler.ListenerDefPhase;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.SymbolTable;
 
 public class TestDefineWalk {
-
-    @Test
-    public void testVariableDeclaration() {
-        
-    }
     
     @Test
     public void testSimpleStruct() {
