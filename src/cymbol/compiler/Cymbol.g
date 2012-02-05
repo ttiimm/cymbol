@@ -25,8 +25,8 @@ structDeclaration
   ;
   
 structMember
-  : type name=ID ';'
-  | type name=ID '[]' ';'
+  : t=type name=ID ';'
+  | t=type name=ID '[]' ';'
   | structDeclaration
   ;
 
