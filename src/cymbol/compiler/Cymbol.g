@@ -7,6 +7,7 @@ grammar Cymbol;
 package cymbol.compiler;
 
 import cymbol.symtab.Scope;
+import cymbol.symtab.Type;
 }
 
 @lexer::header {
@@ -42,22 +43,22 @@ parameter
   | type ID '[]'
   ;
 
-type
-  : primitiveType
-  | ID
+type locals [Type type, String t]
+  : primitiveType { $type.t = $primitiveType.t; } 
+  | ID            { $type.t = $ID.getText(); }
   ;
 
-primitiveType
-  : 'float'
-  | 'int'
-  | 'char'
-  | 'boolean'
-  | 'void'
+primitiveType returns [String t]
+  : 'float'  {$primitiveType.t = "float"; }
+  | 'int'    {$primitiveType.t = "int"; }
+  | 'char'   {$primitiveType.t = "char"; }
+  | 'boolean'{$primitiveType.t = "boolean"; }
+  | 'void'   {$primitiveType.t = "void"; }
   ;
 
 varDeclaration
-  : type name=ID ('=' expression)? ';'
-  | type name=ID '[]' ('=' expression)? ';'
+  : t=type name=ID ('=' expression)? ';'
+  | t=type name=ID '[]' ('=' expression)? ';'
   ;
 
 block 

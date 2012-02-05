@@ -11,7 +11,7 @@ package cymbol.symtab;
 public class Symbol { // A generic programming language symbol
     
     String name; // All symbols at least have a name
-    Type type;
+    public Type type;
     Scope scope; // All symbols know what scope contains them.
 
     public Symbol(String name) {

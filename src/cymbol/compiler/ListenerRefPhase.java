@@ -6,6 +6,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 import cymbol.symtab.GlobalScope;
+import cymbol.symtab.Type;
+import cymbol.symtab.VariableSymbol;
 
 public class ListenerRefPhase implements CymbolListener {
 	
@@ -15,6 +17,21 @@ public class ListenerRefPhase implements CymbolListener {
         this.current = globals;
     }
     
+    @Override public void enterRule(CymbolParser.varDeclarationContext ctx) { }
+
+    @Override public void exitRule(CymbolParser.varDeclarationContext ctx) {
+        VariableSymbol var = new VariableSymbol(ctx.name.getText(), ctx.t.type);
+        current.define(var);
+    }
+    
+    @Override public void enterRule(CymbolParser.typeContext ctx) { }
+    
+    @Override public void exitRule(CymbolParser.typeContext ctx) { 
+        ctx.type = (Type) current.resolve(ctx.t);
+    }
+    
+    @Override public void enterRule(CymbolParser.primitiveTypeContext ctx) { }
+    @Override public void exitRule(CymbolParser.primitiveTypeContext ctx) { }
     @Override public void enterRule(CymbolParser.expressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.expressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }
@@ -31,8 +48,6 @@ public class ListenerRefPhase implements CymbolListener {
 	@Override public void exitRule(CymbolParser.additiveExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.exprContext ctx) { }
 	@Override public void exitRule(CymbolParser.exprContext ctx) { }
-	@Override public void enterRule(CymbolParser.typeContext ctx) { }
-	@Override public void exitRule(CymbolParser.typeContext ctx) { }
 	@Override public void enterRule(CymbolParser.postfixExpressionContext ctx) { }
 	@Override public void exitRule(CymbolParser.postfixExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.lhsContext ctx) { }
@@ -45,8 +60,6 @@ public class ListenerRefPhase implements CymbolListener {
 	@Override public void exitRule(CymbolParser.parameterContext ctx) { }
 	@Override public void enterRule(CymbolParser.formalParametersContext ctx) { }
 	@Override public void exitRule(CymbolParser.formalParametersContext ctx) { }
-	@Override public void enterRule(CymbolParser.primitiveTypeContext ctx) { }
-	@Override public void exitRule(CymbolParser.primitiveTypeContext ctx) { }
 	@Override public void enterRule(CymbolParser.primaryContext ctx) { }
 	@Override public void exitRule(CymbolParser.primaryContext ctx) { }
 	@Override public void enterRule(CymbolParser.relationalExpressionContext ctx) { }
@@ -57,8 +70,6 @@ public class ListenerRefPhase implements CymbolListener {
 	@Override public void exitRule(CymbolParser.multiplicativeExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.methodDeclarationContext ctx) { }
 	@Override public void exitRule(CymbolParser.methodDeclarationContext ctx) { }
-	@Override public void enterRule(CymbolParser.varDeclarationContext ctx) { }
-	@Override public void exitRule(CymbolParser.varDeclarationContext ctx) { }
 
 	@Override public void enterEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void exitEveryRule(ParserRuleContext<Token > ctx) { }
