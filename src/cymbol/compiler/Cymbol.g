@@ -44,7 +44,7 @@ parameter
 
 type
   : primitiveType
-  | 'struct' ID
+  | ID
   ;
 
 primitiveType

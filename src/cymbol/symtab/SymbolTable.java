@@ -19,7 +19,9 @@ public class SymbolTable {
     protected void initTypeSystem() {
         globals.define(new BuiltInTypeSymbol("int"));
         globals.define(new BuiltInTypeSymbol("float"));
-        globals.define(new BuiltInTypeSymbol("void")); // pseudo-type
+        globals.define(new BuiltInTypeSymbol("boolean"));
+        globals.define(new BuiltInTypeSymbol("char"));
+        globals.define(new BuiltInTypeSymbol("void")); 
     }
 
     public String toString() {
