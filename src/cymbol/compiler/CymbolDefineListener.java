@@ -19,20 +19,20 @@ public class CymbolDefineListener implements CymbolListener {
 	
     @Override public void enterRule(CymbolParser.structDeclarationContext ctx) {
        StructSymbol struct = new StructSymbol(ctx.name.getText(), this.current, ctx);
-       current.define(struct);
-       this.current = struct;
+       pushScope(struct);
     }
     
     @Override public void exitRule(CymbolParser.structDeclarationContext ctx) { 
         popScope();
     }
     
-    @Override public void enterRule(CymbolParser.methodDeclarationContext ctx) { 
-        
+    @Override public void enterRule(CymbolParser.methodDeclarationContext ctx) {
+        MethodSymbol method = new MethodSymbol(ctx.name.getText(), this.current, ctx);
+        pushScope(method);
     }
     
     @Override public void exitRule(CymbolParser.methodDeclarationContext ctx) {
-        
+        popScope();
     }
     
     @Override public void enterRule(CymbolParser.expressionContext ctx) { }
@@ -79,6 +79,11 @@ public class CymbolDefineListener implements CymbolListener {
 	@Override public void enterEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void exitEveryRule(ParserRuleContext<Token > ctx) { }
 	@Override public void visitTerminal(ParserRuleContext<Token > ctx, Token symbol) { }
+
+	private void pushScope(ScopedSymbol scope) {
+	    current.define(scope);
+	    this.current = scope;
+	}
 	
 	private void popScope() {
 	    this.current = current.getEnclosingScope();

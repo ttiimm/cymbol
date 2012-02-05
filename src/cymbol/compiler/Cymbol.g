@@ -28,7 +28,7 @@ structMember
   ;
 
 methodDeclaration
-  :   type ID '(' formalParameters? ')' block
+  :   ret=type name=ID '(' formalParameters? ')' block
   ;
 
 formalParameters

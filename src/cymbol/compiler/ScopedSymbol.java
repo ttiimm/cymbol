@@ -29,6 +29,7 @@ public abstract class ScopedSymbol extends Symbol implements Scope {
         this.token = t;
     }
 
+    @Override
     public Symbol resolve(String name) {
         Symbol s = getMembers().get(name);
         if (s != null) return s;
@@ -42,15 +43,18 @@ public abstract class ScopedSymbol extends Symbol implements Scope {
         return resolve(name);
     }
 
+    @Override
     public void define(Symbol sym) {
         getMembers().put(sym.name, sym);
         sym.scope = this; // track the scope in each symbol
     }
 
+    @Override
     public Scope getEnclosingScope() {
         return enclosingScope;
     }
 
+    @Override
     public String getScopeName() {
         return name;
     }

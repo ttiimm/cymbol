@@ -11,19 +11,23 @@ package cymbol.compiler;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+
 public class MethodSymbol extends ScopedSymbol {
     Map<String, Symbol> orderedArgs = new LinkedHashMap<String, Symbol>();
 
-    public MethodSymbol(String name, Type retType, Scope parent) {
-        super(name, retType, parent);
+    public MethodSymbol(String name, Scope parent, ParserRuleContext<Token> t) {
+        super(name, parent, t);
     }
 
+    @Override
     public Map<String, Symbol> getMembers() {
         return orderedArgs;
     }
 
+    @Override
     public String getName() {
-        return name + "(" + stripBrackets(orderedArgs.keySet().toString())
-                + ")";
+        return name + "(" + stripBrackets(orderedArgs.keySet().toString()) + ")";
     }
 }

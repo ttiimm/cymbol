@@ -13,11 +13,44 @@ import org.junit.Test;
 import cymbol.compiler.CymbolDefineListener;
 import cymbol.compiler.CymbolLexer;
 import cymbol.compiler.CymbolParser;
+import cymbol.compiler.MethodSymbol;
 import cymbol.compiler.StructSymbol;
 import cymbol.compiler.SymbolTable;
 
 public class TestDefineWalk {
 
+    @Test
+    public void testSimpleStruct() {
+        String source = "struct A { int x; }";
+        SymbolTable t = define(source);
+        StructSymbol s = (StructSymbol) t.globals.resolve("A");
+        assertEquals("struct A:{\n}\n", s.toString());
+    }
+
+    @Test
+    public void testNestedStruct() {
+        String source = "struct A {   " + 
+                        "   struct B {" +
+                        "       int x;" +
+                        "   }         " +
+                        "}";
+        
+        SymbolTable t = define(source);
+        StructSymbol a = (StructSymbol) t.globals.resolve("A");
+        assertEquals("struct A:{\nstruct B:{\n}\n}\n", a.toString());
+        assertNull(t.globals.resolve("B"));
+        StructSymbol b = (StructSymbol) a.resolve("B");
+        assertEquals("struct B:{\n}\n", b.toString());
+    }
+
+    @Test
+    public void testEmptyMethod() {
+        String source = "void M(){ }";
+        SymbolTable t = define(source);
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
+        assertEquals("global.M()", m.toString());
+    }
+    
     private SymbolTable define(String source) {
         ANTLRInputStream input = new ANTLRInputStream(source);
         CymbolLexer l = new CymbolLexer(input);
@@ -34,29 +67,4 @@ public class TestDefineWalk {
 
         return table;
     }
-
-    @Test
-    public void testSimpleStruct() {
-        String source = "struct A { int x; }";
-        SymbolTable t = define(source);
-        StructSymbol s = (StructSymbol) t.globals.resolve("A");
-        assertEquals("struct A:{}", s.toString());
-    }
-
-    @Test
-    public void testNestedStruct() {
-        String source = "struct A {   " + 
-                        "   struct B {" +
-                        "       int x;" +
-                        "   }         " +
-                        "}";
-        
-        SymbolTable t = define(source);
-        StructSymbol a = (StructSymbol) t.globals.resolve("A");
-        assertEquals("struct A:{struct B:{}}", a.toString());
-        assertNull(t.globals.resolve("B"));
-        StructSymbol b = (StructSymbol) a.resolve("B");
-        assertEquals("struct B:{}", b.toString());
-    }
-
 }
