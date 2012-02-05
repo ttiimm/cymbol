@@ -34,6 +34,6 @@ public class StructSymbol extends ScopedSymbol implements Type, Scope {
 
     public String toString() {
         return "struct " + name + ":{"
-                + stripBrackets(fields.keySet().toString()) + "}";
+                + stripBrackets(fields.values().toString()) + "}";
     }
 }

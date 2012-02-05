@@ -1,6 +1,7 @@
 package cymbol.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -40,6 +41,22 @@ public class TestDefineWalk {
         SymbolTable t = define(source);
         StructSymbol s = (StructSymbol) t.globals.resolve("A");
         assertEquals("struct A:{}", s.toString());
+    }
+
+    @Test
+    public void testNestedStruct() {
+        String source = "struct A {   " + 
+                        "   struct B {" +
+                        "       int x;" +
+                        "   }         " +
+                        "}";
+        
+        SymbolTable t = define(source);
+        StructSymbol a = (StructSymbol) t.globals.resolve("A");
+        assertEquals("struct A:{struct B:{}}", a.toString());
+        assertNull(t.globals.resolve("B"));
+        StructSymbol b = (StructSymbol) a.resolve("B");
+        assertEquals("struct B:{}", b.toString());
     }
 
 }
