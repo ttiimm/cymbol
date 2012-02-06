@@ -1,8 +1,9 @@
-struct A { int x; };
-struct B { int y; };
+struct A { int x; }
+struct B { int y; }
+
 void f() {
-  struct A a;
-  struct B b;
+  A a;
+  B b;
   a = b;            // <struct A> = <struct B>          ERROR
   int i;
   int c = i.x;      // <int>.x                          ERROR

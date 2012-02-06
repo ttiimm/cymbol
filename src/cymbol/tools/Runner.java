@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import cymbol.compiler.ListenerDefPhase;
 import cymbol.compiler.Compiler;
+import cymbol.compiler.ListenerRefPhase;
 import cymbol.symtab.SymbolTable;
 
 public class Runner {
@@ -34,12 +35,13 @@ public class Runner {
         CharStream in = determineInput(args);
         Compiler c = new Compiler();
         ParseTree t = c.constructParseTree(in);
-        // System.out.println("tree = "+t.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerDefPhase def = new ListenerDefPhase(new SymbolTable().globals);
+        SymbolTable table = new SymbolTable();
+        ListenerDefPhase def = new ListenerDefPhase(table.globals);
         walker.walk(def, t);
-        // System.out.println(t.getChild(0));
-        // System.out.println("result from tree walk = "+ ectx.v);
+        ListenerRefPhase ref = new ListenerRefPhase(table.globals);
+        walker.walk(ref, t);
+        System.out.println(table.globals);
     }
 }

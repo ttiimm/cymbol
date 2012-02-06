@@ -7,8 +7,8 @@ void f() {
     float f = a['x']+g('q',10);
     f = 3;
     int i;
-    struct A { int x; };
-    struct A s;
+    struct A { int x; }
+    A s;
     int j = h(1)+4*a[i]+s.x;
 }
 int g(int x, float y) { return 'k'; }
