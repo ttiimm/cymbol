@@ -1,0 +1,36 @@
+
+<project name="Cymbol" default="jar" basedir=".">
+
+    <property name="build.dir" value="${basedir}/build" />
+	
+	<path id="classpath">
+        <pathelement location="/home/tlikarish/Projects/lang/antlr4/dist/antlr-4.0ea-complete.jar"/>
+    </path>
+	
+	<target name="jar" depends="clean, compile">
+	    <mkdir dir="${build.dir}"/>
+    
+        <jar jarfile="${basedir}/cymbol.jar">
+            <fileset dir="${build.dir}/classes" includes="**/*.class"/>
+            <manifest>
+                <attribute name="Main-Class" value="cymbol.tools.Runner"/>
+            </manifest>
+        </jar>
+    </target>
+	
+	<target name="clean">
+	    <delete dir="${build.dir}"/>
+    </target>
+	
+    <target name="compile">
+        <mkdir dir="${build.dir}/classes"/>
+        <javac
+        	srcdir="${basedir}/src"
+            destdir="${build.dir}/classes"
+            debug="true"
+            excludes="cymbol/test/**">
+                    <classpath refid="classpath"/>
+        </javac>
+    </target>
+	
+</project>
