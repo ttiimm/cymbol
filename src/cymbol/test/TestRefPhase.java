@@ -23,13 +23,13 @@ public class TestRefPhase {
         		        "D d;" +
         		        "boolean e;" +
         		        "int f[];";
-        SymbolTable t = runTest(source);
+        SymbolTable t = runTest(source).table;
         assertEquals("<global.a:global.int>", t.globals.resolve("a").toString());
         assertEquals("<global.b:global.char>", t.globals.resolve("b").toString());
         assertEquals("<global.c:global.float>", t.globals.resolve("c").toString());
         assertEquals("<global.d:struct D:{x}>", t.globals.resolve("d").toString());
         assertEquals("<global.e:global.boolean>", t.globals.resolve("e").toString());
-        // TODO set type of array differently?
+        // TODO create Array type
         assertEquals("<global.f:global.int>", t.globals.resolve("f").toString());
     }
     
@@ -39,7 +39,7 @@ public class TestRefPhase {
         		        "    int x;" +
         		        "    float y;" +
         		        "}";
-        SymbolTable t = runTest(source);
+        SymbolTable t = runTest(source).table;
         StructSymbol a = (StructSymbol) t.globals.resolve("A");
         assertEquals("<A.x:global.int>",a.resolve("x").toString());
         assertEquals("<A.y:global.float>", a.resolve("y").toString());
@@ -49,7 +49,7 @@ public class TestRefPhase {
     public void testDefineMethodDecl() {
         String source = "void foo(int x, char y) {" +
                 		"}";
-        SymbolTable t = runTest(source);
+        SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
         assertEquals("global.void", m.type.toString());
         assertEquals("<foo.x:global.int>", m.resolve("x").toString());
@@ -62,7 +62,7 @@ public class TestRefPhase {
                         "   int a[];" +
                         "   float x = a[0];" +
                         "}";
-        SymbolTable t = runTest(source);
+        SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
         CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
         assertEquals("<local.a:global.int>", local.scope.resolve("a").toString());
@@ -77,7 +77,7 @@ public class TestRefPhase {
                         "}" +
                         "" +
                         "struct A { int x; }";
-        SymbolTable t = runTest(source);
+        SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
         CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
         assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
@@ -89,7 +89,7 @@ public class TestRefPhase {
                 "   A a;" +
                 "   struct A { int x; }" +
                 "}";
-        SymbolTable t = runTest(source);
+        SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
         CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
         assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
@@ -101,7 +101,7 @@ public class TestRefPhase {
                 "   struct A { int x; }" +
                 "   A a;" +
                 "}";
-        SymbolTable t = runTest(source);
+        SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
         CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
         assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
@@ -110,17 +110,18 @@ public class TestRefPhase {
     @Test
     public void testDefineVarWithUnknownType() {
         String source = "A a;";
-        SymbolTable t = runTest(source);
-        VariableSymbol a = (VariableSymbol) t.globals.resolve("a");
-        assertEquals("<global.a:unknown>", a.toString());
+        Compiler c = runTest(source);
+        VariableSymbol a = (VariableSymbol) c.table.globals.resolve("a");
+        assertEquals("global.a", a.toString());
+        assertEquals("1:0: unknown symbol: A", c.errors.get(0));
+        
     }
     
-    public static SymbolTable runTest(String source) {
+    public Compiler runTest(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);
         Compiler c = new Compiler(in);
-        c.define();
-        c.reference();
+        c.compile();
 
-        return c.table;
+        return c;
     }
 }

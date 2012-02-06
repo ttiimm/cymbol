@@ -14,10 +14,12 @@ import cymbol.symtab.VariableSymbol;
 
 public class ListenerDefPhase implements CymbolListener {
     
-	private Scope current;
+    private Compiler compiler;
+    private Scope current;
 	
-    public ListenerDefPhase(Scope global) {
+    public ListenerDefPhase(Compiler compiler, Scope global) {
         this.current = global;
+        this.compiler = compiler;
     }
 	
     @Override public void enterRule(CymbolParser.structDeclarationContext ctx) {

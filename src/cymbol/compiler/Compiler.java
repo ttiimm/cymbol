@@ -1,5 +1,8 @@
 package cymbol.compiler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -11,39 +14,41 @@ public class Compiler {
 
     private ParseTree tree;
     public SymbolTable table;
+    private ParseTreeWalker walker;
+
+    public List<String> errors = new ArrayList<String>();
 
     public Compiler(CharStream in) {
         this.tree = constructParseTree(in);
         this.table = new SymbolTable();
+        this.walker = new ParseTreeWalker();
     }
-    
+
     public ParseTree constructParseTree(CharStream in) {
         CymbolLexer l = new CymbolLexer(in);
         CommonTokenStream tokens = new CommonTokenStream(l);
         CymbolParser p = new CymbolParser(tokens);
         p.setBuildParseTree(true);
-        
+
         return p.compilationUnit();
     }
-    
+
     public void compile() {
-        ParseTreeWalker walker = new ParseTreeWalker();
-        SymbolTable table = new SymbolTable();
-        ListenerDefPhase def = new ListenerDefPhase(table.globals);
-        walker.walk(def, tree);
-        ListenerRefPhase ref = new ListenerRefPhase(table.globals);
-        walker.walk(ref, tree);
+        define();
+        reference();
     }
-    
+
     public void define() {
-        ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerDefPhase defl = new ListenerDefPhase(table.globals);
+        ListenerDefPhase defl = new ListenerDefPhase(this, table.globals);
         walker.walk(defl, tree);
     }
 
     public void reference() {
-        ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerRefPhase refl = new ListenerRefPhase(table.globals);
+        ListenerRefPhase refl = new ListenerRefPhase(this, table.globals);
         walker.walk(refl, tree);
+    }
+    
+    public void error(String message) {
+        errors.add(message);
     }
 }

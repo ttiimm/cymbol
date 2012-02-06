@@ -12,10 +12,12 @@ import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
 public class ListenerRefPhase implements CymbolListener {
-	
+
+    private Compiler compiler;
     private Scope current;
     
-    public ListenerRefPhase(Scope globals) {
+    public ListenerRefPhase(Compiler compiler, Scope globals) {
+        this.compiler = compiler;
         this.current = globals;
     }
     
@@ -27,7 +29,8 @@ public class ListenerRefPhase implements CymbolListener {
     }
     
     @Override public void enterRule(CymbolParser.structDeclarationContext ctx) {
-        push((Scope) current.resolve(ctx.name.getText()));
+        Symbol struct = resolve(ctx, ctx.name.getText());
+        push((Scope) struct);
     }
     
     @Override public void exitRule(CymbolParser.structDeclarationContext ctx) {
@@ -38,7 +41,7 @@ public class ListenerRefPhase implements CymbolListener {
     
     @Override public void exitRule(CymbolParser.structMemberContext ctx) { 
         if(ctx.t != null) {
-            Symbol s = current.resolve(ctx.name.getText());
+            Symbol s = resolve(ctx, ctx.name.getText());
             s.type = ctx.t.type;
         }
     }
@@ -48,14 +51,17 @@ public class ListenerRefPhase implements CymbolListener {
     }
     
     @Override public void exitRule(CymbolParser.typeContext ctx) { 
-        ctx.type = (Type) current.resolve(ctx.t);
+        Symbol type = resolve(ctx, ctx.t);
+        ctx.type = (Type) type;
     }
     
     @Override public void enterRule(CymbolParser.methodDeclarationContext ctx) {
-        MethodSymbol method = (MethodSymbol) current.resolve(ctx.name.getText());
+        String name = ctx.name.getText();
+        Symbol symbol = resolve(ctx, name);
+        MethodSymbol method = (MethodSymbol) symbol;
         push(method);
     }
-    
+
     @Override public void exitRule(CymbolParser.methodDeclarationContext ctx) {
         MethodSymbol method = (MethodSymbol) current;
         pop();
@@ -83,6 +89,24 @@ public class ListenerRefPhase implements CymbolListener {
     
     private void pop() {
         this.current = current.getEnclosingScope();
+    }
+    
+    private Symbol resolve(ParserRuleContext<Token> ctx, String name) {
+        Symbol symbol = current.resolve(name);
+        
+        if(symbol == null) { 
+            String msg = "unknown symbol: " + name;
+            reportError(ctx, msg);
+        }
+        
+        return symbol;
+    }
+
+    private void reportError(ParserRuleContext<Token> ctx, String msg) {
+        Token start = ctx.getStart();
+        int line = start.getLine();
+        int pos = start.getCharPositionInLine();
+        compiler.error(line + ":" + pos + ": " + msg);
     }
         
     

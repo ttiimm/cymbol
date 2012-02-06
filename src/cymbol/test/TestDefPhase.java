@@ -73,7 +73,7 @@ public class TestDefPhase {
         assertEquals("local[A]", second.scope.toString());
     }
     
-    public static SymbolTable runTest(String source) {
+    public SymbolTable runTest(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);
         Compiler c = new Compiler(in);
         c.define();
