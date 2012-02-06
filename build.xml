@@ -2,9 +2,10 @@
 <project name="Cymbol" default="jar" basedir=".">
 
     <property name="build.dir" value="${basedir}/build" />
+    <property name="antlr4.jar" value="/home/tlikarish/Projects/lang/antlr4/dist/antlr-4.0ea-complete.jar" />
 	
 	<path id="classpath">
-        <pathelement location="/home/tlikarish/Projects/lang/antlr4/dist/antlr-4.0ea-complete.jar"/>
+        <pathelement location="${antlr4.jar}"/>
     </path>
 	
 	<target name="jar" depends="clean, compile">
@@ -12,6 +13,7 @@
     
         <jar jarfile="${basedir}/cymbol.jar">
             <fileset dir="${build.dir}/classes" includes="**/*.class"/>
+        	<zipfileset src="${antlr4.jar}"/>
             <manifest>
                 <attribute name="Main-Class" value="cymbol.tools.Runner"/>
             </manifest>
@@ -27,6 +29,8 @@
         <javac
         	srcdir="${basedir}/src"
             destdir="${build.dir}/classes"
+        	source="1.5"
+            target="1.5"
             debug="true"
             excludes="cymbol/test/**">
                     <classpath refid="classpath"/>
