@@ -12,14 +12,10 @@ import cymbol.symtab.StructSymbol;
 import cymbol.symtab.VariableSymbol;
 
 
-public class ListenerDefPhase implements CymbolListener {
+public class ListenerDefPhase extends ListenerForCompilation implements CymbolListener {
     
-    private Compiler compiler;
-    private Scope current;
-	
     public ListenerDefPhase(Compiler compiler, Scope global) {
-        this.current = global;
-        this.compiler = compiler;
+        super(compiler, global);
     }
 	
     @Override public void enterRule(CymbolParser.structDeclarationContext ctx) {
@@ -61,14 +57,6 @@ public class ListenerDefPhase implements CymbolListener {
         pop();
     }
     
-    private void push(Scope scope) {
-        this.current = scope;
-    }
-    
-    private void pop() {
-        this.current = current.getEnclosingScope();
-    }
-        
     @Override public void enterRule(CymbolParser.varDeclarationContext ctx) { }
     @Override public void exitRule(CymbolParser.varDeclarationContext ctx) { }
     @Override public void enterRule(CymbolParser.compilationUnitContext ctx) { }

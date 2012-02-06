@@ -11,14 +11,10 @@ import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
-public class ListenerRefPhase implements CymbolListener {
+public class ListenerRefPhase extends ListenerForCompilation implements CymbolListener {
 
-    private Compiler compiler;
-    private Scope current;
-    
     public ListenerRefPhase(Compiler compiler, Scope globals) {
-        this.compiler = compiler;
-        this.current = globals;
+        super(compiler, globals);
     }
     
     @Override public void enterRule(CymbolParser.varDeclarationContext ctx) { }
@@ -82,33 +78,6 @@ public class ListenerRefPhase implements CymbolListener {
     @Override public void exitRule(CymbolParser.blockContext ctx) {
         pop();
     }
-    
-    private void push(Scope scope) {
-        this.current = scope;
-    }
-    
-    private void pop() {
-        this.current = current.getEnclosingScope();
-    }
-    
-    private Symbol resolve(ParserRuleContext<Token> ctx, String name) {
-        Symbol symbol = current.resolve(name);
-        
-        if(symbol == null) { 
-            String msg = "unknown symbol: " + name;
-            reportError(ctx, msg);
-        }
-        
-        return symbol;
-    }
-
-    private void reportError(ParserRuleContext<Token> ctx, String msg) {
-        Token start = ctx.getStart();
-        int line = start.getLine();
-        int pos = start.getCharPositionInLine();
-        compiler.error(line + ":" + pos + ": " + msg);
-    }
-        
     
     @Override public void enterRule(CymbolParser.primitiveTypeContext ctx) { }
     @Override public void exitRule(CymbolParser.primitiveTypeContext ctx) { }
