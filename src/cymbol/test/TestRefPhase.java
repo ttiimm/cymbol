@@ -7,7 +7,9 @@ import org.junit.Test;
 
 import cymbol.compiler.Compiler;
 import cymbol.compiler.CymbolParser;
+import cymbol.compiler.CymbolParser.blockContext;
 import cymbol.symtab.MethodSymbol;
+import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.SymbolTable;
 import cymbol.symtab.VariableSymbol;
@@ -64,9 +66,9 @@ public class TestRefPhase {
                         "}";
         SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
-        assertEquals("<local.a:global.int>", local.scope.resolve("a").toString());
-        assertEquals("<local.x:global.float>", local.scope.resolve("x").toString());
+        Scope local = resolveLocalScope(m);
+        assertEquals("<local.a:global.int>", local.resolve("a").toString());
+        assertEquals("<local.x:global.float>", local.resolve("x").toString());
         
     }
     
@@ -79,10 +81,10 @@ public class TestRefPhase {
                         "struct A { int x; }";
         SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
-        assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
+        Scope local = resolveLocalScope(m);
+        assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
-    
+
     @Test
     public void testDefineVarWithForwardLocalStruct() {
         String source = "void foo() {" +
@@ -91,8 +93,8 @@ public class TestRefPhase {
                 "}";
         SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
-        assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
+        Scope local = resolveLocalScope(m);
+        assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
     
     @Test
@@ -103,8 +105,8 @@ public class TestRefPhase {
                 "}";
         SymbolTable t = runTest(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
-        assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
+        Scope local = resolveLocalScope(m);
+        assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
     
     @Test
@@ -117,11 +119,27 @@ public class TestRefPhase {
         
     }
     
+    @Test 
+    public void testDefineVarWithIllegalForwardRef() {
+        String source = "void foo() { " +
+        		        "     x = 3;" +
+        		        "     int x;" +
+        		        "}";
+        Compiler c = runTest(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        Scope local = resolveLocalScope(m);
+        assertEquals("local.x", local.resolve("x"));
+    }
+    
     public Compiler runTest(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);
         Compiler c = new Compiler(in);
         c.compile();
 
         return c;
+    }
+    
+    private Scope resolveLocalScope(MethodSymbol m) {
+        return ((CymbolParser.blockContext) m.tree.getChild(4)).scope;
     }
 }

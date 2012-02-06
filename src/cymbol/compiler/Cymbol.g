@@ -121,11 +121,12 @@ unaryExpression
   ;
 
 postfixExpression
-  :   primary
+// should that be primary or ID
+  :   p=primary
     (
-      ( '(' expressionList? ')'
-      | '[' expr ']'
-      | '.' ID
+      ( '(' el=expressionList? ')'
+      | '[' e=expr ']'
+      | '.' i=ID
       )
     )*
   ;

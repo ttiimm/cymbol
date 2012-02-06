@@ -1,8 +1,10 @@
 package cymbol.compiler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -19,18 +21,30 @@ public class Compiler {
     public List<String> errors = new ArrayList<String>();
 
     public Compiler(CharStream in) {
-        this.tree = constructParseTree(in);
+        this.tree = parse(in);
         this.table = new SymbolTable();
         this.walker = new ParseTreeWalker();
     }
 
-    public ParseTree constructParseTree(CharStream in) {
+    public ParseTree parse(CharStream in) {
         CymbolLexer l = new CymbolLexer(in);
         CommonTokenStream tokens = new CommonTokenStream(l);
         CymbolParser p = new CymbolParser(tokens);
         p.setBuildParseTree(true);
 
-        return p.compilationUnit();
+        ParseTree tree = null;
+        
+        try {
+            tree = p.compilationUnit();
+            if (p.getNumberOfSyntaxErrors() > 0) {
+                error("Error parsing " + in.getSourceName());
+                return null;
+            }
+        } catch (RecognitionException re) {
+            error("Error parsing " + in.getSourceName(), re);
+        }
+        
+        return tree;
     }
 
     public void compile() {
@@ -47,8 +61,12 @@ public class Compiler {
         ListenerRefPhase refl = new ListenerRefPhase(this, table.globals);
         walker.walk(refl, tree);
     }
-    
+
     public void error(String message) {
         errors.add(message);
+    }
+
+    public void error(String msg, Exception e) {
+        errors.add(msg + "\n" + Arrays.toString(e.getStackTrace()));
     }
 }

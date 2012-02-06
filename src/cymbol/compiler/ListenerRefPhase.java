@@ -79,6 +79,10 @@ public class ListenerRefPhase extends ListenerForCompilation implements CymbolLi
         pop();
     }
     
+    @Override public void enterRule(CymbolParser.postfixExpressionContext ctx) { }
+    
+    @Override public void exitRule(CymbolParser.postfixExpressionContext ctx) { }
+    
     @Override public void enterRule(CymbolParser.primitiveTypeContext ctx) { }
     @Override public void exitRule(CymbolParser.primitiveTypeContext ctx) { }
     @Override public void enterRule(CymbolParser.expressionContext ctx) { }
@@ -93,8 +97,6 @@ public class ListenerRefPhase extends ListenerForCompilation implements CymbolLi
 	@Override public void exitRule(CymbolParser.additiveExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.exprContext ctx) { }
 	@Override public void exitRule(CymbolParser.exprContext ctx) { }
-	@Override public void enterRule(CymbolParser.postfixExpressionContext ctx) { }
-	@Override public void exitRule(CymbolParser.postfixExpressionContext ctx) { }
 	@Override public void enterRule(CymbolParser.lhsContext ctx) { }
 	@Override public void exitRule(CymbolParser.lhsContext ctx) { }
 	@Override public void enterRule(CymbolParser.statementContext ctx) { }

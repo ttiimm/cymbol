@@ -18,19 +18,33 @@ import org.antlr.v4.runtime.CharStream;
 import cymbol.compiler.Compiler;
 
 public class Runner {
+    
     private static CharStream determineInput(String[] args) throws IOException {
         if (args.length > 0) {
             return new ANTLRFileStream(args[0]);
         } else {
-            return new ANTLRInputStream(System.in);
+            ANTLRInputStream in = new ANTLRInputStream(System.in);
+            in.name = "<System.in>";
+            return in;
         }
+    }
+    
+    private static boolean checkErrors(Compiler c) {
+        boolean hasErrors = c.errors.size() > 0;
+        if (hasErrors) { for (String e : c.errors) {  System.err.println(e); } }
+        return hasErrors;
     }
 
     public static void main(String[] args) throws IOException {
         CharStream in = determineInput(args);
         Compiler c = new Compiler(in);
-        c.compile();
-        System.out.println(c.table.globals);
+        
+        boolean e = checkErrors(c);
+        if(!e){ 
+            c.compile(); 
+            checkErrors(c);
+            System.out.println(c.table.globals);
+        }
     }
 
 }
