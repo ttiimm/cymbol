@@ -7,13 +7,16 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
+import cymbol.compiler.CymbolParser;
+import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.SymbolTable;
+import cymbol.symtab.VariableSymbol;
 
 public class TestRefPhase {
 
     @Test
-    public void testReferenceGlobalVars() {
+    public void testDefineGlobalVars() {
         String source = "int a;" +
         		        "char b;" +
         		        "float c;" +
@@ -32,7 +35,7 @@ public class TestRefPhase {
     }
     
     @Test
-    public void testReferenceStructVars() {
+    public void testDefineStructVars() {
         String source = "struct A {" +
         		        "    int x;" +
         		        "    float y;" +
@@ -41,6 +44,76 @@ public class TestRefPhase {
         StructSymbol a = (StructSymbol) t.globals.resolve("A");
         assertEquals("<A.x:global.int>",a.resolve("x").toString());
         assertEquals("<A.y:global.float>", a.resolve("y").toString());
+    }
+    
+    @Test
+    public void testDefineMethodDecl() {
+        String source = "void foo(int x, char y) {" +
+                		"}";
+        SymbolTable t = runTest(source);
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
+        assertEquals("global.void", m.type.toString());
+        assertEquals("<foo.x:global.int>", m.resolve("x").toString());
+        assertEquals("<foo.y:global.char>", m.resolve("y").toString());
+    }
+    
+    @Test
+    public void testDefineVarDecl() {
+        String source = "void foo() {" +
+                        "   int a[];" +
+                        "   float x = a[0];" +
+                        "}";
+        SymbolTable t = runTest(source);
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
+        CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
+        assertEquals("<local.a:global.int>", local.scope.resolve("a").toString());
+        assertEquals("<local.x:global.float>", local.scope.resolve("x").toString());
+        
+    }
+    
+    @Test
+    public void testDefineVarWithForwardGlobalStruct() {
+        String source = "void foo() {" +
+                        "   A a;" +
+                        "}" +
+                        "" +
+                        "struct A { int x; }";
+        SymbolTable t = runTest(source);
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
+        CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
+        assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
+    }
+    
+    @Test
+    public void testDefineVarWithForwardLocalStruct() {
+        String source = "void foo() {" +
+                "   A a;" +
+                "   struct A { int x; }" +
+                "}";
+        SymbolTable t = runTest(source);
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
+        CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
+        assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
+    }
+    
+    @Test
+    public void testDefineVarWithLocalStruct() {
+        String source = "void foo() {" +
+                "   struct A { int x; }" +
+                "   A a;" +
+                "}";
+        SymbolTable t = runTest(source);
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
+        CymbolParser.blockContext local = (CymbolParser.blockContext) m.tree.getChild(4);
+        assertEquals("<local.a:struct A:{x}>", local.scope.resolve("a").toString());
+    }
+    
+    @Test
+    public void testDefineVarWithUnknownType() {
+        String source = "A a;";
+        SymbolTable t = runTest(source);
+        VariableSymbol a = (VariableSymbol) t.globals.resolve("a");
+        assertEquals("<global.a:unknown>", a.toString());
     }
     
     public static SymbolTable runTest(String source) {

@@ -25,7 +25,7 @@ public class TestDefPhase {
     }
     
     @Test
-    public void testNestedStruct() {
+    public void testNestedStructWithinStruct() {
         String source = "struct A {   " + 
                         "   struct B {" +
                         "       int x;" +
@@ -61,7 +61,7 @@ public class TestDefPhase {
     }
     
     @Test
-    public void testDoublyNestedStruct() {
+    public void testStructWithMethodLocalBlock() {
         String source = "void M(){" +
         		        "    {" +
         		        "         struct A { int x; }" +

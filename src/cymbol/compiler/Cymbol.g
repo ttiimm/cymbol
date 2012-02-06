@@ -39,16 +39,18 @@ formalParameters
   ;
     
 parameter
-  : type ID 
-  | type ID '[]'
+  : t=type name=ID 
+  | t=type name=ID '[]'
   ;
 
-type locals [Type type, String t]
+type 
+  locals [Type type, String t]
   : primitiveType { $type.t = $primitiveType.t; } 
   | ID            { $type.t = $ID.getText(); }
   ;
 
-primitiveType returns [String t]
+primitiveType 
+  returns [String t]
   : 'float'  {$primitiveType.t = "float"; }
   | 'int'    {$primitiveType.t = "int"; }
   | 'char'   {$primitiveType.t = "char"; }
@@ -57,8 +59,8 @@ primitiveType returns [String t]
   ;
 
 varDeclaration
-  : t=type name=ID ('=' expression)? ';'
-  | t=type name=ID '[]' ('=' expression)? ';'
+  : t=type name=ID ('=' e=expression)? ';'
+  | t=type name=ID '[]' ('=' e=expression)? ';'
   ;
 
 block 
