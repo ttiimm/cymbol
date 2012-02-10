@@ -31,11 +31,11 @@ structMember
   ;
 
 methodDeclaration
-  :   ret=type name=ID '(' formalParameters? ')' block
+  : ret=type name=ID '(' formalParameters? ')' block
   ;
 
 formalParameters
-  :   parameter (',' parameter)*
+  : parameter (',' parameter)*
   ;
     
 parameter
@@ -59,8 +59,8 @@ primitiveType
   ;
 
 varDeclaration
-  : t=type name=ID ('=' e=expression)? ';'
-  | t=type name=ID '[]' ('=' e=expression)? ';'
+  : t=type name=ID ('=' e=expr)? ';'
+  | t=type name=ID '[]' ('=' e=expr)? ';'
   ;
 
 block 
@@ -72,67 +72,27 @@ statement
   : block
   | structDeclaration
   | varDeclaration
-  | 'if' '(' expression ')' statement ('else' statement)?
-  | 'return' expression? ';'
-  | lhs '=' expression ';'
-  | postfixExpression ';' 
-  ;
-
-lhs 
-  : postfixExpression
-  ;
-  
-expression
-  :   expr
+  | 'if' '(' expr ')' statement ('else' statement)?
+  | 'return' expr? ';'
+  | expr '=' expr ';'
+  | expr ';' 
   ;
 
 expr
-  : equalityExpression
-  ;
-  
-equalityExpression
-  : relationalExpression (('!=' | '==') relationalExpression)*
-  ;
-
-relationalExpression
-  : additiveExpression
-    ( ( ( '<'
-        | '>'
-        | '<='
-        | '>='
-        )
-        additiveExpression
-      )*
-    )
-  ;
-
-additiveExpression
-  : multiplicativeExpression (('+' | '-') multiplicativeExpression)*
-  ;
-
-multiplicativeExpression
-  : unaryExpression (('*' | '/') unaryExpression)*
-  ;
-
-unaryExpression
-  : '-' unaryExpression
-  | '!' unaryExpression
-  | postfixExpression
-  ;
-
-postfixExpression
-// should that be primary or ID
-  :   p=primary
-    (
-      ( '(' el=expressionList? ')'
-      | '[' e=expr ']'
-      | '.' i=ID
-      )
-    )*
+  : expr '(' expressionList? ')'
+  | expr '[' expr ']'
+  | expr '.' expr
+  | '-' expr
+  | '!' expr
+  | expr ('*' | '/') expr
+  | expr ('+' | '-') expr
+  | expr ('!=' | '==' | '<' | '>' | '<=' | '>=') expr
+  | primary
+  | '(' expr ')'
   ;
 
 expressionList
-  :   expr (',' expr)*
+  : expr (',' expr)*
   ;
 
 primary
@@ -142,7 +102,6 @@ primary
 	| CHAR
 	| 'true'
 	| 'false'
-	| '(' expression ')'
 	;
 
 // LEXER RULES
