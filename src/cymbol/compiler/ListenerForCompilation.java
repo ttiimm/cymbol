@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 import cymbol.symtab.Scope;
 import cymbol.symtab.Symbol;
 
-public class ListenerForCompilation {
+public class ListenerForCompilation extends BlankCymbolListener implements CymbolListener {
 
     protected Compiler compiler;
     protected Scope current;
