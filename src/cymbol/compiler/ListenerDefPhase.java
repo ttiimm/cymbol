@@ -1,22 +1,25 @@
 package cymbol.compiler;
 
+import cymbol.compiler.CymbolParser.parameterContext;
+import cymbol.compiler.CymbolParser.typeContext;
+import cymbol.compiler.CymbolParser.varDeclarationContext;
 import cymbol.symtab.LocalScope;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.VariableSymbol;
 
-public class ListenerDefPhase extends ListenerForCompilation implements
-        CymbolListener {
+public class ListenerDefPhase extends BlankCymbolListener implements CymbolListener {
 
-    public ListenerDefPhase(Compiler compiler, Scope global) {
-        super(compiler, global);
+    private Scope current;
+
+    public ListenerDefPhase(Scope globals) {
+        this.current = globals;
     }
 
     @Override
     public void enterRule(CymbolParser.structDeclarationContext ctx) {
-        StructSymbol struct = new StructSymbol(ctx.name.getText(),
-                this.current, ctx);
+        StructSymbol struct = new StructSymbol(ctx.name.getText(), this.current, ctx);
         current.define(struct);
         push(struct);
     }
@@ -28,9 +31,9 @@ public class ListenerDefPhase extends ListenerForCompilation implements
 
     @Override
     public void enterRule(CymbolParser.methodDeclarationContext ctx) {
-        MethodSymbol method = new MethodSymbol(ctx.name.getText(),
-                this.current, ctx);
+        MethodSymbol method = new MethodSymbol(ctx.name.getText(), this.current, ctx);
         current.define(method);
+        ctx.method = method;
         push(method);
     }
 
@@ -42,13 +45,25 @@ public class ListenerDefPhase extends ListenerForCompilation implements
     @Override
     public void enterRule(CymbolParser.structMemberContext ctx) {
         if (ctx.name != null) {
-            VariableSymbol field = new VariableSymbol(ctx.name.getText());
-            current.define(field);
+            ctx.scope = current;
+            VariableSymbol member = new VariableSymbol(ctx.name.getText());
+            current.define(member);
         }
     }
 
     @Override
-    public void exitRule(CymbolParser.structMemberContext ctx) {
+    public void enterRule(parameterContext ctx) {
+        ctx.scope = current;
+    }
+
+    @Override
+    public void enterRule(typeContext ctx) {
+        ctx.scope = current;
+    }
+
+    @Override
+    public void enterRule(varDeclarationContext ctx) {
+        ctx.scope = current;
     }
 
     @Override
@@ -61,6 +76,14 @@ public class ListenerDefPhase extends ListenerForCompilation implements
     @Override
     public void exitRule(CymbolParser.blockContext ctx) {
         pop();
+    }
+
+    private void push(Scope scope) {
+        this.current = scope;
+    }
+
+    private void pop() {
+        this.current = current.getEnclosingScope();
     }
 
 }

@@ -1,95 +1,61 @@
 package cymbol.compiler;
 
-import cymbol.symtab.MethodSymbol;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+
 import cymbol.symtab.Scope;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
-public class ListenerRefPhase extends ListenerForCompilation implements
+public class ListenerRefPhase extends BlankCymbolListener implements
         CymbolListener {
 
-    public ListenerRefPhase(Compiler compiler, Scope globals) {
-        super(compiler, globals);
-    }
+    private Compiler compiler;
 
-    @Override
-    public void enterRule(CymbolParser.varDeclarationContext ctx) {
+
+    public ListenerRefPhase(Compiler compiler) {
+        this.compiler = compiler;
     }
 
     @Override
     public void exitRule(CymbolParser.varDeclarationContext ctx) {
         VariableSymbol var = new VariableSymbol(ctx.name.getText(), ctx.t.type);
-        current.define(var);
-    }
-
-    @Override
-    public void enterRule(CymbolParser.structDeclarationContext ctx) {
-        Symbol struct = resolve(ctx, ctx.name.getText());
-        push((Scope) struct);
-    }
-
-    @Override
-    public void exitRule(CymbolParser.structDeclarationContext ctx) {
-        pop();
-    }
-
-    @Override
-    public void enterRule(CymbolParser.structMemberContext ctx) {
+        ctx.scope.define(var);
     }
 
     @Override
     public void exitRule(CymbolParser.structMemberContext ctx) {
         if (ctx.t != null) {
-            Symbol s = resolve(ctx, ctx.name.getText());
+            Symbol s = resolve(ctx.name.getText(), ctx.scope, ctx);
             s.type = ctx.t.type;
         }
     }
 
     @Override
-    public void enterRule(CymbolParser.typeContext ctx) {
-
-    }
-
-    @Override
     public void exitRule(CymbolParser.typeContext ctx) {
-        Symbol type = resolve(ctx, ctx.t);
-        ctx.type = (Type) type;
-    }
-
-    @Override
-    public void enterRule(CymbolParser.methodDeclarationContext ctx) {
-        String name = ctx.name.getText();
-        Symbol symbol = resolve(ctx, name);
-        MethodSymbol method = (MethodSymbol) symbol;
-        push(method);
+        ctx.type = (Type) resolve(ctx.t, ctx.scope, ctx);
     }
 
     @Override
     public void exitRule(CymbolParser.methodDeclarationContext ctx) {
-        MethodSymbol method = (MethodSymbol) current;
-        pop();
-        method.type = ctx.ret.type;
-    }
-
-    @Override
-    public void enterRule(CymbolParser.parameterContext ctx) {
+        ctx.method.type = ctx.ret.type;
     }
 
     @Override
     public void exitRule(CymbolParser.parameterContext ctx) {
         VariableSymbol var = new VariableSymbol(ctx.name.getText(), ctx.t.type);
-        current.define(var);
+        ctx.scope.define(var);
     }
 
-    @Override
-    public void enterRule(CymbolParser.blockContext ctx) {
-        push(ctx.scope);
-    }
 
-    @Override
-    public void exitRule(CymbolParser.blockContext ctx) {
-        pop();
+    public Symbol resolve(String name, Scope scope, ParserRuleContext<Token> ctx) {
+        Symbol symbol = scope.resolve(name);
+        if(symbol == null) { 
+            String msg = "unknown symbol: " + name;
+            compiler.reportError(ctx, msg);
+        }
+        return symbol;
     }
 
 }

@@ -8,6 +8,7 @@ package cymbol.compiler;
 
 import cymbol.symtab.Scope;
 import cymbol.symtab.Type;
+import cymbol.symtab.Symbol;
 }
 
 @lexer::header {
@@ -25,12 +26,14 @@ structDeclaration
   ;
   
 structMember
+  locals[Scope scope]
   : t=type name=ID ';'
   | t=type name=ID '[]' ';'
   | structDeclaration
   ;
 
 methodDeclaration
+  locals[Symbol method]
   : ret=type name=ID '(' formalParameters? ')' block
   ;
 
@@ -39,12 +42,13 @@ formalParameters
   ;
     
 parameter
+  locals[Scope scope]
   : t=type name=ID 
   | t=type name=ID '[]'
   ;
 
 type 
-  locals [Type type, String t]
+  locals [Type type, String t, Scope scope]
   : primitiveType { $type.t = $primitiveType.t; } 
   | ID            { $type.t = $ID.getText(); }
   ;
@@ -59,6 +63,7 @@ primitiveType
   ;
 
 varDeclaration
+  locals [Scope scope]
   : t=type name=ID ('=' e=expr)? ';'
   | t=type name=ID '[]' ('=' e=expr)? ';'
   ;
@@ -79,6 +84,7 @@ statement
   ;
 
 expr
+  returns [Type type]
   : expr '(' expressionList? ')'
   | expr '[' expr ']'
   | expr '.' expr

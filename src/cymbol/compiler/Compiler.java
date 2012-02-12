@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -58,15 +60,22 @@ public class Compiler {
     }
 
     public void define() {
-        ListenerDefPhase defl = new ListenerDefPhase(this, table.globals);
+        ListenerDefPhase defl = new ListenerDefPhase(table.globals);
         walker.walk(defl, tree);
     }
 
     public void reference() {
-        ListenerRefPhase refl = new ListenerRefPhase(this, table.globals);
+        ListenerRefPhase refl = new ListenerRefPhase(this);
         walker.walk(refl, tree);
     }
 
+    public void reportError(ParserRuleContext<Token> ctx, String msg) {
+        Token start = ctx.getStart();
+        int line = start.getLine();
+        int pos = start.getCharPositionInLine();
+        error(line + ":" + pos + ": " + msg);
+    }
+    
     public void error(String message) {
         errors.add(message);
     }
