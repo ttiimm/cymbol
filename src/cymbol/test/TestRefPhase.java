@@ -3,6 +3,7 @@ package cymbol.test;
 import static org.junit.Assert.assertEquals;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
@@ -25,7 +26,7 @@ public class TestRefPhase {
         		        "D d;" +
         		        "boolean e;" +
         		        "int f[];";
-        SymbolTable t = runTest(source).table;
+        SymbolTable t = Util.runCompilerOn(source).table;
         assertEquals("<global.a:global.int>", t.globals.resolve("a").toString());
         assertEquals("<global.b:global.char>", t.globals.resolve("b").toString());
         assertEquals("<global.c:global.float>", t.globals.resolve("c").toString());
@@ -41,7 +42,7 @@ public class TestRefPhase {
         		        "    int x;" +
         		        "    float y;" +
         		        "}";
-        SymbolTable t = runTest(source).table;
+        SymbolTable t = Util.runCompilerOn(source).table;
         StructSymbol a = (StructSymbol) t.globals.resolve("A");
         assertEquals("<A.x:global.int>",a.resolve("x").toString());
         assertEquals("<A.y:global.float>", a.resolve("y").toString());
@@ -51,7 +52,7 @@ public class TestRefPhase {
     public void testDefineMethodDecl() {
         String source = "void foo(int x, char y) {" +
                 		"}";
-        SymbolTable t = runTest(source).table;
+        SymbolTable t = Util.runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
         assertEquals("global.void", m.type.toString());
         assertEquals("<foo.x:global.int>", m.resolve("x").toString());
@@ -64,9 +65,9 @@ public class TestRefPhase {
                         "   int a[];" +
                         "   float x = a[0];" +
                         "}";
-        SymbolTable t = runTest(source).table;
+        SymbolTable t = Util.runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = resolveLocalScope(m);
+        Scope local = Util.resolveLocalScope(m);
         assertEquals("<local.a:global.int>", local.resolve("a").toString());
         assertEquals("<local.x:global.float>", local.resolve("x").toString());
         
@@ -79,9 +80,9 @@ public class TestRefPhase {
                         "}" +
                         "" +
                         "struct A { int x; }";
-        SymbolTable t = runTest(source).table;
+        SymbolTable t = Util.runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = resolveLocalScope(m);
+        Scope local = Util.resolveLocalScope(m);
         assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
 
@@ -91,9 +92,9 @@ public class TestRefPhase {
                 "   A a;" +
                 "   struct A { int x; }" +
                 "}";
-        SymbolTable t = runTest(source).table;
+        SymbolTable t = Util.runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = resolveLocalScope(m);
+        Scope local = Util.resolveLocalScope(m);
         assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
     
@@ -103,43 +104,20 @@ public class TestRefPhase {
                 "   struct A { int x; }" +
                 "   A a;" +
                 "}";
-        SymbolTable t = runTest(source).table;
+        SymbolTable t = Util.runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = resolveLocalScope(m);
+        Scope local = Util.resolveLocalScope(m);
         assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
     
     @Test
     public void testDefineVarWithUnknownType() {
         String source = "A a;";
-        Compiler c = runTest(source);
+        Compiler c = Util.runCompilerOn(source);
         VariableSymbol a = (VariableSymbol) c.table.globals.resolve("a");
         assertEquals("global.a", a.toString());
         assertEquals("1:0: unknown symbol: A", c.errors.get(0));
         
     }
     
-    @Test 
-    public void testDefineVarWithIllegalForwardRef() {
-        String source = "void foo() { " +
-        		        "     x = 3;" +
-        		        "     int x;" +
-        		        "}";
-        Compiler c = runTest(source);
-        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        Scope local = resolveLocalScope(m);
-        assertEquals("local.x", local.resolve("x"));
-    }
-    
-    public Compiler runTest(String source) {
-        ANTLRInputStream in = new ANTLRInputStream(source);
-        Compiler c = new Compiler(in);
-        c.compile();
-
-        return c;
-    }
-    
-    private Scope resolveLocalScope(MethodSymbol m) {
-        return ((CymbolParser.blockContext) m.tree.getChild(4)).scope;
-    }
 }
