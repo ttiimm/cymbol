@@ -57,8 +57,6 @@ public class ListenerResolvePhase extends BlankCymbolListener implements
     
     @Override
     public void enterRule(exprContext ctx) {
-        ctx.types = new ArrayList<Type>();
-        
         // if struct ref, then scope is not set correctly on member
         if(ctx.member != null) {
             Symbol structVar = resolve(ctx.e1.p.id.getText(), ctx.e1.p.scope, ctx);
@@ -69,9 +67,9 @@ public class ListenerResolvePhase extends BlankCymbolListener implements
 
     @Override
     public void exitRule(exprContext ctx) {
-        if(ctx.e1 != null) { ctx.types.add(0, ctx.e1.types.get(0)); }
-        if(ctx.e2 != null) { ctx.types.add(1, ctx.e2.types.get(0)); }
-        if(ctx.p != null) { ctx.types.add(0, ctx.p.type); }
+        if(ctx.e1 != null) { ctx.type = ctx.e1.type; }
+        if(ctx.p != null) { ctx.type = ctx.p.type; }
+        if(ctx.member != null) { ctx.type = ctx.member.type; }
     }
 
     @Override

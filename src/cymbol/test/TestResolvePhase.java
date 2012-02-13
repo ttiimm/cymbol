@@ -128,7 +128,9 @@ public class TestResolvePhase {
         Compiler c = Util.runCompilerOn(source);
         ParseTreeWalker walker = new ParseTreeWalker();
         Type integer = (Type) c.table.globals.resolve("int");
-        walker.walk(new ExprTypeVerifierListener(integer), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
 
     @Test
@@ -139,7 +141,9 @@ public class TestResolvePhase {
         Compiler c = Util.runCompilerOn(source);
         ParseTreeWalker walker = new ParseTreeWalker();
         Type floating = (Type) c.table.globals.resolve("float");
-        walker.walk(new ExprTypeVerifierListener(floating), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(floating);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
 
     @Test
@@ -150,7 +154,9 @@ public class TestResolvePhase {
         Compiler c = Util.runCompilerOn(source);
         ParseTreeWalker walker = new ParseTreeWalker();
         Type character = (Type) c.table.globals.resolve("char");
-        walker.walk(new ExprTypeVerifierListener(character), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(character);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
     
     @Test
@@ -161,7 +167,9 @@ public class TestResolvePhase {
         Compiler c = Util.runCompilerOn(source);
         ParseTreeWalker walker = new ParseTreeWalker();
         Type bool = (Type) c.table.globals.resolve("boolean");
-        walker.walk(new ExprTypeVerifierListener(bool), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(bool);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
 
     @Test
@@ -173,7 +181,9 @@ public class TestResolvePhase {
         Compiler c = Util.runCompilerOn(source);
         ParseTreeWalker walker = new ParseTreeWalker();
         Type integer = (Type) c.table.globals.resolve("int");
-        walker.walk(new ExprTypeVerifierListener(integer), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
 
     @Test
@@ -184,7 +194,9 @@ public class TestResolvePhase {
         Compiler c = Util.runCompilerOn(source);
         ParseTreeWalker walker = new ParseTreeWalker();
         Type v = (Type) c.table.globals.resolve("void");
-        walker.walk(new ExprTypeVerifierListener(v, v), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(v, v);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
     
     @Test
@@ -196,7 +208,9 @@ public class TestResolvePhase {
         Compiler c = Util.runCompilerOn(source);
         ParseTreeWalker walker = new ParseTreeWalker();
         Type integer = (Type) c.table.globals.resolve("int");
-        walker.walk(new ExprTypeVerifierListener(integer, integer), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer, integer);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
 
     @Test
@@ -209,7 +223,9 @@ public class TestResolvePhase {
         ParseTreeWalker walker = new ParseTreeWalker();
         Type integer = (Type) c.table.globals.resolve("int");
         Type character = (Type) c.table.globals.resolve("char");
-        walker.walk(new ExprTypeVerifierListener(character, integer, character, integer), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(character, character, integer);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
     
     @Test
@@ -223,13 +239,15 @@ public class TestResolvePhase {
         ParseTreeWalker walker = new ParseTreeWalker();
         Type A = (Type) c.table.globals.resolve("A");
         Type integer = (Type) c.table.globals.resolve("int");
-        walker.walk(new ExprTypeVerifierListener(A, A, integer, A, integer), c.tree);
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer, A, integer);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
     }
     
     class ExprTypeVerifierListener extends BlankCymbolListener {
 
         private Type[] expected;
-        private int p = 0;
+        public int p = 0;
 
         public ExprTypeVerifierListener(Type... expected) {
             this.expected = expected;
@@ -237,11 +255,9 @@ public class TestResolvePhase {
 
         @Override
         public void enterRule(exprContext ctx) {
-//            System.out.println(ctx.start + " " + ctx.stop);
-            assertEquals(expected[p++].getName(), ctx.types.get(0).getName());
-            if(ctx.types.size() == 2) {
-                assertEquals(expected[p++].getName(), ctx.types.get(1).getName());
-            }
+            System.out.println(ctx.start + " " + ctx.stop);
+            System.out.println(ctx.type);
+            assertEquals(expected[p++], ctx.type);
         }
         
     }

@@ -84,7 +84,7 @@ statement
   ;
 
 expr
-  locals [List<Type> types]
+  locals [Type type]
   : e1=expr '(' ( expr (',' expr)* )? ')'
   | e1=expr '[' e2=expr ']'
   | e1=expr '.' member=expr
