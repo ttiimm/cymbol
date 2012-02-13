@@ -84,10 +84,10 @@ statement
   ;
 
 expr
-  locals [Type type]
+  locals [List<Type> types]
   : e1=expr '(' ( expr (',' expr)* )? ')'
   | e1=expr '[' e2=expr ']'
-  | e1=expr '.' e2=expr
+  | e1=expr '.' member=expr
   | '-' e1=expr
   | '!' e1=expr
   | e1=expr ('*' | '/') e2=expr

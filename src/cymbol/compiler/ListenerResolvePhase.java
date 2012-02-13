@@ -1,11 +1,14 @@
 package cymbol.compiler;
 
+import java.util.ArrayList;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 import cymbol.compiler.CymbolParser.exprContext;
 import cymbol.compiler.CymbolParser.primaryContext;
 import cymbol.symtab.Scope;
+import cymbol.symtab.StructSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.SymbolTable;
 import cymbol.symtab.Type;
@@ -53,10 +56,22 @@ public class ListenerResolvePhase extends BlankCymbolListener implements
     }
     
     @Override
+    public void enterRule(exprContext ctx) {
+        ctx.types = new ArrayList<Type>();
+        
+        // if struct ref, then scope is not set correctly on member
+        if(ctx.member != null) {
+            Symbol structVar = resolve(ctx.e1.p.id.getText(), ctx.e1.p.scope, ctx);
+            StructSymbol struct = (StructSymbol) structVar.type;
+            ctx.member.p.scope = struct;
+        }
+    }
+
+    @Override
     public void exitRule(exprContext ctx) {
-        if(ctx.e1 != null) { ctx.type = ctx.e1.type; }
-        if(ctx.e2 != null) { ctx.type = ctx.e2.type; }
-        if(ctx.p != null) { ctx.type = ctx.p.type; }
+        if(ctx.e1 != null) { ctx.types.add(0, ctx.e1.types.get(0)); }
+        if(ctx.e2 != null) { ctx.types.add(1, ctx.e2.types.get(0)); }
+        if(ctx.p != null) { ctx.types.add(0, ctx.p.type); }
     }
 
     @Override

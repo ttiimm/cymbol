@@ -177,27 +177,71 @@ public class TestResolvePhase {
     }
 
     @Test
-    public void testResolveExprTypeWithFunctionCall() {
+    public void testResolveExprTypeWithRecursiveFunctionCall() {
         String source = "void foo() {" +
                         "    foo();" +
                         "}";
         Compiler c = Util.runCompilerOn(source);
         ParseTreeWalker walker = new ParseTreeWalker();
-        Type integer = (Type) c.table.globals.resolve("void");
-        walker.walk(new ExprTypeVerifierListener(integer), c.tree);
+        Type v = (Type) c.table.globals.resolve("void");
+        walker.walk(new ExprTypeVerifierListener(v, v), c.tree);
+    }
+    
+    @Test
+    public void testResolveExprTypeWithFunctionCall() {
+        String source = "int bar() { }" +
+        		        "void foo() {" +
+                        "    bar();" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type integer = (Type) c.table.globals.resolve("int");
+        walker.walk(new ExprTypeVerifierListener(integer, integer), c.tree);
+    }
+
+    @Test
+    public void testResolveExprTypeWithArrayRef() {
+        String source = "void foo() {" +
+                        "    char c[];" +
+                        "    c[1];" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type integer = (Type) c.table.globals.resolve("int");
+        Type character = (Type) c.table.globals.resolve("char");
+        walker.walk(new ExprTypeVerifierListener(character, integer, character, integer), c.tree);
+    }
+    
+    @Test
+    public void testResolveStructRef() {
+        String source = "struct A{ int x;}" +
+                        "void foo() {" +
+                        "    A a;" +
+                        "    a.x;" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type A = (Type) c.table.globals.resolve("A");
+        Type integer = (Type) c.table.globals.resolve("int");
+        walker.walk(new ExprTypeVerifierListener(A, A, integer, A, integer), c.tree);
     }
     
     class ExprTypeVerifierListener extends BlankCymbolListener {
 
-        private Type expected;
+        private Type[] expected;
+        private int p = 0;
 
-        public ExprTypeVerifierListener(Type expected) {
+        public ExprTypeVerifierListener(Type... expected) {
             this.expected = expected;
         }
 
         @Override
         public void enterRule(exprContext ctx) {
-            assertEquals(expected.getName(), ctx.type.getName());
+//            System.out.println(ctx.start + " " + ctx.stop);
+            assertEquals(expected[p++].getName(), ctx.types.get(0).getName());
+            if(ctx.types.size() == 2) {
+                assertEquals(expected[p++].getName(), ctx.types.get(1).getName());
+            }
         }
         
     }
