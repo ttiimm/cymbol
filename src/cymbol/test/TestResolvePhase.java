@@ -244,6 +244,41 @@ public class TestResolvePhase {
         assertEquals(verifier.p, verifier.expected.length);
     }
     
+    @Test
+    public void testResolveNestedStructRef() {
+        String source = "struct A{" +
+                		"    struct B{" +
+                		"        int x;" +
+                		"    }" +
+                		"    B b;" +
+                		"}" +
+                        "void foo() {" +
+                        "    A a;" +
+                        "    a.b.x;" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type A = (Type) c.table.globals.resolve("A");
+        Type integer = (Type) c.table.globals.resolve("int");
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer, A, integer);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
+    }
+    
+    @Test
+    public void testUnaryMinusExpr() {
+        String source = "void foo() {" +
+                        "    int a;" +
+                        "    -a;" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type integer = (Type) c.table.globals.resolve("int");
+        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer, integer);
+        walker.walk(verifier, c.tree);
+        assertEquals(verifier.p, verifier.expected.length);
+    }
+    
     class ExprTypeVerifierListener extends BlankCymbolListener {
 
         private Type[] expected;
@@ -255,8 +290,8 @@ public class TestResolvePhase {
 
         @Override
         public void enterRule(exprContext ctx) {
-            System.out.println(ctx.start + " " + ctx.stop);
-            System.out.println(ctx.type);
+//            System.out.println(ctx.start + " " + ctx.stop);
+//            System.out.println(ctx.type);
             assertEquals(expected[p++], ctx.type);
         }
         
