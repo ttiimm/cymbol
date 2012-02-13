@@ -1,4 +1,4 @@
-// From Parr's "Language Implementation Patterns"
+// Based on Parr's "Language Implementation Patterns"
 // code/semantics/safety/Cymbol.g
 
 grammar Cymbol;
@@ -48,7 +48,7 @@ parameter
   ;
 
 type 
-  locals [Type type, String t, Scope scope]
+  locals [Type type, String t, Scope scope, Symbol method]
   : primitiveType { $type.t = $primitiveType.t; } 
   | ID            { $type.t = $ID.getText(); }
   ;
@@ -84,30 +84,27 @@ statement
   ;
 
 expr
-  returns [Type type]
-  : expr '(' expressionList? ')'
-  | expr '[' expr ']'
-  | expr '.' expr
-  | '-' expr
-  | '!' expr
-  | expr ('*' | '/') expr
-  | expr ('+' | '-') expr
-  | expr ('!=' | '==' | '<' | '>' | '<=' | '>=') expr
-  | primary
-  | '(' expr ')'
-  ;
-
-expressionList
-  : expr (',' expr)*
+  locals [Type type]
+  : e1=expr '(' ( expr (',' expr)* )? ')'
+  | e1=expr '[' e2=expr ']'
+  | e1=expr '.' e2=expr
+  | '-' e1=expr
+  | '!' e1=expr
+  | e1=expr ('*' | '/') e2=expr
+  | e1=expr ('+' | '-') e2=expr
+  | e1=expr ('!=' | '==' | '<' | '>' | '<=' | '>=') e2=expr
+  | p=primary
+  | '(' e1=expr ')'
   ;
 
 primary
-	: ID
-	| INT
-	| FLOAT
-	| CHAR
-	| 'true'
-	| 'false'
+  returns [Scope scope, Type type]
+	: id=ID
+	| i=INT
+	| f=FLOAT
+	| c=CHAR
+	| bool='true'
+	| bool='false'
 	;
 
 // LEXER RULES

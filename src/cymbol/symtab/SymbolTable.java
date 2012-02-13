@@ -10,18 +10,21 @@ package cymbol.symtab;
  ***/
 public class SymbolTable {
     
+    public static final BuiltInTypeSymbol INT = new BuiltInTypeSymbol("int");
+    public static final BuiltInTypeSymbol FLOAT = new BuiltInTypeSymbol("float");
+    public static final BuiltInTypeSymbol BOOLEAN = new BuiltInTypeSymbol("boolean");
+    public static final BuiltInTypeSymbol CHAR = new BuiltInTypeSymbol("char");
+    public static final BuiltInTypeSymbol VOID = new BuiltInTypeSymbol("void");
+
+    
     public GlobalScope globals = new GlobalScope();
 
     public SymbolTable() {
-        initTypeSystem();
-    }
-
-    protected void initTypeSystem() {
-        globals.define(new BuiltInTypeSymbol("int"));
-        globals.define(new BuiltInTypeSymbol("float"));
-        globals.define(new BuiltInTypeSymbol("boolean"));
-        globals.define(new BuiltInTypeSymbol("char"));
-        globals.define(new BuiltInTypeSymbol("void")); 
+        globals.define(INT);
+        globals.define(FLOAT);
+        globals.define(BOOLEAN);
+        globals.define(CHAR);
+        globals.define(VOID);
     }
 
     public String toString() {

@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 public abstract class ScopedSymbol extends Symbol implements Scope {
+    
     Scope enclosingScope;
     public ParserRuleContext<Token> tree;
 

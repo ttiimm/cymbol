@@ -60,12 +60,12 @@ public class Compiler {
     }
 
     public void define() {
-        ListenerDefPhase defl = new ListenerDefPhase(table.globals);
+        ListenerDefinePhase defl = new ListenerDefinePhase(table.globals);
         walker.walk(defl, tree);
     }
 
     public void reference() {
-        ListenerRefPhase refl = new ListenerRefPhase(this);
+        ListenerResolvePhase refl = new ListenerResolvePhase(this);
         walker.walk(refl, tree);
     }
 

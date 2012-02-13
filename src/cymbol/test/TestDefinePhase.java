@@ -13,7 +13,7 @@ import cymbol.symtab.StructSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.SymbolTable;
 
-public class TestDefPhase {
+public class TestDefinePhase {
     
     @Test
     public void testSimpleStruct() {

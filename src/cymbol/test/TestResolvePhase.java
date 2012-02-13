@@ -2,23 +2,23 @@ package cymbol.test;
 
 import static org.junit.Assert.assertEquals;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.junit.Ignore;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 
+import cymbol.compiler.BlankCymbolListener;
 import cymbol.compiler.Compiler;
-import cymbol.compiler.CymbolParser;
-import cymbol.compiler.CymbolParser.blockContext;
+import cymbol.compiler.CymbolParser.exprContext;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.SymbolTable;
+import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
-public class TestRefPhase {
+public class TestResolvePhase {
 
     @Test
-    public void testDefineGlobalVars() {
+    public void testResolveGlobalVars() {
         String source = "int a;" +
         		        "char b;" +
         		        "float c;" +
@@ -37,7 +37,7 @@ public class TestRefPhase {
     }
     
     @Test
-    public void testDefineStructVars() {
+    public void testResolveStructVars() {
         String source = "struct A {" +
         		        "    int x;" +
         		        "    float y;" +
@@ -49,7 +49,7 @@ public class TestRefPhase {
     }
     
     @Test
-    public void testDefineMethodDecl() {
+    public void testResolveMethodDecl() {
         String source = "void foo(int x, char y) {" +
                 		"}";
         SymbolTable t = Util.runCompilerOn(source).table;
@@ -60,7 +60,7 @@ public class TestRefPhase {
     }
     
     @Test
-    public void testDefineVarDecl() {
+    public void testResolveVarDecl() {
         String source = "void foo() {" +
                         "   int a[];" +
                         "   float x = a[0];" +
@@ -74,7 +74,7 @@ public class TestRefPhase {
     }
     
     @Test
-    public void testDefineVarWithForwardGlobalStruct() {
+    public void testResolveVarWithForwardGlobalStruct() {
         String source = "void foo() {" +
                         "   A a;" +
                         "}" +
@@ -87,10 +87,22 @@ public class TestRefPhase {
     }
 
     @Test
-    public void testDefineVarWithForwardLocalStruct() {
+    public void testResolveVarWithForwardLocalStruct() {
         String source = "void foo() {" +
-                "   A a;" +
+                        "   A a;" +
+                        "   struct A { int x; }" +
+                        "}";
+        SymbolTable t = Util.runCompilerOn(source).table;
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
+        Scope local = Util.resolveLocalScope(m);
+        assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
+    }
+    
+    @Test
+    public void testResolveVarWithLocalStruct() {
+        String source = "void foo() {" +
                 "   struct A { int x; }" +
+                "   A a;" +
                 "}";
         SymbolTable t = Util.runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
@@ -99,19 +111,7 @@ public class TestRefPhase {
     }
     
     @Test
-    public void testDefineVarWithLocalStruct() {
-        String source = "void foo() {" +
-                "   struct A { int x; }" +
-                "   A a;" +
-                "}";
-        SymbolTable t = Util.runCompilerOn(source).table;
-        MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = Util.resolveLocalScope(m);
-        assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
-    }
-    
-    @Test
-    public void testDefineVarWithUnknownType() {
+    public void testResolveVarWithUnknownType() {
         String source = "A a;";
         Compiler c = Util.runCompilerOn(source);
         VariableSymbol a = (VariableSymbol) c.table.globals.resolve("a");
@@ -120,4 +120,85 @@ public class TestRefPhase {
         
     }
     
+    @Test
+    public void testResolveExprTypeWithPrimaryInt() {
+        String source = "void foo() {" +
+        		        "     4;" +
+        		        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type integer = (Type) c.table.globals.resolve("int");
+        walker.walk(new ExprTypeVerifierListener(integer), c.tree);
+    }
+
+    @Test
+    public void testResolveExprTypeWithPrimaryFloat() {
+        String source = "void foo() {" +
+                        "     4.0;" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type floating = (Type) c.table.globals.resolve("float");
+        walker.walk(new ExprTypeVerifierListener(floating), c.tree);
+    }
+
+    @Test
+    public void testResolveExprTypeWithPrimaryChar() {
+        String source = "void foo() {" +
+                        "     'h';" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type character = (Type) c.table.globals.resolve("char");
+        walker.walk(new ExprTypeVerifierListener(character), c.tree);
+    }
+    
+    @Test
+    public void testResolveExprTypeWithPrimaryBoolean() {
+        String source = "void foo() {" +
+                        "     true;" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type bool = (Type) c.table.globals.resolve("boolean");
+        walker.walk(new ExprTypeVerifierListener(bool), c.tree);
+    }
+
+    @Test
+    public void testResolveExprTypeWithPrimaryId() {
+        String source = "void foo() {" +
+                        "int a;" +
+                        "    a;" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type integer = (Type) c.table.globals.resolve("int");
+        walker.walk(new ExprTypeVerifierListener(integer), c.tree);
+    }
+
+    @Test
+    public void testResolveExprTypeWithFunctionCall() {
+        String source = "void foo() {" +
+                        "    foo();" +
+                        "}";
+        Compiler c = Util.runCompilerOn(source);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Type integer = (Type) c.table.globals.resolve("void");
+        walker.walk(new ExprTypeVerifierListener(integer), c.tree);
+    }
+    
+    class ExprTypeVerifierListener extends BlankCymbolListener {
+
+        private Type expected;
+
+        public ExprTypeVerifierListener(Type expected) {
+            this.expected = expected;
+        }
+
+        @Override
+        public void enterRule(exprContext ctx) {
+            assertEquals(expected.getName(), ctx.type.getName());
+        }
+        
+    }
 }

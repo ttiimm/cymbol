@@ -1,6 +1,7 @@
 package cymbol.compiler;
 
 import cymbol.compiler.CymbolParser.parameterContext;
+import cymbol.compiler.CymbolParser.primaryContext;
 import cymbol.compiler.CymbolParser.typeContext;
 import cymbol.compiler.CymbolParser.varDeclarationContext;
 import cymbol.symtab.LocalScope;
@@ -9,17 +10,17 @@ import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.VariableSymbol;
 
-public class ListenerDefPhase extends BlankCymbolListener implements CymbolListener {
+public class ListenerDefinePhase extends BlankCymbolListener implements CymbolListener {
 
     private Scope current;
 
-    public ListenerDefPhase(Scope globals) {
+    public ListenerDefinePhase(Scope globals) {
         this.current = globals;
     }
 
     @Override
     public void enterRule(CymbolParser.structDeclarationContext ctx) {
-        StructSymbol struct = new StructSymbol(ctx.name.getText(), this.current, ctx);
+        StructSymbol struct = new StructSymbol(ctx.name.getText(), current, ctx);
         current.define(struct);
         push(struct);
     }
@@ -31,7 +32,7 @@ public class ListenerDefPhase extends BlankCymbolListener implements CymbolListe
 
     @Override
     public void enterRule(CymbolParser.methodDeclarationContext ctx) {
-        MethodSymbol method = new MethodSymbol(ctx.name.getText(), this.current, ctx);
+        MethodSymbol method = new MethodSymbol(ctx.name.getText(), current, ctx);
         current.define(method);
         ctx.method = method;
         push(method);
@@ -69,13 +70,18 @@ public class ListenerDefPhase extends BlankCymbolListener implements CymbolListe
     @Override
     public void enterRule(CymbolParser.blockContext ctx) {
         LocalScope local = new LocalScope(this.current);
-        this.current = local;
+        current = local;
         ctx.scope = local;
     }
 
     @Override
     public void exitRule(CymbolParser.blockContext ctx) {
         pop();
+    }
+    
+    @Override
+    public void enterRule(primaryContext ctx) {
+        ctx.scope = current;
     }
 
     private void push(Scope scope) {
