@@ -12,8 +12,7 @@ import cymbol.symtab.SymbolTable;
 import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
-public class ListenerResolvePhase extends BlankCymbolListener implements
-        CymbolListener {
+public class ListenerResolvePhase extends BlankCymbolListener {
 
     private Compiler compiler;
 
@@ -38,7 +37,7 @@ public class ListenerResolvePhase extends BlankCymbolListener implements
 
     @Override
     public void enterRule(CymbolParser.methodDeclarationContext ctx) {
-        ctx.ret.method = ctx.method;
+        ctx.ret.method = ctx.p.symbol;
     }
 
     @Override

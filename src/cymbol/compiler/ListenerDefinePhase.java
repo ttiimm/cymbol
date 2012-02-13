@@ -4,13 +4,14 @@ import cymbol.compiler.CymbolParser.parameterContext;
 import cymbol.compiler.CymbolParser.primaryContext;
 import cymbol.compiler.CymbolParser.typeContext;
 import cymbol.compiler.CymbolParser.varDeclarationContext;
+import cymbol.compiler.model.CymbolProperties;
 import cymbol.symtab.LocalScope;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.VariableSymbol;
 
-public class ListenerDefinePhase extends BlankCymbolListener implements CymbolListener {
+public class ListenerDefinePhase extends BlankCymbolListener {
 
     private Scope current;
 
@@ -34,7 +35,7 @@ public class ListenerDefinePhase extends BlankCymbolListener implements CymbolLi
     public void enterRule(CymbolParser.methodDeclarationContext ctx) {
         MethodSymbol method = new MethodSymbol(ctx.name.getText(), current, ctx);
         current.define(method);
-        ctx.method = method;
+        ctx.p = new CymbolProperties(current, null, method);
         push(method);
     }
 
