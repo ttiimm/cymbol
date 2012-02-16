@@ -56,7 +56,7 @@ public class TestDefinePhase {
         MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
         assertEquals("global.M()", m.toString());
         CymbolParser.blockContext ctx = (CymbolParser.blockContext) m.tree.getChild(4);
-        assertEquals("local[A]", ctx.scope.toString());
+        assertEquals("local[A]", ctx.props.scope.toString());
     }
     
     @Test
@@ -70,7 +70,7 @@ public class TestDefinePhase {
         MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
         CymbolParser.blockContext first = (CymbolParser.blockContext) m.tree.getChild(4);
         CymbolParser.blockContext second = (CymbolParser.blockContext) first.getChild(1).getChild(0);
-        assertEquals("local[A]", second.scope.toString());
+        assertEquals("local[A]", second.props.scope.toString());
     }
     
     public SymbolTable runTest(String source) {

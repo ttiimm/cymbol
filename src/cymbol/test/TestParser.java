@@ -27,6 +27,14 @@ public class TestParser {
         		        "(expr (expr ( (expr (expr (primary x)) + (expr (primary y))) )) * (expr (primary z))) ;))";
         assertEquals(expect, t);
     }
+    
+    @Test
+    public void primitiveBooleanType() {
+        String source = "boolean a;";
+        String t = runTest(source);
+        String expect = "(compilationUnit (varDeclaration (type (primitiveType boolean)) a ;))";
+        assertEquals(expect, t);
+    }
 
     public String runTest(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);

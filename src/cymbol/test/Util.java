@@ -18,6 +18,6 @@ public class Util {
     }
     
     public static Scope resolveLocalScope(MethodSymbol m) {
-        return ((CymbolParser.blockContext) m.tree.getChild(4)).scope;
+        return ((CymbolParser.blockContext) m.tree.getChild(4)).props.scope;
     }
 }

@@ -17,6 +17,8 @@ package cymbol.compiler;
 }
 
 compilationUnit
+  locals[CymbolProperties props]
+  @init{$compilationUnit.props = new CymbolProperties();}
 	: (structDeclaration 
 	| methodDeclaration 
 	| varDeclaration)+
@@ -27,7 +29,8 @@ structDeclaration
   ;
   
 structMember
-  locals[Scope scope]
+  locals[CymbolProperties props]
+  @init{$structMember.props = new CymbolProperties();}
   : t=type name=ID ';'
   | t=type name=ID '[]' ';'
   | structDeclaration
@@ -35,7 +38,8 @@ structMember
 
 methodDeclaration
   locals[CymbolProperties props]
-  : ret=type name=ID '(' formalParameters? ')' block
+  @init{$methodDeclaration.props = new CymbolProperties();}
+  : type ID '(' formalParameters? ')' block
   ;
 
 formalParameters
@@ -43,34 +47,39 @@ formalParameters
   ;
     
 parameter
-  locals[Scope scope]
+  locals[CymbolProperties props]
+  @init{$parameter.props = new CymbolProperties();}
   : t=type name=ID 
   | t=type name=ID '[]'
   ;
 
 type 
-  locals [Type type, String t, Scope scope, Symbol method]
-  : primitiveType { $type.t = $primitiveType.t; } 
-  | ID            { $type.t = $ID.getText(); }
+  returns [CymbolProperties props]
+  @init{$type.props = new CymbolProperties();}
+  : p=primitiveType 
+  | i=ID            
   ;
 
 primitiveType 
-  returns [String t]
-  : 'float'  {$primitiveType.t = "float"; }
-  | 'int'    {$primitiveType.t = "int"; }
-  | 'char'   {$primitiveType.t = "char"; }
-  | 'boolean'{$primitiveType.t = "boolean"; }
-  | 'void'   {$primitiveType.t = "void"; }
+  returns [CymbolProperties props]
+  @init{$primitiveType.props = new CymbolProperties();}
+  : 'float'  
+  | 'int'    
+  | 'char'
+  | 'boolean'
+  | 'void' 
   ;
 
 varDeclaration
-  locals [Scope scope]
+  returns [CymbolProperties props]
+  @init{$varDeclaration.props = new CymbolProperties();}
   : t=type name=ID ('=' e=expr)? ';'
   | t=type name=ID '[]' ('=' e=expr)? ';'
   ;
 
 block 
-  locals [Scope scope]  
+  returns [CymbolProperties props]
+  @init{$block.props = new CymbolProperties();}
   : '{' statement* '}'
   ;
 
@@ -85,27 +94,29 @@ statement
   ;
 
 expr
-  locals [Type type]
-  : e1=expr '(' ( expr (',' expr)* )? ')'
-  | e1=expr '[' e2=expr ']'
-  | e1=expr '.' member=expr
-  | '-' e1=expr
-  | '!' e1=expr
-  | e1=expr ('*' | '/') e2=expr
-  | e1=expr ('+' | '-') e2=expr
-  | e1=expr ('!=' | '==' | '<' | '>' | '<=' | '>=') e2=expr
-  | p=primary
-  | '(' e1=expr ')'
+  returns [CymbolProperties props]
+  @init{$expr.props = new CymbolProperties();}
+  : expr '(' ( expr (',' expr)* )? ')'                
+  | expr '[' expr ']'                                
+  | expr '.' expr                                     
+  | '-' expr                                         
+  | '!' expr                                          
+  | expr ('*' | '/') expr                          
+  | expr ('+' | '-') expr                             
+  | expr ('!=' | '==' | '<' | '>' | '<=' | '>=') expr 
+  | primary -> expr_primary 
+  | '(' expr ')'                                      
   ;
 
 primary
-  returns [Scope scope, Type type]
-	: id=ID
-	| i=INT
-	| f=FLOAT
-	| c=CHAR
-	| bool='true'
-	| bool='false'
+  returns [CymbolProperties props]
+  @init{$primary.props = new CymbolProperties();}
+	: ID      
+	| INT     
+	| FLOAT   
+	| CHAR    
+	| 'true'
+	| 'false'
 	;
 
 // LEXER RULES

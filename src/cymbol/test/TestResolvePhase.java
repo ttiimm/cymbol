@@ -5,9 +5,10 @@ import static org.junit.Assert.assertEquals;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 
-import cymbol.compiler.BlankCymbolListener;
 import cymbol.compiler.Compiler;
+import cymbol.compiler.CymbolBaseListener;
 import cymbol.compiler.CymbolParser.exprContext;
+import cymbol.compiler.CymbolParser.expr_primaryContext;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
@@ -57,6 +58,19 @@ public class TestResolvePhase {
         assertEquals("global.void", m.type.toString());
         assertEquals("<foo.x:global.int>", m.resolve("x").toString());
         assertEquals("<foo.y:global.char>", m.resolve("y").toString());
+    }
+
+    @Test
+    public void testResolveMultipleMethodDecl() {
+        String source = "void foo(int x, char y) {}" +
+        		        "float bar(char z){}";
+        SymbolTable t = Util.runCompilerOn(source).table;
+        MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
+        assertEquals("global.void", m.type.toString());
+        assertEquals("<foo.x:global.int>", m.resolve("x").toString());
+        assertEquals("<foo.y:global.char>", m.resolve("y").toString());
+        MethodSymbol bar = (MethodSymbol) t.globals.resolve("bar");
+        assertEquals("global.float", bar.type.toString());
     }
     
     @Test
@@ -279,7 +293,7 @@ public class TestResolvePhase {
         assertEquals(verifier.p, verifier.expected.length);
     }
     
-    class ExprTypeVerifierListener extends BlankCymbolListener {
+    class ExprTypeVerifierListener extends CymbolBaseListener {
 
         private Type[] expected;
         public int p = 0;
@@ -290,9 +304,16 @@ public class TestResolvePhase {
 
         @Override
         public void enter(exprContext ctx) {
-//            System.out.println(ctx.start + " " + ctx.stop);
-//            System.out.println(ctx.type);
-            assertEquals(expected[p++], ctx.type);
+            System.out.println(ctx.start + " " + ctx.stop);
+            System.out.println(ctx.props.type);
+            assertEquals(expected[p++], ctx.props.type);
+        }
+
+        @Override
+        public void enter(expr_primaryContext ctx) {
+            System.out.println(ctx.start + " " + ctx.stop);
+            System.out.println(ctx.props.type);
+            assertEquals(expected[p++], ctx.props.type);
         }
         
     }
