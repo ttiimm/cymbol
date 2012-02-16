@@ -22,13 +22,13 @@ public class ListenerResolvePhase extends BlankCymbolListener {
     }
 
     @Override
-    public void exitRule(CymbolParser.varDeclarationContext ctx) {
+    public void exit(CymbolParser.varDeclarationContext ctx) {
         VariableSymbol var = new VariableSymbol(ctx.name.getText(), ctx.t.type);
         ctx.scope.define(var);
     }
 
     @Override
-    public void exitRule(CymbolParser.structMemberContext ctx) {
+    public void exit(CymbolParser.structMemberContext ctx) {
         if (ctx.t != null) {
             Symbol s = resolve(ctx.name.getText(), ctx.scope, ctx);
             s.type = ctx.t.type;
@@ -36,24 +36,24 @@ public class ListenerResolvePhase extends BlankCymbolListener {
     }
 
     @Override
-    public void enterRule(CymbolParser.methodDeclarationContext ctx) {
-        ctx.ret.method = ctx.p.symbol;
+    public void enter(CymbolParser.methodDeclarationContext ctx) {
+        ctx.ret.method = ctx.props.symbol;
     }
 
     @Override
-    public void exitRule(CymbolParser.parameterContext ctx) {
+    public void exit(CymbolParser.parameterContext ctx) {
         VariableSymbol var = new VariableSymbol(ctx.name.getText(), ctx.t.type);
         ctx.scope.define(var);
     }
     
     @Override
-    public void exitRule(CymbolParser.typeContext ctx) {
+    public void exit(CymbolParser.typeContext ctx) {
         ctx.type = (Type) resolve(ctx.t, ctx.scope, ctx);
         if(ctx.method != null) { ctx.method.type = ctx.type; }
     }
     
     @Override
-    public void enterRule(exprContext ctx) {
+    public void enter(exprContext ctx) {
         // if struct ref, then scope is not set correctly on member
         if(ctx.member != null) {
             Symbol structVar = resolve(ctx.e1.p.id.getText(), ctx.e1.p.scope, ctx);
@@ -63,14 +63,14 @@ public class ListenerResolvePhase extends BlankCymbolListener {
     }
 
     @Override
-    public void exitRule(exprContext ctx) {
+    public void exit(exprContext ctx) {
         if(ctx.e1 != null) { ctx.type = ctx.e1.type; }
         if(ctx.p != null) { ctx.type = ctx.p.type; }
         if(ctx.member != null) { ctx.type = ctx.member.type; }
     }
 
     @Override
-    public void enterRule(primaryContext ctx) {
+    public void enter(primaryContext ctx) {
         if(ctx.id != null) {
             Symbol s = ctx.scope.resolve(ctx.id.getText());
             ctx.type = s.type;

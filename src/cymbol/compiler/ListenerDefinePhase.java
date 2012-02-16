@@ -4,7 +4,6 @@ import cymbol.compiler.CymbolParser.parameterContext;
 import cymbol.compiler.CymbolParser.primaryContext;
 import cymbol.compiler.CymbolParser.typeContext;
 import cymbol.compiler.CymbolParser.varDeclarationContext;
-import cymbol.compiler.model.CymbolProperties;
 import cymbol.symtab.LocalScope;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
@@ -20,32 +19,32 @@ public class ListenerDefinePhase extends BlankCymbolListener {
     }
 
     @Override
-    public void enterRule(CymbolParser.structDeclarationContext ctx) {
+    public void enter(CymbolParser.structDeclarationContext ctx) {
         StructSymbol struct = new StructSymbol(ctx.name.getText(), current, ctx);
         current.define(struct);
         push(struct);
     }
 
     @Override
-    public void exitRule(CymbolParser.structDeclarationContext ctx) {
+    public void exit(CymbolParser.structDeclarationContext ctx) {
         pop();
     }
 
     @Override
-    public void enterRule(CymbolParser.methodDeclarationContext ctx) {
+    public void enter(CymbolParser.methodDeclarationContext ctx) {
         MethodSymbol method = new MethodSymbol(ctx.name.getText(), current, ctx);
         current.define(method);
-        ctx.p = new CymbolProperties(current, null, method);
+        ctx.props = new CymbolProperties(current, null, method);
         push(method);
     }
 
     @Override
-    public void exitRule(CymbolParser.methodDeclarationContext ctx) {
+    public void exit(CymbolParser.methodDeclarationContext ctx) {
         pop();
     }
 
     @Override
-    public void enterRule(CymbolParser.structMemberContext ctx) {
+    public void enter(CymbolParser.structMemberContext ctx) {
         if (ctx.name != null) {
             ctx.scope = current;
             VariableSymbol member = new VariableSymbol(ctx.name.getText());
@@ -54,34 +53,34 @@ public class ListenerDefinePhase extends BlankCymbolListener {
     }
 
     @Override
-    public void enterRule(parameterContext ctx) {
+    public void enter(parameterContext ctx) {
         ctx.scope = current;
     }
 
     @Override
-    public void enterRule(typeContext ctx) {
+    public void enter(typeContext ctx) {
         ctx.scope = current;
     }
 
     @Override
-    public void enterRule(varDeclarationContext ctx) {
+    public void enter(varDeclarationContext ctx) {
         ctx.scope = current;
     }
 
     @Override
-    public void enterRule(CymbolParser.blockContext ctx) {
+    public void enter(CymbolParser.blockContext ctx) {
         LocalScope local = new LocalScope(this.current);
         current = local;
         ctx.scope = local;
     }
 
     @Override
-    public void exitRule(CymbolParser.blockContext ctx) {
+    public void exit(CymbolParser.blockContext ctx) {
         pop();
     }
     
     @Override
-    public void enterRule(primaryContext ctx) {
+    public void enter(primaryContext ctx) {
         ctx.scope = current;
     }
 

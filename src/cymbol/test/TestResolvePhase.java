@@ -289,7 +289,7 @@ public class TestResolvePhase {
         }
 
         @Override
-        public void enterRule(exprContext ctx) {
+        public void enter(exprContext ctx) {
 //            System.out.println(ctx.start + " " + ctx.stop);
 //            System.out.println(ctx.type);
             assertEquals(expected[p++], ctx.type);

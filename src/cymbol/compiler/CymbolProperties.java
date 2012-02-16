@@ -1,4 +1,4 @@
-package cymbol.compiler.model;
+package cymbol.compiler;
 
 import cymbol.symtab.Scope;
 import cymbol.symtab.Symbol;

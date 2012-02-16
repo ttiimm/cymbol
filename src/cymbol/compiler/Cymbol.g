@@ -9,7 +9,7 @@ package cymbol.compiler;
 import cymbol.symtab.Scope;
 import cymbol.symtab.Type;
 import cymbol.symtab.Symbol;
-import cymbol.compiler.model.CymbolProperties;
+import cymbol.compiler.CymbolProperties;
 }
 
 @lexer::header {
@@ -34,7 +34,7 @@ structMember
   ;
 
 methodDeclaration
-  locals[CymbolProperties p]
+  locals[CymbolProperties props]
   : ret=type name=ID '(' formalParameters? ')' block
   ;
 
