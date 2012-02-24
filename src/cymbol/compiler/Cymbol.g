@@ -25,14 +25,14 @@ compilationUnit
 	;
 
 structDeclaration
-  : 'struct' name=ID '{' structMember+ '}'
+  : 'struct' ID '{' structMember+ '}'
   ;
   
 structMember
   locals[CymbolProperties props]
   @init{$structMember.props = new CymbolProperties();}
-  : t=type name=ID ';'
-  | t=type name=ID '[]' ';'
+  : type ID ';'
+  | type ID '[]' ';'
   | structDeclaration
   ;
 
@@ -49,15 +49,15 @@ formalParameters
 parameter
   locals[CymbolProperties props]
   @init{$parameter.props = new CymbolProperties();}
-  : t=type name=ID 
-  | t=type name=ID '[]'
+  : type ID 
+  | type ID '[]'
   ;
 
 type 
   returns [CymbolProperties props]
   @init{$type.props = new CymbolProperties();}
-  : p=primitiveType 
-  | i=ID            
+  : primitiveType 
+  | ID            
   ;
 
 primitiveType 
@@ -73,8 +73,8 @@ primitiveType
 varDeclaration
   returns [CymbolProperties props]
   @init{$varDeclaration.props = new CymbolProperties();}
-  : t=type name=ID ('=' e=expr)? ';'
-  | t=type name=ID '[]' ('=' e=expr)? ';'
+  : type ID ('=' expr)? ';'
+  | type ID '[]' ('=' expr)? ';'
   ;
 
 block 

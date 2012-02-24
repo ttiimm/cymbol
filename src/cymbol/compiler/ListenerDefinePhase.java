@@ -26,7 +26,7 @@ public class ListenerDefinePhase extends CymbolBaseListener {
 
     @Override
     public void enter(CymbolParser.structDeclarationContext ctx) {
-        StructSymbol struct = new StructSymbol(ctx.name.getText(), current, ctx);
+        StructSymbol struct = new StructSymbol(ctx.ID().getText(), current, ctx);
         current.define(struct);
         push(struct);
     }
@@ -50,9 +50,9 @@ public class ListenerDefinePhase extends CymbolBaseListener {
 
     @Override
     public void enter(CymbolParser.structMemberContext ctx) {
-        if (ctx.name != null) {
+        if (ctx.ID() != null) {
             ctx.props.scope = current;
-            VariableSymbol member = new VariableSymbol(ctx.name.getText());
+            VariableSymbol member = new VariableSymbol(ctx.ID().getText());
             current.define(member);
         }
     }

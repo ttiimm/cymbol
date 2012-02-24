@@ -39,34 +39,34 @@ public class ListenerResolvePhase extends CymbolBaseListener {
 
     @Override
     public void exit(CymbolParser.varDeclarationContext ctx) {
-        VariableSymbol var = new VariableSymbol(ctx.name.getText(), ctx.t.props.type);
+        VariableSymbol var = new VariableSymbol(ctx.ID().getText(), ctx.type().props.type);
         ctx.props.scope.define(var);
     }
 
     @Override
     public void exit(CymbolParser.structMemberContext ctx) {
-        if (ctx.t != null) {
-            Symbol s = resolve(ctx.name.getText(), ctx.props.scope, ctx);
-            s.type = ctx.t.props.type;
+        if (ctx.type() != null) {
+            Symbol s = resolve(ctx.ID().getText(), ctx.props.scope, ctx);
+            s.type = ctx.type().props.type;
         }
     }
 
     @Override
     public void exit(CymbolParser.parameterContext ctx) {
-        VariableSymbol var = new VariableSymbol(ctx.name.getText(), ctx.t.props.type);
+        VariableSymbol var = new VariableSymbol(ctx.ID().getText(), ctx.type().props.type);
         ctx.props.scope.define(var);
     }
     
     @Override
     public void exit(CymbolParser.typeContext ctx) {
-        if(ctx.i != null) { ctx.props.type = (Type) resolve(ctx.i.getText(), ctx.props.scope, ctx); }
-        if(ctx.p != null) { ctx.props.type = ctx.p.props.type;}
+        if(ctx.ID() != null) { ctx.props.type = (Type) resolve(ctx.ID().getText(), ctx.props.scope, ctx); }
+        if(ctx.primitiveType() != null) { ctx.props.type = ctx.primitiveType().props.type;}
     }
 
 
     @Override
     public void enter(exprContext ctx) {
-        System.out.println(ctx.start + " " + ctx.stop);
+//        System.out.println(ctx.start + " " + ctx.stop);
         ctx.props = new CymbolProperties();
         // if struct ref, then scope is not set correctly on member
 //        if(ctx.member != null) {
@@ -78,7 +78,7 @@ public class ListenerResolvePhase extends CymbolBaseListener {
 
     @Override
     public void exit(exprContext ctx) {
-        System.out.println("BYE: " +ctx.start + " " + ctx.stop);
+//        System.out.println("BYE: " +ctx.start + " " + ctx.stop);
         ctx.props.type = ctx.expr(0).props.type;
     }
 
