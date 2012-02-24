@@ -19,15 +19,15 @@ public class Compiler {
     public CymbolParser parser;
     public ParseTree tree;
     public SymbolTable table;
-    private ParseTreeWalker walker;
+    
+//    public 
 
     public List<String> errors = new ArrayList<String>();
 
     public Compiler(CharStream in) {
         this.parser = setupParser(in);
-        this.tree = parse(in);
+        this.tree = parse(parser, in);
         this.table = new SymbolTable();
-        this.walker = new ParseTreeWalker();
     }
 
     private CymbolParser setupParser(CharStream in) {
@@ -38,12 +38,12 @@ public class Compiler {
         return p;
     }
 
-    private ParseTree parse(CharStream in) {
+    private ParseTree parse(CymbolParser parser, CharStream in) {
         ParseTree tree = null;
         
         try {
-            tree = this.parser.compilationUnit();
-            if (this.parser.getNumberOfSyntaxErrors() > 0) {
+            tree = parser.compilationUnit();
+            if (parser.getNumberOfSyntaxErrors() > 0) {
                 error("Error parsing " + in.getSourceName());
                 return null;
             }
@@ -60,11 +60,13 @@ public class Compiler {
     }
 
     public void define() {
+        ParseTreeWalker walker = new ParseTreeWalker();
         ListenerDefinePhase defl = new ListenerDefinePhase(table.globals);
         walker.walk(defl, tree);
     }
 
     public void reference() {
+        ParseTreeWalker walker = new ParseTreeWalker();
         ListenerResolvePhase refl = new ListenerResolvePhase(this);
         walker.walk(refl, tree);
     }
