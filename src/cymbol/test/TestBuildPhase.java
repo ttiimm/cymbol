@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
+import cymbol.model.VariableDeclaration;
 
 public class TestBuildPhase {
 
@@ -16,13 +17,13 @@ public class TestBuildPhase {
     }
 
     @Test
-    public void globalVars() {
-        String source = "int x;" +
-        		        "char c;" +
-        		        "float f;" +
-        		        "boolean b[];";
+    public void globalVar() {
+        String source = "int x;";
         Compiler c = Util.runCompilerOn(source);
-        assertEquals(4, c.src.vars.size());
+        VariableDeclaration var = c.src.vars.get(0);
+        assertEquals("int", var.type.getName());
+        assertEquals("x", var.name);
+        
     }
     
     @Test

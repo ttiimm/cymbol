@@ -8,6 +8,7 @@ import cymbol.model.SourceFile;
 import cymbol.model.FunctionDeclaration;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
+import cymbol.symtab.Symbol;
 
 public class ListenerBuildPhase extends CymbolBaseListener {
 
@@ -20,7 +21,8 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     @Override
     public void enter(compilationUnitContext ctx) {
         for(varDeclarationContext var : ctx.getRuleContexts(varDeclarationContext.class)) {
-            src.add(new VariableDeclaration());
+            Symbol symbol = var.props.scope.resolve(var.ID().getText());
+            src.add(new VariableDeclaration(symbol));
         }
         
         for(structDeclarationContext struct : ctx.getRuleContexts(structDeclarationContext.class)) {

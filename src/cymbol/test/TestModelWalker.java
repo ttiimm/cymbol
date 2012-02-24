@@ -6,10 +6,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.stringtemplate.v4.ST;
 
-import cymbol.model.SourceFile;
-import cymbol.model.ModelTemplateWalker;
-import cymbol.model.VariableDeclaration;
 import cymbol.compiler.Compiler;
+import cymbol.model.ModelTemplateWalker;
+import cymbol.model.SourceFile;
+import cymbol.model.VariableDeclaration;
+import cymbol.symtab.SymbolTable;
 
 public class TestModelWalker {
 
@@ -24,10 +25,15 @@ public class TestModelWalker {
     @Test
     public void testCompilationUnitSourceWithVarDecl() {
         String expected = "// Cymbol generated C\n" + 
-        		          "// <Test>";
+        		          "// <Test>\n" +
+        		          "\n" +
+        		          "\n" +
+        		          "int x;" +
+        		          "\n" +
+        		          "\n";
         
         SourceFile src = new SourceFile("<Test>");
-        src.add(new VariableDeclaration());
+        src.add(new VariableDeclaration(SymbolTable.INT, "x"));
         ST result = walker.walk(src);
         assertEquals(expected, result.render());
     }
