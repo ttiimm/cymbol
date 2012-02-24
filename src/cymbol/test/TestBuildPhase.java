@@ -1,7 +1,6 @@
 package cymbol.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
@@ -10,10 +9,10 @@ import cymbol.compiler.Compiler;
 public class TestBuildPhase {
 
     @Test
-    public void compilationUnitSource() {
+    public void sourceFile() {
         String source = "int x;";
         Compiler c = Util.runCompilerOn(source);
-        assertNotNull(c.compSource);
+        assertEquals("<String>", c.src.name);
     }
 
     @Test
@@ -23,7 +22,7 @@ public class TestBuildPhase {
         		        "float f;" +
         		        "boolean b[];";
         Compiler c = Util.runCompilerOn(source);
-        assertEquals(4, c.compSource.globalVars.size());
+        assertEquals(4, c.src.vars.size());
     }
     
     @Test
@@ -31,7 +30,7 @@ public class TestBuildPhase {
         String source = "struct A { int x; }" +
         		        "struct B { int y; }";
         Compiler c = Util.runCompilerOn(source);
-        assertEquals(2, c.compSource.globalStructs.size());
+        assertEquals(2, c.src.structs.size());
     }
     
     @Test
@@ -40,6 +39,6 @@ public class TestBuildPhase {
                         "char bar(){ }" +
                         "float baz(){ }";
         Compiler c = Util.runCompilerOn(source);
-        assertEquals(3, c.compSource.globalMethodFuncs.size());
+        assertEquals(3, c.src.funcDefs.size());
     }
 }

@@ -11,6 +11,7 @@ public class Util {
     
     public static Compiler runCompilerOn(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);
+        in.name = "<String>";
         Compiler c = new Compiler(in);
         c.compile();
 

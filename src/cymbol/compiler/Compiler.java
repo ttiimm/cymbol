@@ -12,7 +12,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import cymbol.model.CompilationUnitSource;
+import cymbol.model.SourceFile;
 import cymbol.symtab.SymbolTable;
 
 public class Compiler {
@@ -20,15 +20,20 @@ public class Compiler {
     public CymbolParser parser;
     public ParseTree tree;
     public SymbolTable table;
-    
-    public CompilationUnitSource compSource;
+    public SourceFile src;
 
     public List<String> errors = new ArrayList<String>();
 
+    public Compiler() {
+        this(null);
+    }
+    
     public Compiler(CharStream in) {
         this.parser = setupParser(in);
-        this.tree = parse(parser, in);
+        this.tree = in != null ? parse(parser, in) : null;
         this.table = new SymbolTable();
+        String sourceName = in != null ? in.getSourceName() : "<UNDEFINED>";
+        this.src = new SourceFile(sourceName);
     }
 
     private CymbolParser setupParser(CharStream in) {
@@ -55,14 +60,13 @@ public class Compiler {
         return tree;
     }
 
-    public CompilationUnitSource compile() {
-        compSource = new CompilationUnitSource();
+    public SourceFile compile() {
         define();
         reference();
         build();
         
         if(errors.size() > 0) { return null; }
-        else { return compSource; }
+        else { return src; }
     }
 
     public void define() {
@@ -79,7 +83,7 @@ public class Compiler {
     
     private void build() {
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerBuildPhase builder = new ListenerBuildPhase(compSource);
+        ListenerBuildPhase builder = new ListenerBuildPhase(src);
         walker.walk(builder, tree);
     }
 
