@@ -28,6 +28,7 @@ public class ListenerDefinePhase extends CymbolBaseListener {
     public void enter(CymbolParser.structDeclarationContext ctx) {
         StructSymbol struct = new StructSymbol(ctx.ID().getText(), current, ctx);
         current.define(struct);
+        ctx.props.symbol = struct;
         push(struct);
     }
 

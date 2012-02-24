@@ -25,6 +25,8 @@ compilationUnit
 	;
 
 structDeclaration
+  locals[CymbolProperties props]
+  @init{$structDeclaration.props = new CymbolProperties();}
   : 'struct' ID '{' structMember+ '}'
   ;
   

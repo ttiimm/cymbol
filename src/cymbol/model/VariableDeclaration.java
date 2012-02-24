@@ -20,5 +20,8 @@ public class VariableDeclaration extends OutputModelObject{
         this.name = symbol.getName();
     }
 
-    
+    @Override
+    public String toString() {
+        return type.getName() + " " + name;
+    }
 }

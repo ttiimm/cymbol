@@ -27,10 +27,12 @@ public class StructSymbol extends ScopedSymbol implements Type, Scope {
         return fields.get(name);
     }
 
+    @Override
     public Map<String, Symbol> getMembers() {
         return fields;
     }
 
+    @Override
     public String toString() {
         return "struct " + name + ":{"
                 + stripBrackets(fields.keySet().toString()) + "}";
