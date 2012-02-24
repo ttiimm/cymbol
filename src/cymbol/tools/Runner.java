@@ -14,9 +14,11 @@ import java.io.IOException;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
-import org.stringtemplate.v4.STGroupFile;
+import org.stringtemplate.v4.ST;
 
 import cymbol.compiler.Compiler;
+import cymbol.model.ModelTemplateWalker;
+import cymbol.model.SourceFile;
 
 public class Runner {
     
@@ -42,9 +44,12 @@ public class Runner {
         
         boolean e = checkErrors(c);
         if(!e){ 
-            c.compile(); 
+            SourceFile src = c.compile(); 
+            ModelTemplateWalker walker = new ModelTemplateWalker(c);
+            ST st = walker.walk(src);
             checkErrors(c);
-            System.out.println(c.table.globals);
+            
+            System.out.println(st.render());
         }
     }
 
