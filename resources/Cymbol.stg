@@ -1,0 +1,26 @@
+
+SourceFile(file, structs, vars, funcDefs) ::= <<
+// Cymbol generated C
+// <file.name>
+
+<structs: {s | <s>}; separator="\n">
+ 
+<vars: {v | <v>}; separator="\n">
+ 
+<funcDefs: {f | <f>}; separator="\n">
+>>
+
+Struct(struct, nested, vars) ::= <<
+struct <struct.name> {
+
+    <nested: {s | <s>}; separator="\n">
+    
+    <vars: {v | <v>}; separator="\n">
+}>>
+
+VariableDeclaration(var) ::= <<
+<var.type.name> <var.name>;>>
+
+FunctionDeclaration(func) ::= <<
+<func.type.name> <func.name>(<func.args: {arg | <arg.type.name> <arg.name>}; separator=", ">);>>
+
