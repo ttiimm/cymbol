@@ -32,6 +32,7 @@ public class ListenerResolvePhase extends CymbolBaseListener {
        for(methodDeclarationContext mctx : contexts) {
            MethodSymbol method = (MethodSymbol) ctx.props.scope.resolve(mctx.ID().getText());
            method.type = (Type) ctx.props.scope.resolve(mctx.start.getText());
+           mctx.props.symbol = method;
        }
     }
 

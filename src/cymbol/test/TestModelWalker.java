@@ -6,10 +6,12 @@ import org.junit.Test;
 import org.stringtemplate.v4.ST;
 
 import cymbol.compiler.Compiler;
+import cymbol.model.FunctionDeclaration;
 import cymbol.model.ModelTemplateWalker;
 import cymbol.model.SourceFile;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
+import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.SymbolTable;
 import cymbol.symtab.VariableSymbol;
@@ -76,6 +78,24 @@ public class TestModelWalker {
         a.define(b);
         b.define(new VariableSymbol("x", SymbolTable.INT));
         src.add(new Struct(a));
+        ST result = runTest(src);
+        assertEquals(expected, result.render());
+    }
+    
+    @Test
+    public void testFuncDecl() {
+        String expected = "// Cymbol generated C\n" + 
+                          "// <Test>\n" +
+                          "\n" +
+                          "\n" +
+                          "\n" +
+                          "void foo(float y);";
+        
+        MethodSymbol m = new MethodSymbol("foo", SymbolTable.VOID, null, null);
+        m.define(new VariableSymbol("y", SymbolTable.FLOAT));
+        FunctionDeclaration func = new FunctionDeclaration(m);
+        SourceFile src = new SourceFile("<Test>");
+        src.add(func);
         ST result = runTest(src);
         assertEquals(expected, result.render());
     }

@@ -22,7 +22,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     @Override
     public void enter(compilationUnitContext ctx) {
         for(varDeclarationContext var : ctx.getRuleContexts(varDeclarationContext.class)) {
-            Symbol symbol = var.props.scope.resolve(var.ID().getText());
+            Symbol symbol = var.props.symbol;
             src.add(new VariableDeclaration(symbol));
         }
         
@@ -32,7 +32,8 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         }
         
         for(methodDeclarationContext method : ctx.getRuleContexts(methodDeclarationContext.class)) {
-            src.add(new FunctionDeclaration());
+            Symbol s = method.props.symbol;
+            src.add(new FunctionDeclaration(s));
         }
     }
 

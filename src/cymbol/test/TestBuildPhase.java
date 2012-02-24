@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
+import cymbol.model.FunctionDeclaration;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 
@@ -18,7 +19,7 @@ public class TestBuildPhase {
     }
 
     @Test
-    public void globalVar() {
+    public void var() {
         String source = "int x;";
         Compiler c = Util.runCompilerOn(source);
         VariableDeclaration var = c.src.vars.get(0);
@@ -26,7 +27,7 @@ public class TestBuildPhase {
     }
     
     @Test
-    public void globalStructs() {
+    public void struct() {
         String source = "struct A { int x; }";
         Compiler c = Util.runCompilerOn(source);
         Struct struct = c.src.structs.get(0);
@@ -46,9 +47,10 @@ public class TestBuildPhase {
     }
     
     @Test
-    public void globalMethodFuncs() {
-        String source = "void foo(){ }";
+    public void func() {
+        String source = "void foo(float y){ }";
         Compiler c = Util.runCompilerOn(source);
-        assertEquals(3, c.src.funcDefs.size());
+        FunctionDeclaration f = c.src.funcDefs.get(0);
+        assertEquals("void foo[float y]", f.toString());
     }
 }
