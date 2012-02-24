@@ -14,7 +14,7 @@ public class TestCompile {
         String source = "class A { }";
         Compiler c = runTest(source);
         assertEquals("Error parsing <String>", c.errors.get(0));
-        System.err.println("[TestCompile] Parsing failure expected.");
+        System.err.println("[TestCompile] The above parsing failure is expected.");
     }
     
     public Compiler runTest(String source) {

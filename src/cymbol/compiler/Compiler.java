@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import cymbol.model.CompilationUnitSource;
 import cymbol.symtab.SymbolTable;
 
 public class Compiler {
@@ -20,7 +21,7 @@ public class Compiler {
     public ParseTree tree;
     public SymbolTable table;
     
-//    public 
+    public CompilationUnitSource compSource;
 
     public List<String> errors = new ArrayList<String>();
 
@@ -54,9 +55,14 @@ public class Compiler {
         return tree;
     }
 
-    public void compile() {
+    public CompilationUnitSource compile() {
+        compSource = new CompilationUnitSource();
         define();
         reference();
+        build();
+        
+        if(errors.size() > 0) { return null; }
+        else { return compSource; }
     }
 
     public void define() {
@@ -69,6 +75,12 @@ public class Compiler {
         ParseTreeWalker walker = new ParseTreeWalker();
         ListenerResolvePhase refl = new ListenerResolvePhase(this);
         walker.walk(refl, tree);
+    }
+    
+    private void build() {
+        ParseTreeWalker walker = new ParseTreeWalker();
+        ListenerBuildPhase builder = new ListenerBuildPhase(compSource);
+        walker.walk(builder, tree);
     }
 
     public void reportError(ParserRuleContext<Token> ctx, String msg) {

@@ -26,7 +26,6 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         this.compiler = compiler;
     }
 
-
     @Override
     public void enter(compilationUnitContext ctx) {
        List<? extends methodDeclarationContext> contexts = ctx.getRuleContexts(methodDeclarationContext.class);
@@ -36,11 +35,11 @@ public class ListenerResolvePhase extends CymbolBaseListener {
        }
     }
 
-
     @Override
     public void exit(CymbolParser.varDeclarationContext ctx) {
         VariableSymbol var = new VariableSymbol(ctx.ID().getText(), ctx.type().props.type);
         ctx.props.scope.define(var);
+        ctx.props.symbol = var;
     }
 
     @Override
