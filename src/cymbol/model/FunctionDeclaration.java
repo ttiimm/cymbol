@@ -3,7 +3,6 @@ package cymbol.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.codegen.model.ModelElement;
 import org.antlr.v4.codegen.model.OutputModelObject;
 
 import cymbol.symtab.MethodSymbol;
