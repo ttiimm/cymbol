@@ -13,6 +13,7 @@
     
         <jar jarfile="${basedir}/cymbol.jar">
             <fileset dir="${build.dir}/classes" includes="**/*.class"/>
+        	<fileset dir="${basedir}/resources"></fileset>
         	<zipfileset src="${antlr4.jar}"/>
             <manifest>
                 <attribute name="Main-Class" value="cymbol.tools.Runner"/>
