@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
-import cymbol.compiler.CymbolParser;
+import cymbol.compiler.CymbolParser.BlockContext;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.Symbol;
@@ -55,7 +55,7 @@ public class TestDefinePhase {
         SymbolTable t = runTest(source);
         MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
         assertEquals("global.M()", m.toString());
-        CymbolParser.blockContext ctx = (CymbolParser.blockContext) m.tree.getChild(4);
+        BlockContext ctx = (BlockContext) m.tree.getChild(4);
         assertEquals("local[A]", ctx.props.scope.toString());
     }
     
@@ -68,8 +68,8 @@ public class TestDefinePhase {
         		        "}";
         SymbolTable t = runTest(source);
         MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
-        CymbolParser.blockContext first = (CymbolParser.blockContext) m.tree.getChild(4);
-        CymbolParser.blockContext second = (CymbolParser.blockContext) first.getChild(1).getChild(0);
+        BlockContext first = (BlockContext) m.tree.getChild(4);
+        BlockContext second = (BlockContext) first.getChild(1).getChild(0);
         assertEquals("local[A]", second.props.scope.toString());
     }
     

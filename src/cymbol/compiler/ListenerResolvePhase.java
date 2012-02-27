@@ -5,12 +5,16 @@ import java.util.List;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
-import cymbol.compiler.CymbolParser.compilationUnitContext;
-import cymbol.compiler.CymbolParser.exprContext;
-import cymbol.compiler.CymbolParser.expr_primaryContext;
-import cymbol.compiler.CymbolParser.methodDeclarationContext;
-import cymbol.compiler.CymbolParser.primaryContext;
-import cymbol.compiler.CymbolParser.primitiveTypeContext;
+import cymbol.compiler.CymbolParser.CompilationUnitContext;
+import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
+import cymbol.compiler.CymbolParser.ExpressionContext;
+import cymbol.compiler.CymbolParser.MethodDeclarationContext;
+import cymbol.compiler.CymbolParser.ParameterContext;
+import cymbol.compiler.CymbolParser.PrimaryContext;
+import cymbol.compiler.CymbolParser.PrimitiveTypeContext;
+import cymbol.compiler.CymbolParser.StructMemberContext;
+import cymbol.compiler.CymbolParser.TypeContext;
+import cymbol.compiler.CymbolParser.VarDeclarationContext;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.Symbol;
@@ -27,9 +31,9 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void enter(compilationUnitContext ctx) {
-       List<? extends methodDeclarationContext> contexts = ctx.getRuleContexts(methodDeclarationContext.class);
-       for(methodDeclarationContext mctx : contexts) {
+    public void enterCompilationUnit(CompilationUnitContext ctx) {
+       List<? extends MethodDeclarationContext> contexts = ctx.getRuleContexts(MethodDeclarationContext.class);
+       for(MethodDeclarationContext mctx : contexts) {
            MethodSymbol method = (MethodSymbol) ctx.props.scope.resolve(mctx.ID().getText());
            method.type = (Type) ctx.props.scope.resolve(mctx.start.getText());
            mctx.props.symbol = method;
@@ -37,14 +41,14 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void exit(CymbolParser.varDeclarationContext ctx) {
+    public void exitVarDeclaration(VarDeclarationContext ctx) {
         VariableSymbol var = new VariableSymbol(ctx.ID().getText(), ctx.type().props.type);
         ctx.props.scope.define(var);
         ctx.props.symbol = var;
     }
 
     @Override
-    public void exit(CymbolParser.structMemberContext ctx) {
+    public void exitStructMember(StructMemberContext ctx) {
         if (ctx.type() != null) {
             Symbol s = resolve(ctx.ID().getText(), ctx.props.scope, ctx);
             s.type = ctx.type().props.type;
@@ -52,20 +56,20 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void exit(CymbolParser.parameterContext ctx) {
+    public void exitParameter(ParameterContext ctx) {
         VariableSymbol var = new VariableSymbol(ctx.ID().getText(), ctx.type().props.type);
         ctx.props.scope.define(var);
     }
     
     @Override
-    public void exit(CymbolParser.typeContext ctx) {
+    public void exitType(TypeContext ctx) {
         if(ctx.ID() != null) { ctx.props.type = (Type) resolve(ctx.ID().getText(), ctx.props.scope, ctx); }
         if(ctx.primitiveType() != null) { ctx.props.type = ctx.primitiveType().props.type;}
     }
 
 
     @Override
-    public void enter(exprContext ctx) {
+    public void enterExpression(ExpressionContext ctx) {
 //        System.out.println(ctx.start + " " + ctx.stop);
         ctx.props = new CymbolProperties();
         // if struct ref, then scope is not set correctly on member
@@ -77,23 +81,23 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void exit(exprContext ctx) {
+    public void exitExpression(ExpressionContext ctx) {
 //        System.out.println("BYE: " +ctx.start + " " + ctx.stop);
         ctx.props.type = ctx.expr(0).props.type;
     }
 
     @Override
-    public void exit(expr_primaryContext ctx) {
+    public void exitExpr_Primary(Expr_PrimaryContext ctx) {
         ctx.props.type = ctx.primary().props.type;
     }
 
     @Override
-    public void enter(primitiveTypeContext ctx) {
+    public void enterPrimitiveType(PrimitiveTypeContext ctx) {
         setType(ctx.props, ctx.start);
     }
 
     @Override
-    public void enter(primaryContext ctx) {
+    public void enterPrimary(PrimaryContext ctx) {
         setType(ctx.props, ctx.start);
     }
 
