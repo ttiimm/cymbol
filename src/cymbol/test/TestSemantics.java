@@ -1,8 +1,7 @@
 package cymbol.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,12 +24,4 @@ public class TestSemantics {
         assertEquals("local.x", local.resolve("x"));
     }
     
-    public Compiler runTest(String source) {
-        ANTLRInputStream in = new ANTLRInputStream(source);
-        Compiler c = new Compiler(in);
-        c.compile();
-
-        return c;
-    }
-
 }

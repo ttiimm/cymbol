@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import cymbol.compiler.CymbolParser.CompilationUnitContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
@@ -25,9 +26,11 @@ import cymbol.symtab.VariableSymbol;
 public class ListenerResolvePhase extends CymbolBaseListener {
     
     private Compiler compiler;
+    private ParseTreeProperty<CymbolProperties> properties;
 
-    public ListenerResolvePhase(Compiler compiler) {
+    public ListenerResolvePhase(Compiler compiler, ParseTreeProperty<CymbolProperties> properties) {
         this.compiler = compiler;
+        this.properties = properties;
     }
 
     @Override

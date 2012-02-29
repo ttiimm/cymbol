@@ -1,26 +1,47 @@
-
-SourceFile(file, structs, vars, funcDefs) ::= <<
+SourceFile(file, FunctionDeclarations, FunctionDefinitions) ::= <<
 // Cymbol generated C
 // <file.name>
 
-<structs: {s | <s>}; separator="\n">
+<file.structs:struct(); separator="\n">
+
+<FunctionDeclarations>
  
-<vars: {v | <v>}; separator="\n">
- 
-<funcDefs: {f | <f>}; separator="\n">
+<file.vars:variableDeclaration(); separator="\n">
+
+<FunctionDefinitions>
+
 >>
 
-Struct(struct, nested, vars) ::= <<
+
+variableDeclaration(var) ::= <<
+<var.type.name> <var.name><if(var.expr)> = <var.expr><endif>;>>
+
+
+struct(struct) ::= <<
 struct <struct.name> {
 
-    <nested: {s | <s>}; separator="\n">
+    <struct.nested:struct(); separator="\n">
     
-    <vars: {v | <v>}; separator="\n">
+    <struct.vars:variableDeclaration(); separator="\n">
 }>>
 
-VariableDeclaration(var) ::= <<
-<var.type.name> <var.name>;>>
 
-FunctionDeclaration(func) ::= <<
-<func.type.name> <func.name>(<func.args: {arg | <arg.type.name> <arg.name>}; separator=", ">);>>
+FunctionDeclarations(funcs) ::= <<
+<funcs: {f |<signature(f)>;
+}>
+>>
+
+
+FunctionDefinitions(funcs) ::= <<
+<funcs: {f | <signature(f)> {
+    
+\}
+
+}
+>
+>>
+
+
+signature(func) ::= <<
+<func.type.name> <func.name>(<func.args: {arg | <arg.type.name> <arg.name>}; separator=", ">)>>
 

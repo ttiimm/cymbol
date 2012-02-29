@@ -6,13 +6,17 @@ import java.util.List;
 import org.antlr.v4.codegen.model.ModelElement;
 import org.antlr.v4.codegen.model.OutputModelObject;
 
+import cymbol.symtab.Symbol;
+
 public class SourceFile extends OutputModelObject {
 
     public String name;
     
-    @ModelElement public List<Struct> structs = new ArrayList<Struct>();
-    @ModelElement public List<VariableDeclaration> vars = new ArrayList<VariableDeclaration>();
-    @ModelElement public List<FunctionDeclaration> funcDefs = new ArrayList<FunctionDeclaration>();
+    public List<Struct> structs = new ArrayList<Struct>();
+    public List<VariableDeclaration> vars = new ArrayList<VariableDeclaration>();
+    
+    @ModelElement public List<FunctionDeclarations> FunctionDeclarations = new ArrayList<FunctionDeclarations>();
+    @ModelElement public List<FunctionDefinitions> FunctionDefinitions = new ArrayList<FunctionDefinitions>();
 
     public SourceFile(String sourceName) {
        this.name = sourceName;
@@ -26,8 +30,23 @@ public class SourceFile extends OutputModelObject {
         vars.add(var);
     }
 
-    public void add(FunctionDeclaration methodFunction) {
-        funcDefs.add(methodFunction);
+    public void add(MethodFunction func) {
+        FunctionDeclarations.add(new FunctionDeclarations(func.symbol));
+        FunctionDefinitions.add(new FunctionDefinitions(func.symbol));
     }
     
+    public class FunctionDeclarations extends MethodFunction {
+
+        public FunctionDeclarations(Symbol symbol) {
+            super(symbol);
+        } 
+
+    }
+    
+    public class FunctionDefinitions extends MethodFunction {
+
+        public FunctionDefinitions(Symbol symbol) {
+            super(symbol);
+        }
+    }
 }
