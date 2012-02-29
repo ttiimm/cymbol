@@ -9,6 +9,7 @@ import cymbol.compiler.Compiler;
 import cymbol.model.MethodFunction;
 import cymbol.model.ModelTemplateWalker;
 import cymbol.model.SourceFile;
+import cymbol.model.Statement.Block;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 import cymbol.symtab.MethodSymbol;
@@ -123,7 +124,7 @@ public class TestModelWalker {
         
         MethodSymbol m = new MethodSymbol("foo", SymbolTable.VOID, null, null);
         m.define(new VariableSymbol("y", SymbolTable.FLOAT));
-        MethodFunction func = new MethodFunction(m);
+        MethodFunction func = new MethodFunction(m, new Block());
         SourceFile src = new SourceFile("<Test>");
         src.add(func);
         ST result = runTest(src);
@@ -147,16 +148,16 @@ public class TestModelWalker {
                     		"\n" + 
                     		"char bar(int x) {\n" + 
                     		"\n" + 
-                    		"}\n" + 
-                    		"\n" + 
+                    		"}\n" +
+                    		"\n" +
                     		"\n";
         
         MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
         mfoo.define(new VariableSymbol("y", SymbolTable.FLOAT));
-        MethodFunction foo = new MethodFunction(mfoo);
+        MethodFunction foo = new MethodFunction(mfoo, new Block());
         MethodSymbol mbar = new MethodSymbol("bar", SymbolTable.CHAR, null, null);
         mbar.define(new VariableSymbol("x", SymbolTable.INT));
-        MethodFunction bar = new MethodFunction(mbar);
+        MethodFunction bar = new MethodFunction(mbar, new Block());
         SourceFile src = new SourceFile("<Test>");
         src.add(foo);
         src.add(bar);

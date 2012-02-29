@@ -68,7 +68,7 @@ public class TestBuildPhase {
     public void func() {
         String source = "void foo(float y){ }";
         Compiler c = Util.runCompilerOn(source);
-        MethodFunction f = c.src.FunctionDefinitions.get(0);
+        MethodFunction f = c.src.functionDefinitions.get(0);
         assertEquals("void foo[float y]", f.toString());
     }
 }
