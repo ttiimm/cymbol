@@ -12,72 +12,75 @@ import cymbol.compiler.CymbolParser.VarDeclarationContext;
 import cymbol.model.Expression.Primary;
 import cymbol.model.MethodFunction;
 import cymbol.model.SourceFile;
+import cymbol.model.Statement.Block;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
-import cymbol.symtab.StructSymbol;
 import cymbol.symtab.Symbol;
-import cymbol.model.Statement.Block;
 
 public class ListenerBuildPhase extends CymbolBaseListener {
 
-    private SourceFile src;
-    private ParseTreeProperty<CymbolProperties> properties;
-
-    public ListenerBuildPhase(SourceFile src, ParseTreeProperty<CymbolProperties> properties) {
-        this.src = src;
-        this.properties = properties;
+    private ScopeUtil scopes;
+    public ParseTreeProperty<OutputModelObject> models;
+    private String sourceName;
+    
+    public ListenerBuildPhase(ScopeUtil scopes, ParseTreeProperty<OutputModelObject> models, String sourceName) {
+        this.scopes = scopes;
+        this.models = models;
+        this.sourceName = sourceName;
     }
 
     @Override
     public void exitCompilationUnit(CompilationUnitContext ctx) {
+        SourceFile src = new SourceFile(sourceName);
+        
         for(VarDeclarationContext var : ctx.getRuleContexts(VarDeclarationContext.class)) {
-            src.add((VariableDeclaration) properties.get(var).model);
+            src.add((VariableDeclaration) models.get(var));
         }
         
         for(StructDeclarationContext struct : ctx.getRuleContexts(StructDeclarationContext.class)) {
-            StructSymbol s = (StructSymbol) struct.props.symbol;
-            src.add(new Struct(s));
+            src.add((Struct) models.get(struct));
         }
         
         for(MethodDeclarationContext method : ctx.getRuleContexts(MethodDeclarationContext.class)) {
-            MethodFunction func = (MethodFunction) properties.get(method).model;
-            src.add(func);
+            src.add((MethodFunction) models.get(method));
         }
+        
+        models.put(ctx, src);
+    }
+
+    @Override
+    public void exitStructDeclaration(StructDeclarationContext ctx) {
+        Symbol s = scopes.resolve(ctx);
+        Struct struct = new Struct(s);
+        models.put(ctx, struct);
     }
 
     @Override
     public void exitMethodDeclaration(MethodDeclarationContext ctx) {
-        Symbol s = ctx.props.symbol;
+        Symbol s = scopes.resolve(ctx);
         BlockContext blockCtx = ctx.block();
-        Block block = (Block) properties.get(blockCtx).model;
+        Block block = (Block) models.get(blockCtx);
         MethodFunction func = new MethodFunction(s, block);
-        ctx.props.model = func;
-        properties.put(ctx, ctx.props);
+        models.put(ctx, func);
     }
 
     @Override
     public void exitBlock(BlockContext ctx) {
-        ctx.props.model = new Block();
-        properties.put(ctx, ctx.props);
+        models.put(ctx, new Block());
     }
 
     @Override
     public void exitVarDeclaration(VarDeclarationContext ctx) {
-      Symbol symbol = ctx.props.symbol;
-      VariableDeclaration var = new VariableDeclaration(symbol);
-      CymbolProperties exprProps = properties.get(ctx.expr());
-      OutputModelObject expr = exprProps != null ? exprProps.model : null;
-      var.add(expr);
-      ctx.props.model = var;
-      properties.put(ctx, ctx.props);
+        Symbol s = scopes.resolve(ctx);
+        VariableDeclaration var = new VariableDeclaration(s);
+        OutputModelObject expr = models.get(ctx.expr());
+        var.add(expr);
+        models.put(ctx, var);
     }
 
     @Override
     public void enterExpr_Primary(Expr_PrimaryContext ctx) {
        Primary p = new Primary(ctx.getStart().getText());
-       ctx.props.model = p;
-       properties.put(ctx, ctx.props);
+       models.put(ctx, p);
     }
-
-    
 }

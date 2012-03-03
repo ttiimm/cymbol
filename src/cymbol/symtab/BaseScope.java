@@ -21,6 +21,11 @@ public abstract class BaseScope implements Scope {
     }
 
     @Override
+    public Type lookup(String name) {
+        return (Type) resolve(name);
+    }
+
+    @Override
     public Symbol resolve(String name) {
         Symbol s = symbols.get(name);
         if (s != null) return s;

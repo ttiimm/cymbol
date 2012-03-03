@@ -1,5 +1,7 @@
 package cymbol.compiler;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import cymbol.compiler.CymbolParser.BlockContext;
@@ -19,91 +21,96 @@ import cymbol.symtab.VariableSymbol;
 
 public class ListenerDefinePhase extends CymbolBaseListener {
 
-    private Scope current;
-    private ParseTreeProperty<CymbolProperties> properties;
-
-    public ListenerDefinePhase(Scope globals, ParseTreeProperty<CymbolProperties> properties) {
-        this.current = globals;
-        this.properties = properties;
+    private Scope theScope;
+    public ParseTreeProperty<Scope> scopes;
+    
+    public ListenerDefinePhase(Scope globals) {
+        this.theScope = globals;
+        this.scopes = new ParseTreeProperty<Scope>();
     }
 
     @Override
     public void enterCompilationUnit(CompilationUnitContext ctx) {
-        ctx.props.scope = current;
+        stashScope(ctx);
     }
 
     @Override
     public void enterStructDeclaration(StructDeclarationContext ctx) {
-        StructSymbol struct = new StructSymbol(ctx.ID().getText(), current, ctx);
-        current.define(struct);
-        ctx.props.symbol = struct;
-        push(struct);
+        StructSymbol struct = new StructSymbol(Util.name(ctx), theScope, ctx);
+        theScope.define(struct);
+        stashScope(ctx);
+        pushScope(struct);
     }
 
     @Override
     public void exitStructDeclaration(StructDeclarationContext ctx) {
-        pop();
+        popScope();
     }
 
     @Override
     public void enterMethodDeclaration(MethodDeclarationContext ctx) {
-        MethodSymbol method = new MethodSymbol(ctx.ID().getText(), current, ctx);
-        current.define(method);
-        push(method);
+        MethodSymbol method = new MethodSymbol(Util.name(ctx), theScope, ctx);
+        theScope.define(method);
+        stashScope(ctx);
+        pushScope(method);
     }
 
     @Override
     public void exitMethodDeclaration(MethodDeclarationContext ctx) {
-        pop();
+        popScope();
     }
 
     @Override
-    public void enterStructMember(StructMemberContext ctx) {
+    public void exitStructMember(StructMemberContext ctx) {
         if (ctx.ID() != null) {
-            ctx.props.scope = current;
-            VariableSymbol member = new VariableSymbol(ctx.ID().getText());
-            current.define(member);
+            stashScope(ctx);
+            VariableSymbol member = new VariableSymbol(Util.name(ctx));
+            theScope.define(member);
         }
     }
 
     @Override
-    public void enterParameter(ParameterContext ctx) {
-        ctx.props.scope = current;
+    public void exitParameter(ParameterContext ctx) {
+        stashScope(ctx);
     }
 
     @Override
-    public void enterType(TypeContext ctx) {
-        ctx.props.scope = current;
-    }
-
-    @Override
-    public void enterVarDeclaration(VarDeclarationContext ctx) {
-        ctx.props.scope = current;
+    public void exitVarDeclaration(VarDeclarationContext ctx) {
+        stashScope(ctx);
     }
 
     @Override
     public void enterBlock(BlockContext ctx) {
-        LocalScope local = new LocalScope(this.current);
-        current = local;
-        ctx.props.scope = local;
+        LocalScope local = new LocalScope(this.theScope);
+        theScope = local;
+        stashScope(ctx);
     }
 
     @Override
     public void exitBlock(BlockContext ctx) {
-        pop();
+        popScope();
     }
     
     @Override
     public void enterPrimary(PrimaryContext ctx) {
-        ctx.props.scope = current;
+        stashScope(ctx);
+    }
+    
+    @Override
+    public void enterType(TypeContext ctx) {
+        stashScope(ctx);
+    }
+    
+    private void stashScope(ParserRuleContext<Token> ctx) {
+        scopes.put(ctx, theScope);
     }
 
-    private void push(Scope scope) {
-        this.current = scope;
+    private void pushScope(Scope scope) {
+        this.theScope = scope;
     }
 
-    private void pop() {
-        this.current = current.getEnclosingScope();
+    private void popScope() {
+        this.theScope = theScope.getEnclosingScope();
     }
 
 }

@@ -30,6 +30,11 @@ public abstract class ScopedSymbol extends Symbol implements Scope {
         this.tree = tree;
     }
 
+    @Override
+    public Type lookup(String name) {
+        return (Type) resolve(name);
+    }
+
     public Symbol resolve(String name) {
         Symbol s = getMembers().get(name);
         if (s != null) return s;
