@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
@@ -11,6 +12,7 @@ import cymbol.symtab.Scope;
 
 public class TestSemantics {
 
+    @Ignore
     @Test 
     public void testDefineVarWithIllegalForwardRef() {
         String source = "void foo() { " +

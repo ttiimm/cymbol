@@ -7,12 +7,12 @@ import org.antlr.v4.codegen.model.OutputModelObject;
 
 public interface Statement {
 
-    public class Block extends OutputModelObject {
+    public class Block extends OutputModelObject implements Statement {
         
-        public List<OutputModelObject> statements = new ArrayList<OutputModelObject>();
+        public List<Statement> statements = new ArrayList<Statement>();
         
-        public void add(OutputModelObject omo) {
-            statements.add(omo);
+        public void add(Statement statement) {
+            statements.add(statement);
         }
     }
 }

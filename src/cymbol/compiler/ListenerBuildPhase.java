@@ -1,17 +1,24 @@
 package cymbol.compiler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.antlr.v4.codegen.model.OutputModelObject;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import cymbol.compiler.CymbolParser.BlockContext;
 import cymbol.compiler.CymbolParser.CompilationUnitContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
+import cymbol.compiler.CymbolParser.Stat_VarDeclContext;
 import cymbol.compiler.CymbolParser.StructDeclarationContext;
 import cymbol.compiler.CymbolParser.VarDeclarationContext;
 import cymbol.model.Expression.Primary;
 import cymbol.model.MethodFunction;
 import cymbol.model.SourceFile;
+import cymbol.model.Statement;
 import cymbol.model.Statement.Block;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
@@ -54,6 +61,15 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         Struct struct = new Struct(s);
         models.put(ctx, struct);
     }
+    
+    @Override
+    public void exitVarDeclaration(VarDeclarationContext ctx) {
+        Symbol s = scopes.resolve(ctx);
+        VariableDeclaration var = new VariableDeclaration(s);
+        OutputModelObject expr = models.get(ctx.expr());
+        var.add(expr);
+        models.put(ctx, var);
+    }
 
     @Override
     public void exitMethodDeclaration(MethodDeclarationContext ctx) {
@@ -66,16 +82,18 @@ public class ListenerBuildPhase extends CymbolBaseListener {
 
     @Override
     public void exitBlock(BlockContext ctx) {
-        models.put(ctx, new Block());
+        Block block = new Block();
+        for(ParserRuleContext<Token> var: ctx.getRuleContexts(Stat_VarDeclContext.class)) {
+            block.add((Statement) models.get(var));
+        }
+        
+        models.put(ctx, block);
     }
 
+
     @Override
-    public void exitVarDeclaration(VarDeclarationContext ctx) {
-        Symbol s = scopes.resolve(ctx);
-        VariableDeclaration var = new VariableDeclaration(s);
-        OutputModelObject expr = models.get(ctx.expr());
-        var.add(expr);
-        models.put(ctx, var);
+    public void exitStat_VarDecl(Stat_VarDeclContext ctx) {
+        copyModel(ctx.varDeclaration(), ctx);
     }
 
     @Override
@@ -83,4 +101,10 @@ public class ListenerBuildPhase extends CymbolBaseListener {
        Primary p = new Primary(ctx.getStart().getText());
        models.put(ctx, p);
     }
+    
+    private void copyModel(ParserRuleContext<Token> from, ParserRuleContext<Token> to) {
+       OutputModelObject model = models.get(from);
+       models.put(to, model);
+    }
 }
+    

@@ -70,12 +70,21 @@ public class TestBuildPhase {
     }
     
     @Test
-    public void func() {
+    public void emptyFunc() {
         String source = "void foo(float y){ }";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
         assertEquals("void foo[float y]", f.toString());
         assertNotNull(f.block);
+    }
+
+    @Test
+    public void funcWithVarDeclaration() {
+        String source = "void foo(float y){ int x; }";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[float y]", f.toString());
+        assertEquals("int x", f.block.statements.get(0).toString());
     }
     
     public SourceFile runCompilerOn(String source) {

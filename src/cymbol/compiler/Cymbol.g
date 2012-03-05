@@ -67,13 +67,13 @@ block
   ;
 
 statement
-  : block
-  | structDeclaration
-  | varDeclaration
-  | 'if' '(' expr ')' statement ('else' statement)?
-  | 'return' expr? ';'
-  | expr '=' expr ';'
-  | expr ';' 
+  : block                                            -> stat
+  | structDeclaration                                -> stat
+  | varDeclaration                                   -> stat_VarDecl
+  | 'if' '(' expr ')' statement ('else' statement)?  -> stat
+  | 'return' expr? ';'                               -> stat
+  | expr '=' expr ';'                                -> stat
+  | expr ';'                                         -> stat
   ;
 
 expr

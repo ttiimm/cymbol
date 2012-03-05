@@ -5,7 +5,7 @@ import org.antlr.v4.codegen.model.OutputModelObject;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
 
-public class VariableDeclaration extends OutputModelObject {
+public class VariableDeclaration extends OutputModelObject implements Statement {
     
     public Type type;
     public String name;
