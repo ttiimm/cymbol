@@ -8,6 +8,7 @@ import org.antlr.v4.codegen.model.OutputModelObject;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
+import cymbol.model.Statement.Block;;
 
 public class MethodFunction extends OutputModelObject {
     
@@ -15,17 +16,20 @@ public class MethodFunction extends OutputModelObject {
     public Type type; 
     public String name;
     public List<Argument> args = new ArrayList<Argument>();
+    public Block block;
 
-    public MethodFunction(Type type, String name) {
+    public MethodFunction(Type type, String name, Block block) {
         this.symbol = new MethodSymbol(name, null, null);
         this.symbol.type = type;
         this.type = type;
         this.name = name;
+        this.block = block;
     }
     
-    public MethodFunction(Symbol symbol) {
+    public MethodFunction(Symbol symbol, Block block) {
         this.symbol = symbol;
         this.type = symbol.type;
+        this.block = block;
         String methodName = symbol.getName();
         int paranIndex = methodName.indexOf("(");
         this.name = methodName.substring(0, paranIndex);

@@ -6,6 +6,7 @@ import java.util.List;
 import org.antlr.v4.codegen.model.ModelElement;
 import org.antlr.v4.codegen.model.OutputModelObject;
 
+import cymbol.model.Statement.Block;
 import cymbol.symtab.Symbol;
 
 public class SourceFile extends OutputModelObject {
@@ -15,8 +16,8 @@ public class SourceFile extends OutputModelObject {
     public List<Struct> structs = new ArrayList<Struct>();
     public List<VariableDeclaration> vars = new ArrayList<VariableDeclaration>();
     
-    @ModelElement public List<FunctionDeclarations> FunctionDeclarations = new ArrayList<FunctionDeclarations>();
-    @ModelElement public List<FunctionDefinitions> FunctionDefinitions = new ArrayList<FunctionDefinitions>();
+    @ModelElement public List<FunctionDeclarations> functionDeclarations = new ArrayList<FunctionDeclarations>();
+    @ModelElement public List<FunctionDefinitions> functionDefinitions = new ArrayList<FunctionDefinitions>();
 
     public SourceFile(String sourceName) {
        this.name = sourceName;
@@ -31,22 +32,22 @@ public class SourceFile extends OutputModelObject {
     }
 
     public void add(MethodFunction func) {
-        FunctionDeclarations.add(new FunctionDeclarations(func.symbol));
-        FunctionDefinitions.add(new FunctionDefinitions(func.symbol));
+        functionDeclarations.add(new FunctionDeclarations(func.symbol, func.block));
+        functionDefinitions.add(new FunctionDefinitions(func.symbol, func.block));
     }
     
     public class FunctionDeclarations extends MethodFunction {
 
-        public FunctionDeclarations(Symbol symbol) {
-            super(symbol);
+        public FunctionDeclarations(Symbol symbol, Block block) {
+            super(symbol, block);
         } 
 
     }
     
     public class FunctionDefinitions extends MethodFunction {
 
-        public FunctionDefinitions(Symbol symbol) {
-            super(symbol);
+        public FunctionDefinitions(Symbol symbol, Block block) {
+            super(symbol, block);
         }
     }
 }

@@ -1,14 +1,14 @@
-SourceFile(file, FunctionDeclarations, FunctionDefinitions) ::= <<
+SourceFile(file, functionDeclarations, functionDefinitions) ::= <<
 // Cymbol generated C
 // <file.name>
 
 <file.structs:struct(); separator="\n">
 
-<FunctionDeclarations>
+<functionDeclarations>
  
 <file.vars:variableDeclaration(); separator="\n">
 
-<FunctionDefinitions>
+<functionDefinitions>
 
 >>
 
@@ -33,15 +33,18 @@ FunctionDeclarations(funcs) ::= <<
 
 
 FunctionDefinitions(funcs) ::= <<
-<funcs: {f | <signature(f)> {
-    
-\}
-
-}
->
+<funcs: {f | <signature(f)> <f.block:Block()>}>
 >>
 
 
 signature(func) ::= <<
 <func.type.name> <func.name>(<func.args: {arg | <arg.type.name> <arg.name>}; separator=", ">)>>
 
+
+Block(block) ::= <<
+{
+
+}
+
+
+>>
