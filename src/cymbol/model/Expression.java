@@ -17,4 +17,22 @@ public interface Expression {
             return value;
         } 
     }
+    
+    class Binary extends OutputModelObject {
+        
+        private Expression left;
+        private Expression right;
+        private String op;
+        
+        public Binary(Expression left, String op, Expression right) {
+            this.left = left;
+            this.right = right;
+            this.op = op;
+        }
+     
+        @Override
+        public String toString() {
+            return left.toString() + op + right.toString();
+        } 
+    }
 }

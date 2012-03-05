@@ -1,54 +1,59 @@
 package cymbol.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
 import cymbol.model.MethodFunction;
+import cymbol.model.SourceFile;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
+import cymbol.symtab.Scope;
 
 public class TestBuildPhase {
 
     @Test
     public void sourceFile() {
         String source = "int x;";
-        Compiler c = Util.runCompilerOn(source);
-        assertEquals("<String>", c.src.name);
+        SourceFile src = runCompilerOn(source);
+        assertEquals("<String>", src.name);
     }
 
     @Test
     public void var() {
         String source = "int x;";
-        Compiler c = Util.runCompilerOn(source);
-        VariableDeclaration var = c.src.vars.get(0);
+        SourceFile src = runCompilerOn(source);
+        VariableDeclaration var = src.vars.get(0);
         assertEquals("int x", var.toString());
     }
 
     @Test
     public void varDeclWithPrimary() {
         String source = "int x = 1;";
-        Compiler c = Util.runCompilerOn(source);
-        VariableDeclaration var = c.src.vars.get(0);
+        SourceFile src = runCompilerOn(source);
+        VariableDeclaration var = src.vars.get(0);
         assertEquals("int x = 1", var.toString());
     }
 
     @Test
     public void multipleVarDecls() {
         String source = "int x; int y;";
-        Compiler c = Util.runCompilerOn(source);
-        VariableDeclaration x = c.src.vars.get(0);
+        SourceFile src = runCompilerOn(source);
+        VariableDeclaration x = src.vars.get(0);
         assertEquals("int x", x.toString());
-        VariableDeclaration y = c.src.vars.get(1);
+        VariableDeclaration y = src.vars.get(1);
         assertEquals("int y", y.toString());
     }
     
     @Test
     public void struct() {
         String source = "struct A { int x; }";
-        Compiler c = Util.runCompilerOn(source);
-        Struct struct = c.src.structs.get(0);
+        SourceFile src = runCompilerOn(source);
+        Struct struct = src.structs.get(0);
         assertEquals("A", struct.name);
         assertEquals("int x", struct.vars.get(0).toString());
     }
@@ -56,8 +61,8 @@ public class TestBuildPhase {
     @Test
     public void nestedStruct() {
         String source = "struct A { struct B { int x; } }";
-        Compiler c = Util.runCompilerOn(source);
-        Struct struct = c.src.structs.get(0);
+        SourceFile src = runCompilerOn(source);
+        Struct struct = src.structs.get(0);
         assertEquals("A", struct.name);
         Struct nested = struct.nested.get(0);
         assertEquals("B", nested.name);
@@ -67,8 +72,20 @@ public class TestBuildPhase {
     @Test
     public void func() {
         String source = "void foo(float y){ }";
-        Compiler c = Util.runCompilerOn(source);
-        MethodFunction f = c.src.functionDefinitions.get(0);
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
         assertEquals("void foo[float y]", f.toString());
+        assertNotNull(f.block);
+    }
+    
+    public SourceFile runCompilerOn(String source) {
+        ANTLRInputStream in = new ANTLRInputStream(source);
+        in.name = "<String>";
+        Compiler c = new Compiler(in);
+        ParseTreeProperty<Scope> scopes = c.define();
+        c.resolve(scopes);
+        SourceFile src = c.build(scopes);
+        
+        return src;
     }
 }

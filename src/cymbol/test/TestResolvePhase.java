@@ -2,14 +2,15 @@ package cymbol.test;
 
 import static org.junit.Assert.assertEquals;
 
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
-import cymbol.compiler.CymbolBaseListener;
-import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
-import cymbol.compiler.CymbolParser.ExpressionContext;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
@@ -18,6 +19,9 @@ import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
 public class TestResolvePhase {
+
+    private ParseTreeProperty<Scope> scopes;
+    private ParseTreeProperty<Type> types;
 
     @Test
     public void testResolveGlobalVars() {
@@ -28,7 +32,7 @@ public class TestResolvePhase {
         		        "D d;" +
         		        "boolean e;" +
         		        "int f[];";
-        SymbolTable t = Util.runCompilerOn(source).table;
+        SymbolTable t = runCompilerOn(source).table;
         assertEquals("<global.a:global.int>", t.globals.resolve("a").toString());
         assertEquals("<global.b:global.char>", t.globals.resolve("b").toString());
         assertEquals("<global.c:global.float>", t.globals.resolve("c").toString());
@@ -44,7 +48,7 @@ public class TestResolvePhase {
         		        "    int x;" +
         		        "    float y;" +
         		        "}";
-        SymbolTable t = Util.runCompilerOn(source).table;
+        SymbolTable t = runCompilerOn(source).table;
         StructSymbol a = (StructSymbol) t.globals.resolve("A");
         assertEquals("<A.x:global.int>",a.resolve("x").toString());
         assertEquals("<A.y:global.float>", a.resolve("y").toString());
@@ -54,7 +58,7 @@ public class TestResolvePhase {
     public void testResolveMethodDecl() {
         String source = "void foo(int x, char y) {" +
                 		"}";
-        SymbolTable t = Util.runCompilerOn(source).table;
+        SymbolTable t = runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
         assertEquals("global.void", m.type.toString());
         assertEquals("<foo.x:global.int>", m.resolve("x").toString());
@@ -65,7 +69,7 @@ public class TestResolvePhase {
     public void testResolveMultipleMethodDecl() {
         String source = "void foo(int x, char y) {}" +
         		        "float bar(char z){}";
-        SymbolTable t = Util.runCompilerOn(source).table;
+        SymbolTable t = runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
         assertEquals("global.void", m.type.toString());
         assertEquals("<foo.x:global.int>", m.resolve("x").toString());
@@ -80,9 +84,10 @@ public class TestResolvePhase {
                         "   int a[];" +
                         "   float x = a[0];" +
                         "}";
-        SymbolTable t = Util.runCompilerOn(source).table;
+        SymbolTable t = runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = Util.resolveLocalScope(m);
+        ParseTree blockCtx = getBlock(m);
+        Scope local = scopes.get(blockCtx);
         assertEquals("<local.a:global.int>", local.resolve("a").toString());
         assertEquals("<local.x:global.float>", local.resolve("x").toString());
         
@@ -95,9 +100,10 @@ public class TestResolvePhase {
                         "}" +
                         "" +
                         "struct A { int x; }";
-        SymbolTable t = Util.runCompilerOn(source).table;
+        SymbolTable t = runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = Util.resolveLocalScope(m);
+        ParseTree blockCtx = getBlock(m);
+        Scope local = scopes.get(blockCtx);
         assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
 
@@ -107,32 +113,33 @@ public class TestResolvePhase {
                         "   A a;" +
                         "   struct A { int x; }" +
                         "}";
-        SymbolTable t = Util.runCompilerOn(source).table;
+        SymbolTable t = runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = Util.resolveLocalScope(m);
+        ParseTree blockCtx = getBlock(m);
+        Scope local = scopes.get(blockCtx);
         assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
     
     @Test
     public void testResolveVarWithLocalStruct() {
         String source = "void foo() {" +
-                "   struct A { int x; }" +
-                "   A a;" +
-                "}";
-        SymbolTable t = Util.runCompilerOn(source).table;
+                        "   struct A { int x; }" +
+                        "   A a;" +
+                        "}";
+        SymbolTable t = runCompilerOn(source).table;
         MethodSymbol m = (MethodSymbol) t.globals.resolve("foo");
-        Scope local = Util.resolveLocalScope(m);
+        ParseTree blockCtx = getBlock(m);
+        Scope local = scopes.get(blockCtx);
         assertEquals("<local.a:struct A:{x}>", local.resolve("a").toString());
     }
     
     @Test
     public void testResolveVarWithUnknownType() {
         String source = "A a;";
-        Compiler c = Util.runCompilerOn(source);
+        Compiler c = runCompilerOn(source);
         VariableSymbol a = (VariableSymbol) c.table.globals.resolve("a");
         assertEquals("global.a", a.toString());
-        assertEquals("1:0: unknown symbol: A", c.errors.get(0));
-        
+        assertEquals("1:0: unknown type: A", c.errors.get(0));
     }
     
     @Test
@@ -140,12 +147,10 @@ public class TestResolvePhase {
         String source = "void foo() {" +
         		        "     4;" +
         		        "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type integer = (Type) c.table.globals.resolve("int");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.INT, types.get(block.getChild(1).getChild(0)));
     }
 
     @Test
@@ -153,12 +158,10 @@ public class TestResolvePhase {
         String source = "void foo() {" +
                         "     4.0;" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type floating = (Type) c.table.globals.resolve("float");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(floating);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.FLOAT, types.get(block.getChild(1).getChild(0)));
     }
 
     @Test
@@ -166,12 +169,10 @@ public class TestResolvePhase {
         String source = "void foo() {" +
                         "     'h';" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type character = (Type) c.table.globals.resolve("char");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(character);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.CHAR, types.get(block.getChild(1).getChild(0)));
     }
     
     @Test
@@ -179,12 +180,10 @@ public class TestResolvePhase {
         String source = "void foo() {" +
                         "     true;" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type bool = (Type) c.table.globals.resolve("boolean");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(bool);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.BOOLEAN, types.get(block.getChild(1).getChild(0)));
     }
 
     @Test
@@ -193,12 +192,10 @@ public class TestResolvePhase {
                         "int a;" +
                         "    a;" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type integer = (Type) c.table.globals.resolve("int");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(0)));
     }
 
     @Test
@@ -206,12 +203,10 @@ public class TestResolvePhase {
         String source = "void foo() {" +
                         "    foo();" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type v = (Type) c.table.globals.resolve("void");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(v, v);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.VOID, types.get(block.getChild(1).getChild(0)));
     }
     
     @Test
@@ -220,12 +215,10 @@ public class TestResolvePhase {
         		        "void foo() {" +
                         "    bar();" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type integer = (Type) c.table.globals.resolve("int");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer, integer);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.INT, types.get(block.getChild(1).getChild(0)));
     }
 
     @Test
@@ -234,14 +227,11 @@ public class TestResolvePhase {
                         "    char c[];" +
                         "    c[1];" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type integer = (Type) c.table.globals.resolve("int");
-        Type character = (Type) c.table.globals.resolve("char");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(character, character, integer);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
-    }
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.CHAR, types.get(block.getChild(2).getChild(0)));
+     }
     
     @Ignore
     @Test
@@ -251,13 +241,12 @@ public class TestResolvePhase {
                         "    A a;" +
                         "    a.x;" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
+        Compiler c = runCompilerOn(source);
         Type A = (Type) c.table.globals.resolve("A");
-        Type integer = (Type) c.table.globals.resolve("int");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer, A, integer);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(A, types.get(block.getChild(2).getChild(0)));
+        assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(2)));
     }
     
     @Ignore
@@ -273,13 +262,11 @@ public class TestResolvePhase {
                         "    A a;" +
                         "    a.b.x;" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type A = (Type) c.table.globals.resolve("A");
-        Type integer = (Type) c.table.globals.resolve("int");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer, A, integer);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+//        Type A = (Type) c.table.globals.resolve("A");
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(4)));
     }
     
     @Test
@@ -288,36 +275,24 @@ public class TestResolvePhase {
                         "    int a;" +
                         "    -a;" +
                         "}";
-        Compiler c = Util.runCompilerOn(source);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        Type integer = (Type) c.table.globals.resolve("int");
-        ExprTypeVerifierListener verifier = new ExprTypeVerifierListener(integer, integer);
-        walker.walk(verifier, c.tree);
-        assertEquals(verifier.p, verifier.expected.length);
+        Compiler c = runCompilerOn(source);
+        MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
+        ParserRuleContext<Token> block = getBlock(m);
+        assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(0)));
     }
     
-    class ExprTypeVerifierListener extends CymbolBaseListener {
+    public Compiler runCompilerOn(String source) {
+        ANTLRInputStream in = new ANTLRInputStream(source);
+        in.name = "<String>";
+        Compiler c = new Compiler(in);
+        scopes = c.define();
+        types = c.resolve(scopes);
 
-        private Type[] expected;
-        public int p = 0;
-
-        public ExprTypeVerifierListener(Type... expected) {
-            this.expected = expected;
-        }
-
-        @Override
-        public void enterExpression(ExpressionContext ctx) {
-//            System.out.println(ctx.start + " " + ctx.stop);
-//            System.out.println(ctx.props.type);
-            assertEquals(expected[p++], ctx.props.type);
-        }
-
-        @Override
-        public void enterExpr_Primary(Expr_PrimaryContext ctx) {
-//            System.out.println(ctx.start + " " + ctx.stop);
-//            System.out.println(ctx.props.type);
-            assertEquals(expected[p++], ctx.props.type);
-        }
-        
+        return c;
+    }
+    
+    private ParserRuleContext<Token> getBlock(MethodSymbol m) {
+        ParseTree blockCtx = m.tree.getChild(4);
+        return (ParserRuleContext<Token>) blockCtx;
     }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.antlr.v4.codegen.model.OutputModelObject;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -14,15 +15,16 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import cymbol.model.SourceFile;
+import cymbol.symtab.Scope;
 import cymbol.symtab.SymbolTable;
+import cymbol.symtab.Type;
 
 public class Compiler {
 
     public CymbolParser parser;
     public ParseTree tree;
-    public ParseTreeProperty<CymbolProperties> properties = new ParseTreeProperty<CymbolProperties>();
     public SymbolTable table;
-    public SourceFile src;
+    private String sourceName;
 
     public List<String> errors = new ArrayList<String>();
 
@@ -34,8 +36,7 @@ public class Compiler {
         this.parser = setupParser(in);
         this.tree = in != null ? parse(parser, in) : null;
         this.table = new SymbolTable();
-        String sourceName = in != null ? in.getSourceName() : "<UNDEFINED>";
-        this.src = new SourceFile(sourceName);
+        this.sourceName = in != null ? in.getSourceName() : "<UNDEFINED>";
     }
 
     private CymbolParser setupParser(CharStream in) {
@@ -63,30 +64,34 @@ public class Compiler {
     }
 
     public SourceFile compile() {
-        define();
-        reference();
-        build();
+        ParseTreeProperty<Scope> scopes = define();
+        resolve(scopes);
+        SourceFile src = build(scopes);
         
         if(errors.size() > 0) { return null; }
         else { return src; }
     }
 
-    public void define() {
+    public ParseTreeProperty<Scope> define() {
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerDefinePhase defl = new ListenerDefinePhase(table.globals, properties);
+        ListenerDefinePhase defl = new ListenerDefinePhase(table.globals);
         walker.walk(defl, tree);
+        return defl.scopes;
     }
 
-    public void reference() {
+    public ParseTreeProperty<Type> resolve(ParseTreeProperty<Scope> scopes) {
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerResolvePhase refl = new ListenerResolvePhase(this, properties);
+        ListenerResolvePhase refl = new ListenerResolvePhase(new ScopeUtil(this, scopes));
         walker.walk(refl, tree);
+        return refl.types;
     }
     
-    private void build() {
+    public SourceFile build(ParseTreeProperty<Scope> scopes) {
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerBuildPhase builder = new ListenerBuildPhase(src, properties);
+        ParseTreeProperty<OutputModelObject> models = new ParseTreeProperty<OutputModelObject>();
+        ListenerBuildPhase builder = new ListenerBuildPhase(new ScopeUtil(this, scopes), models, sourceName);
         walker.walk(builder, tree);
+        return (SourceFile) models.get(tree);
     }
 
     public void reportError(ParserRuleContext<Token> ctx, String msg) {

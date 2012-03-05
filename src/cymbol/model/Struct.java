@@ -17,10 +17,10 @@ public class Struct extends OutputModelObject{
     public List<VariableDeclaration> vars = new ArrayList<VariableDeclaration>();
     public List<Struct> nested = new ArrayList<Struct>();
     
-    public Struct(StructSymbol struct) {
+    public Struct(Symbol struct) {
        this.name = struct.getName();
        
-       for(Symbol s : struct.getMembers().values()) {
+       for(Symbol s : ((StructSymbol) struct).getMembers().values()) {
            if(s instanceof VariableSymbol || s instanceof BuiltInTypeSymbol) { 
                vars.add(new VariableDeclaration(s)); 
            } else if (s instanceof StructSymbol) {
