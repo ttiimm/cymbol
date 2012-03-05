@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import cymbol.compiler.Compiler;
 import cymbol.compiler.CymbolBaseListener;
-import cymbol.compiler.CymbolParser.exprContext;
-import cymbol.compiler.CymbolParser.expr_primaryContext;
+import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
+import cymbol.compiler.CymbolParser.ExpressionContext;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
@@ -306,14 +306,14 @@ public class TestResolvePhase {
         }
 
         @Override
-        public void enter(exprContext ctx) {
+        public void enterExpression(ExpressionContext ctx) {
 //            System.out.println(ctx.start + " " + ctx.stop);
 //            System.out.println(ctx.props.type);
             assertEquals(expected[p++], ctx.props.type);
         }
 
         @Override
-        public void enter(expr_primaryContext ctx) {
+        public void enterExpr_Primary(Expr_PrimaryContext ctx) {
 //            System.out.println(ctx.start + " " + ctx.stop);
 //            System.out.println(ctx.props.type);
             assertEquals(expected[p++], ctx.props.type);

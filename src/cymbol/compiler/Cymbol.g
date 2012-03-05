@@ -98,16 +98,16 @@ statement
 expr
   returns [CymbolProperties props]
   @init{$expr.props = new CymbolProperties();}
-  : expr '(' ( expr (',' expr)* )? ')'                
-  | expr '[' expr ']'                                
-  | expr '.' expr                                     
-  | '-' expr                                         
-  | '!' expr                                          
-  | expr ('*' | '/') expr                          
-  | expr ('+' | '-') expr                             
-  | expr ('!=' | '==' | '<' | '>' | '<=' | '>=') expr 
-  | primary -> expr_primary 
-  | '(' expr ')'                                      
+  : expr '(' ( expr (',' expr)* )? ')'                -> expression              
+  | expr '[' expr ']'                                 -> expression
+  | expr '.' expr                                     -> expression         
+  | '-' expr                                          -> expression
+  | '!' expr                                          -> expression
+  | expr ('*' | '/') expr                             -> expression
+  | expr ('+' | '-') expr                             -> expression
+  | expr ('!=' | '==' | '<' | '>' | '<=' | '>=') expr -> expression
+  | primary                                           -> expr_Primary 
+  | '(' expr ')'                                      -> expression
   ;
 
 primary

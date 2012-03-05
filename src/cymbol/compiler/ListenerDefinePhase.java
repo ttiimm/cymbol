@@ -1,10 +1,14 @@
 package cymbol.compiler;
 
-import cymbol.compiler.CymbolParser.compilationUnitContext;
-import cymbol.compiler.CymbolParser.parameterContext;
-import cymbol.compiler.CymbolParser.primaryContext;
-import cymbol.compiler.CymbolParser.typeContext;
-import cymbol.compiler.CymbolParser.varDeclarationContext;
+import cymbol.compiler.CymbolParser.BlockContext;
+import cymbol.compiler.CymbolParser.CompilationUnitContext;
+import cymbol.compiler.CymbolParser.MethodDeclarationContext;
+import cymbol.compiler.CymbolParser.ParameterContext;
+import cymbol.compiler.CymbolParser.PrimaryContext;
+import cymbol.compiler.CymbolParser.StructDeclarationContext;
+import cymbol.compiler.CymbolParser.StructMemberContext;
+import cymbol.compiler.CymbolParser.TypeContext;
+import cymbol.compiler.CymbolParser.VarDeclarationContext;
 import cymbol.symtab.LocalScope;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
@@ -20,12 +24,12 @@ public class ListenerDefinePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void enter(compilationUnitContext ctx) {
+    public void enterCompilationUnit(CompilationUnitContext ctx) {
         ctx.props.scope = current;
     }
 
     @Override
-    public void enter(CymbolParser.structDeclarationContext ctx) {
+    public void enterStructDeclaration(StructDeclarationContext ctx) {
         StructSymbol struct = new StructSymbol(ctx.ID().getText(), current, ctx);
         current.define(struct);
         ctx.props.symbol = struct;
@@ -33,24 +37,24 @@ public class ListenerDefinePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void exit(CymbolParser.structDeclarationContext ctx) {
+    public void exitStructDeclaration(StructDeclarationContext ctx) {
         pop();
     }
 
     @Override
-    public void enter(CymbolParser.methodDeclarationContext ctx) {
+    public void enterMethodDeclaration(MethodDeclarationContext ctx) {
         MethodSymbol method = new MethodSymbol(ctx.ID().getText(), current, ctx);
         current.define(method);
         push(method);
     }
 
     @Override
-    public void exit(CymbolParser.methodDeclarationContext ctx) {
+    public void exitMethodDeclaration(MethodDeclarationContext ctx) {
         pop();
     }
 
     @Override
-    public void enter(CymbolParser.structMemberContext ctx) {
+    public void enterStructMember(StructMemberContext ctx) {
         if (ctx.ID() != null) {
             ctx.props.scope = current;
             VariableSymbol member = new VariableSymbol(ctx.ID().getText());
@@ -59,34 +63,34 @@ public class ListenerDefinePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void enter(parameterContext ctx) {
+    public void enterParameter(ParameterContext ctx) {
         ctx.props.scope = current;
     }
 
     @Override
-    public void enter(typeContext ctx) {
+    public void enterType(TypeContext ctx) {
         ctx.props.scope = current;
     }
 
     @Override
-    public void enter(varDeclarationContext ctx) {
+    public void enterVarDeclaration(VarDeclarationContext ctx) {
         ctx.props.scope = current;
     }
 
     @Override
-    public void enter(CymbolParser.blockContext ctx) {
+    public void enterBlock(BlockContext ctx) {
         LocalScope local = new LocalScope(this.current);
         current = local;
         ctx.props.scope = local;
     }
 
     @Override
-    public void exit(CymbolParser.blockContext ctx) {
+    public void exitBlock(BlockContext ctx) {
         pop();
     }
     
     @Override
-    public void enter(primaryContext ctx) {
+    public void enterPrimary(PrimaryContext ctx) {
         ctx.props.scope = current;
     }
 

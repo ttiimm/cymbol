@@ -1,9 +1,9 @@
 package cymbol.compiler;
 
-import cymbol.compiler.CymbolParser.compilationUnitContext;
-import cymbol.compiler.CymbolParser.methodDeclarationContext;
-import cymbol.compiler.CymbolParser.structDeclarationContext;
-import cymbol.compiler.CymbolParser.varDeclarationContext;
+import cymbol.compiler.CymbolParser.CompilationUnitContext;
+import cymbol.compiler.CymbolParser.MethodDeclarationContext;
+import cymbol.compiler.CymbolParser.StructDeclarationContext;
+import cymbol.compiler.CymbolParser.VarDeclarationContext;
 import cymbol.model.FunctionDeclaration;
 import cymbol.model.SourceFile;
 import cymbol.model.Struct;
@@ -20,18 +20,18 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     }
 
     @Override
-    public void enter(compilationUnitContext ctx) {
-        for(varDeclarationContext var : ctx.getRuleContexts(varDeclarationContext.class)) {
+    public void enterCompilationUnit(CompilationUnitContext ctx) {
+        for(VarDeclarationContext var : ctx.getRuleContexts(VarDeclarationContext.class)) {
             Symbol symbol = var.props.symbol;
             src.add(new VariableDeclaration(symbol));
         }
         
-        for(structDeclarationContext struct : ctx.getRuleContexts(structDeclarationContext.class)) {
+        for(StructDeclarationContext struct : ctx.getRuleContexts(StructDeclarationContext.class)) {
             StructSymbol s = (StructSymbol) struct.props.symbol;
             src.add(new Struct(s));
         }
         
-        for(methodDeclarationContext method : ctx.getRuleContexts(methodDeclarationContext.class)) {
+        for(MethodDeclarationContext method : ctx.getRuleContexts(MethodDeclarationContext.class)) {
             Symbol s = method.props.symbol;
             src.add(new FunctionDeclaration(s));
         }
