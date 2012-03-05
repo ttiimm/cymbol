@@ -9,18 +9,22 @@ import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
 
-public class FunctionDeclaration extends OutputModelObject{
+public class MethodFunction extends OutputModelObject {
     
+    public Symbol symbol;
     public Type type; 
     public String name;
     public List<Argument> args = new ArrayList<Argument>();
 
-    public FunctionDeclaration(Type type, String name) {
+    public MethodFunction(Type type, String name) {
+        this.symbol = new MethodSymbol(name, null, null);
+        this.symbol.type = type;
         this.type = type;
         this.name = name;
     }
     
-    public FunctionDeclaration(Symbol symbol) {
+    public MethodFunction(Symbol symbol) {
+        this.symbol = symbol;
         this.type = symbol.type;
         String methodName = symbol.getName();
         int paranIndex = methodName.indexOf("(");
@@ -35,6 +39,7 @@ public class FunctionDeclaration extends OutputModelObject{
     public String toString() {
         return type.getName() + " " + name + args;
     }
+
     
     public class Argument {
         public Type type; 
@@ -50,5 +55,4 @@ public class FunctionDeclaration extends OutputModelObject{
             return type.getName() + " " + name;
         }
     }
-
 }

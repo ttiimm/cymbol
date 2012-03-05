@@ -1,5 +1,7 @@
 package cymbol.compiler;
 
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+
 import cymbol.compiler.CymbolParser.BlockContext;
 import cymbol.compiler.CymbolParser.CompilationUnitContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
@@ -18,9 +20,11 @@ import cymbol.symtab.VariableSymbol;
 public class ListenerDefinePhase extends CymbolBaseListener {
 
     private Scope current;
+    private ParseTreeProperty<CymbolProperties> properties;
 
-    public ListenerDefinePhase(Scope globals) {
+    public ListenerDefinePhase(Scope globals, ParseTreeProperty<CymbolProperties> properties) {
         this.current = globals;
+        this.properties = properties;
     }
 
     @Override

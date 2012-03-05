@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import cymbol.model.SourceFile;
@@ -19,6 +20,7 @@ public class Compiler {
 
     public CymbolParser parser;
     public ParseTree tree;
+    public ParseTreeProperty<CymbolProperties> properties = new ParseTreeProperty<CymbolProperties>();
     public SymbolTable table;
     public SourceFile src;
 
@@ -71,19 +73,19 @@ public class Compiler {
 
     public void define() {
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerDefinePhase defl = new ListenerDefinePhase(table.globals);
+        ListenerDefinePhase defl = new ListenerDefinePhase(table.globals, properties);
         walker.walk(defl, tree);
     }
 
     public void reference() {
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerResolvePhase refl = new ListenerResolvePhase(this);
+        ListenerResolvePhase refl = new ListenerResolvePhase(this, properties);
         walker.walk(refl, tree);
     }
     
     private void build() {
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerBuildPhase builder = new ListenerBuildPhase(src);
+        ListenerBuildPhase builder = new ListenerBuildPhase(src, properties);
         walker.walk(builder, tree);
     }
 

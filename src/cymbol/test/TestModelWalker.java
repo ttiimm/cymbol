@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.stringtemplate.v4.ST;
 
 import cymbol.compiler.Compiler;
-import cymbol.model.FunctionDeclaration;
+import cymbol.model.MethodFunction;
 import cymbol.model.ModelTemplateWalker;
 import cymbol.model.SourceFile;
 import cymbol.model.Struct;
@@ -15,6 +15,7 @@ import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.SymbolTable;
 import cymbol.symtab.VariableSymbol;
+import cymbol.model.Expression.Primary;
 
 public class TestModelWalker {
 
@@ -24,12 +25,32 @@ public class TestModelWalker {
         		          "// <Test>\n" +
         		          "\n" +
         		          "\n" +
+        		          "\n" +
         		          "int x;" +
         		          "\n" +
         		          "\n";
         
         SourceFile src = new SourceFile("<Test>");
         src.add(new VariableDeclaration(SymbolTable.INT, "x"));
+        ST result = runTest(src);
+        assertEquals(expected, result.render());
+    }
+    
+    @Test
+    public void testVarWithAssignment() {
+        String expected = "// Cymbol generated C\n" + 
+                "// <Test>\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "int x = 1;" +
+                "\n" +
+                "\n";
+        
+        SourceFile src = new SourceFile("<Test>");
+        VariableDeclaration var = new VariableDeclaration(SymbolTable.INT, "x");
+        var.add(new Primary("1"));
+        src.add(var);
         ST result = runTest(src);
         assertEquals(expected, result.render());
     }
@@ -44,6 +65,7 @@ public class TestModelWalker {
                           "\n" +
                           "    int x;\n" +
                           "}\n" +
+                          "\n" +
                           "\n" +
                           "\n";
         
@@ -70,6 +92,7 @@ public class TestModelWalker {
                 "\n" +
                 "}\n" +
                 "\n" +
+                "\n" +
                 "\n";
         
         SourceFile src = new SourceFile("<Test>");
@@ -83,19 +106,60 @@ public class TestModelWalker {
     }
     
     @Test
-    public void testFuncDecl() {
+    public void testMethodFuncs() {
         String expected = "// Cymbol generated C\n" + 
                           "// <Test>\n" +
                           "\n" +
                           "\n" +
+                          "void foo(float y);\n" +
                           "\n" +
-                          "void foo(float y);";
+                          "\n" +
+                          "\n" +
+                          "void foo(float y) {\n" +
+                          "\n" +
+                          "}\n" +
+                          "\n" +
+                          "\n";
         
         MethodSymbol m = new MethodSymbol("foo", SymbolTable.VOID, null, null);
         m.define(new VariableSymbol("y", SymbolTable.FLOAT));
-        FunctionDeclaration func = new FunctionDeclaration(m);
+        MethodFunction func = new MethodFunction(m);
         SourceFile src = new SourceFile("<Test>");
         src.add(func);
+        ST result = runTest(src);
+        assertEquals(expected, result.render());
+    }
+    
+    @Test
+    public void testMethodFuncsWithMultiple() {
+        String expected = "// Cymbol generated C\n" + 
+                    		"// <Test>\n" + 
+                    		"\n" + 
+                    		"\n" + 
+                    		"void foo(float y);\n" + 
+                    		"char bar(int x);\n" + 
+                    		"\n" + 
+                    		"\n" + 
+                    		"\n" + 
+                    		"void foo(float y) {\n" + 
+                    		"\n" + 
+                    		"}\n" + 
+                    		"\n" + 
+                    		"char bar(int x) {\n" + 
+                    		"\n" + 
+                    		"}\n" + 
+                    		"\n" + 
+                    		"\n";
+        
+        MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
+        mfoo.define(new VariableSymbol("y", SymbolTable.FLOAT));
+        MethodFunction foo = new MethodFunction(mfoo);
+        MethodSymbol mbar = new MethodSymbol("bar", SymbolTable.CHAR, null, null);
+        mbar.define(new VariableSymbol("x", SymbolTable.INT));
+        MethodFunction bar = new MethodFunction(mbar);
+        SourceFile src = new SourceFile("<Test>");
+        src.add(foo);
+        src.add(bar);
         ST result = runTest(src);
         assertEquals(expected, result.render());
     }

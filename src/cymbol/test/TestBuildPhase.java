@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
-import cymbol.model.FunctionDeclaration;
+import cymbol.model.MethodFunction;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 
@@ -24,6 +24,24 @@ public class TestBuildPhase {
         Compiler c = Util.runCompilerOn(source);
         VariableDeclaration var = c.src.vars.get(0);
         assertEquals("int x", var.toString());
+    }
+
+    @Test
+    public void varDeclWithPrimary() {
+        String source = "int x = 1;";
+        Compiler c = Util.runCompilerOn(source);
+        VariableDeclaration var = c.src.vars.get(0);
+        assertEquals("int x = 1", var.toString());
+    }
+
+    @Test
+    public void multipleVarDecls() {
+        String source = "int x; int y;";
+        Compiler c = Util.runCompilerOn(source);
+        VariableDeclaration x = c.src.vars.get(0);
+        assertEquals("int x", x.toString());
+        VariableDeclaration y = c.src.vars.get(1);
+        assertEquals("int y", y.toString());
     }
     
     @Test
@@ -50,7 +68,7 @@ public class TestBuildPhase {
     public void func() {
         String source = "void foo(float y){ }";
         Compiler c = Util.runCompilerOn(source);
-        FunctionDeclaration f = c.src.funcDefs.get(0);
+        MethodFunction f = c.src.FunctionDefinitions.get(0);
         assertEquals("void foo[float y]", f.toString());
     }
 }
