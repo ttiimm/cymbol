@@ -68,7 +68,7 @@ block
 
 statement
   : block                                            -> stat
-  | structDeclaration                                -> stat
+  | structDeclaration                                -> stat_StructDecl
   | varDeclaration                                   -> stat_VarDecl
   | 'if' '(' expr ')' statement ('else' statement)?  -> stat
   | 'return' expr? ';'                               -> stat

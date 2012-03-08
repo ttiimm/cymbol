@@ -6,17 +6,17 @@ import org.junit.Test;
 import org.stringtemplate.v4.ST;
 
 import cymbol.compiler.Compiler;
+import cymbol.model.Block;
+import cymbol.model.Expression.Primary;
 import cymbol.model.MethodFunction;
 import cymbol.model.ModelTemplateWalker;
 import cymbol.model.SourceFile;
-import cymbol.model.Statement.Block;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.SymbolTable;
 import cymbol.symtab.VariableSymbol;
-import cymbol.model.Expression.Primary;
 
 public class TestModelWalker {
 
@@ -62,8 +62,6 @@ public class TestModelWalker {
                           "// <Test>\n" +
                           "\n" +
                           "struct A {\n" +
-                          "\n" +
-                          "\n" +
                           "    int x;\n" +
                           "}\n" +
                           "\n" +
@@ -84,13 +82,9 @@ public class TestModelWalker {
                 "// <Test>\n" +
                 "\n" +
                 "struct A {\n" +
-                "\n" +
                 "    struct B {\n" +
-                "\n" +
-                "\n" +
                 "        int x;\n" +
                 "    }\n" +
-                "\n" +
                 "}\n" +
                 "\n" +
                 "\n" +
@@ -117,10 +111,7 @@ public class TestModelWalker {
                           "\n" +
                           "\n" +
                           "void foo(float y) {\n" +
-                          "\n" +
-                          "}\n" +
-                          "\n" +
-                          "\n";
+                          "}\n";
         
         MethodSymbol m = new MethodSymbol("foo", SymbolTable.VOID, null, null);
         m.define(new VariableSymbol("y", SymbolTable.FLOAT));
@@ -132,7 +123,7 @@ public class TestModelWalker {
     }
     
     @Test
-    public void testMethodFuncsWithMultiple() {
+    public void testMultipleMethodFuncs() {
         String expected = "// Cymbol generated C\n" + 
                     		"// <Test>\n" + 
                     		"\n" + 
@@ -143,14 +134,10 @@ public class TestModelWalker {
                     		"\n" + 
                     		"\n" + 
                     		"void foo(float y) {\n" + 
-                    		"\n" + 
                     		"}\n" + 
                     		"\n" + 
                     		"char bar(int x) {\n" + 
-                    		"\n" + 
-                    		"}\n" +
-                    		"\n" +
-                    		"\n";
+                    		"}\n";
         
         MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
         mfoo.define(new VariableSymbol("y", SymbolTable.FLOAT));
@@ -161,6 +148,58 @@ public class TestModelWalker {
         SourceFile src = new SourceFile("<Test>");
         src.add(foo);
         src.add(bar);
+        ST result = runTest(src);
+        assertEquals(expected, result.render());
+    }
+    
+    @Test
+    public void testFuncWithVarDecl() {
+        String expected = "// Cymbol generated C\n" + 
+                "// <Test>\n" + 
+                "\n" + 
+                "\n" + 
+                "void foo();\n" + 
+                "\n" + 
+                "\n" + 
+                "\n" + 
+                "void foo() {\n" + 
+                "    int x;\n" + 
+                "}\n";
+        
+        Block block = new Block();
+        block.add(new VariableDeclaration(SymbolTable.INT, "x"));
+        MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
+        MethodFunction foo = new MethodFunction(mfoo, block);
+        SourceFile src = new SourceFile("<Test>");
+        src.add(foo);
+        ST result = runTest(src);
+        assertEquals(expected, result.render());
+    }
+
+    @Test
+    public void testFuncWithStructDecl() {
+        String expected = "// Cymbol generated C\n" + 
+                "// <Test>\n" + 
+                "\n" + 
+                "\n" + 
+                "void foo();\n" + 
+                "\n" + 
+                "\n" + 
+                "\n" + 
+                "void foo() {\n" + 
+                "    struct A {\n" +
+                "        int x;\n" +
+                "    }\n" + 
+                "}\n";
+        
+        Block block = new Block();
+        StructSymbol struct = new StructSymbol("A", null, null);
+        struct.define(new VariableSymbol("x", SymbolTable.INT));
+        block.add(new Struct(struct));
+        MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
+        MethodFunction foo = new MethodFunction(mfoo, block);
+        SourceFile src = new SourceFile("<Test>");
+        src.add(foo);
         ST result = runTest(src);
         assertEquals(expected, result.render());
     }

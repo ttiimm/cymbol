@@ -9,7 +9,6 @@ SourceFile(file, functionDeclarations, functionDefinitions) ::= <<
 <file.vars:variableDeclaration(); separator="\n">
 
 <functionDefinitions>
-
 >>
 
 
@@ -19,9 +18,7 @@ variableDeclaration(var) ::= <<
 
 struct(struct) ::= <<
 struct <struct.name> {
-
     <struct.nested:struct(); separator="\n">
-    
     <struct.vars:variableDeclaration(); separator="\n">
 }>>
 
@@ -33,6 +30,7 @@ FunctionDeclarations(funcs) ::= <<
 
 
 FunctionDefinitions(funcs) ::= <<
+
 <funcs: {f | <signature(f)> <f.block:Block()>}>
 >>
 
@@ -43,8 +41,9 @@ signature(func) ::= <<
 
 Block(block) ::= <<
 {
-
+    <block.structs:struct()>
+    <block.vars:variableDeclaration()>
+    <block.statements: {s |<s>}; separator="\n">
 }
-
 
 >>

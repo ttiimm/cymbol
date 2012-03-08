@@ -28,7 +28,7 @@ public class TestBuildPhase {
         String source = "int x;";
         SourceFile src = runCompilerOn(source);
         VariableDeclaration var = src.vars.get(0);
-        assertEquals("int x", var.toString());
+        assertEquals("int x;", var.toString());
     }
 
     @Test
@@ -36,7 +36,7 @@ public class TestBuildPhase {
         String source = "int x = 1;";
         SourceFile src = runCompilerOn(source);
         VariableDeclaration var = src.vars.get(0);
-        assertEquals("int x = 1", var.toString());
+        assertEquals("int x = 1;", var.toString());
     }
 
     @Test
@@ -44,9 +44,9 @@ public class TestBuildPhase {
         String source = "int x; int y;";
         SourceFile src = runCompilerOn(source);
         VariableDeclaration x = src.vars.get(0);
-        assertEquals("int x", x.toString());
+        assertEquals("int x;", x.toString());
         VariableDeclaration y = src.vars.get(1);
-        assertEquals("int y", y.toString());
+        assertEquals("int y;", y.toString());
     }
     
     @Test
@@ -55,7 +55,7 @@ public class TestBuildPhase {
         SourceFile src = runCompilerOn(source);
         Struct struct = src.structs.get(0);
         assertEquals("A", struct.name);
-        assertEquals("int x", struct.vars.get(0).toString());
+        assertEquals("int x;", struct.vars.get(0).toString());
     }
     
     @Test
@@ -66,7 +66,7 @@ public class TestBuildPhase {
         assertEquals("A", struct.name);
         Struct nested = struct.nested.get(0);
         assertEquals("B", nested.name);
-        assertEquals("int x", nested.vars.get(0).toString());
+        assertEquals("int x;", nested.vars.get(0).toString());
     }
     
     @Test
@@ -84,7 +84,24 @@ public class TestBuildPhase {
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
         assertEquals("void foo[float y]", f.toString());
-        assertEquals("int x", f.block.statements.get(0).toString());
+        assertEquals("int x;", f.block.vars.get(0).toString());
+    }
+
+    @Test
+    public void funcWithStructDeclaration() {
+        String source = "void foo(){\n" +
+        		        "    struct A {\n" +
+        		        "        int x;\n" +
+        		        "    }\n" +
+        		        "}";
+        String struct = "struct A {\n" +
+        		        "    []\n" +
+        		        "    [int x;]\n" +
+        		        "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(struct, f.block.structs.get(0).toString());
     }
     
     public SourceFile runCompilerOn(String source) {

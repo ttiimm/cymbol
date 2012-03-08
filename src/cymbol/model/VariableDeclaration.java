@@ -26,9 +26,19 @@ public class VariableDeclaration extends OutputModelObject implements Statement 
     }
     
     @Override
+    public boolean isStruct() {
+        return false;
+    }
+
+    @Override
+    public boolean isVariableDeclaration() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         String left = type.getName() + " " + name;
         String right = expr != null ? " = " + expr : "";
-        return left + right;
+        return left + right + ";";
     }
 }

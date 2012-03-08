@@ -3,12 +3,12 @@ package cymbol.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.codegen.model.ModelElement;
 import org.antlr.v4.codegen.model.OutputModelObject;
 
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
-import cymbol.model.Statement.Block;;
 
 public class MethodFunction extends OutputModelObject {
     
@@ -16,7 +16,7 @@ public class MethodFunction extends OutputModelObject {
     public Type type; 
     public String name;
     public List<Argument> args = new ArrayList<Argument>();
-    public Block block;
+    @ModelElement public Block block;
 
     public MethodFunction(Type type, String name, Block block) {
         this.symbol = new MethodSymbol(name, null, null);

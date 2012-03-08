@@ -12,14 +12,14 @@ import cymbol.compiler.CymbolParser.BlockContext;
 import cymbol.compiler.CymbolParser.CompilationUnitContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
+import cymbol.compiler.CymbolParser.Stat_StructDeclContext;
 import cymbol.compiler.CymbolParser.Stat_VarDeclContext;
 import cymbol.compiler.CymbolParser.StructDeclarationContext;
 import cymbol.compiler.CymbolParser.VarDeclarationContext;
+import cymbol.model.Block;
 import cymbol.model.Expression.Primary;
 import cymbol.model.MethodFunction;
 import cymbol.model.SourceFile;
-import cymbol.model.Statement;
-import cymbol.model.Statement.Block;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 import cymbol.symtab.Symbol;
@@ -40,17 +40,9 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     public void exitCompilationUnit(CompilationUnitContext ctx) {
         SourceFile src = new SourceFile(sourceName);
         
-        for(VarDeclarationContext var : ctx.getRuleContexts(VarDeclarationContext.class)) {
-            src.add((VariableDeclaration) models.get(var));
-        }
-        
-        for(StructDeclarationContext struct : ctx.getRuleContexts(StructDeclarationContext.class)) {
-            src.add((Struct) models.get(struct));
-        }
-        
-        for(MethodDeclarationContext method : ctx.getRuleContexts(MethodDeclarationContext.class)) {
-            src.add((MethodFunction) models.get(method));
-        }
+        src.addAll(getAll(ctx.getRuleContexts(VarDeclarationContext.class)));
+        src.addAll(getAll(ctx.getRuleContexts(StructDeclarationContext.class)));
+        src.addAll(getAll(ctx.getRuleContexts(MethodDeclarationContext.class)));
         
         models.put(ctx, src);
     }
@@ -83,13 +75,16 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     @Override
     public void exitBlock(BlockContext ctx) {
         Block block = new Block();
-        for(ParserRuleContext<Token> var: ctx.getRuleContexts(Stat_VarDeclContext.class)) {
-            block.add((Statement) models.get(var));
-        }
-        
+        block.addAll(getAll(ctx.getRuleContexts(Stat_VarDeclContext.class)));
+        block.addAll(getAll(ctx.getRuleContexts(Stat_StructDeclContext.class)));
         models.put(ctx, block);
     }
 
+
+    @Override
+    public void exitStat_StructDecl(Stat_StructDeclContext ctx) {
+       copyModel(ctx.structDeclaration(), ctx);
+    }
 
     @Override
     public void exitStat_VarDecl(Stat_VarDeclContext ctx) {
@@ -100,6 +95,12 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     public void enterExpr_Primary(Expr_PrimaryContext ctx) {
        Primary p = new Primary(ctx.getStart().getText());
        models.put(ctx, p);
+    }
+    
+    private List<OutputModelObject> getAll(List<? extends ParserRuleContext<Token>> ctxs) {
+        List<OutputModelObject> ms = new ArrayList<OutputModelObject>();
+        for(ParserRuleContext<Token> ctx : ctxs) { ms.add(models.get(ctx)); }
+        return ms;
     }
     
     private void copyModel(ParserRuleContext<Token> from, ParserRuleContext<Token> to) {

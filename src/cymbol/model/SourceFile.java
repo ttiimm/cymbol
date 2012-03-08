@@ -6,7 +6,6 @@ import java.util.List;
 import org.antlr.v4.codegen.model.ModelElement;
 import org.antlr.v4.codegen.model.OutputModelObject;
 
-import cymbol.model.Statement.Block;
 import cymbol.symtab.Symbol;
 
 public class SourceFile extends OutputModelObject {
@@ -21,6 +20,15 @@ public class SourceFile extends OutputModelObject {
 
     public SourceFile(String sourceName) {
        this.name = sourceName;
+    }
+    
+    public void addAll(List<OutputModelObject> all) {
+        for(OutputModelObject omo : all) {
+            if(omo instanceof Struct) { add((Struct) omo); }
+            else if(omo instanceof VariableDeclaration) { add((VariableDeclaration) omo); }
+            else if(omo instanceof MethodFunction){ add((MethodFunction) omo); }
+            else { throw new IllegalStateException("Tried to add " + omo + " to source file"); }
+        }
     }
 
     public void add(Struct struct) {
