@@ -10,11 +10,12 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import cymbol.compiler.CymbolParser.BlockContext;
 import cymbol.compiler.CymbolParser.CompilationUnitContext;
+import cymbol.compiler.CymbolParser.Expr_BinaryContext;
 import cymbol.compiler.CymbolParser.Expr_GroupContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
+import cymbol.compiler.CymbolParser.StatContext;
 import cymbol.compiler.CymbolParser.Stat_BlockContext;
-import cymbol.compiler.CymbolParser.Stat_SimpleContext;
 import cymbol.compiler.CymbolParser.Stat_StructDeclContext;
 import cymbol.compiler.CymbolParser.Stat_VarDeclContext;
 import cymbol.compiler.CymbolParser.StatementContext;
@@ -107,15 +108,24 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     }
 
     @Override
-    public void exitStat_Simple(Stat_SimpleContext ctx) {
-        Expression expr = (Expression) models.get(ctx.expr());
+    public void exitStat(StatContext ctx) {
+        OutputModelObject expr = models.get(ctx.expr());
         Statement statement = new Statement(expr.toString() + ";");
         models.put(ctx, statement);
+    }
+    
+    @Override
+    public void exitExpr_Binary(Expr_BinaryContext ctx) {
+        OutputModelObject left = models.get(ctx.expr(0));
+        OutputModelObject right = models.get(ctx.expr(1));
+        String theExpression = left.toString() + " " + ctx.o.getText() + " " + right.toString();
+        OutputModelObject binary = new Expression(theExpression);
+        models.put(ctx, binary );
     }
 
     @Override
     public void exitExpr_Group(Expr_GroupContext ctx) {
-        Expression expr = (Expression) models.get(ctx.expr());
+        OutputModelObject expr = models.get(ctx.expr());
         Expression group = new Expression("(" + expr.toString() + ")");
         models.put(ctx, group);
     }

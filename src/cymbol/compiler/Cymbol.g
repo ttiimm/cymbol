@@ -73,20 +73,20 @@ statement
   | 'if' '(' expr ')' statement ('else' statement)?  -> stat
   | 'return' expr? ';'                               -> stat
   | expr '=' expr ';'                                -> stat
-  | expr ';'                                         -> stat_Simple
+  | expr ';'                                         -> stat
   ;
 
 expr
-  : expr '(' ( expr (',' expr)* )? ')'                -> expression              
-  | expr '[' expr ']'                                 -> expression
-  | expr '.' expr                                     -> expression         
-  | '-' expr                                          -> expr_Unary
-  | '!' expr                                          -> expression
-  | expr ('*' | '/') expr                             -> expr_Binary
-  | expr ('+' | '-') expr                             -> expr_Binary
-  | expr ('!=' | '==' | '<' | '>' | '<=' | '>=') expr -> expr_Binary
-  | primary                                           -> expr_Primary 
-  | '(' expr ')'                                      -> expr_Group
+  : expr '(' ( expr (',' expr)* )? ')'                  -> expression              
+  | expr '[' expr ']'                                   -> expression
+  | expr '.' expr                                       -> expression         
+  | '-' expr                                            -> expr_Unary
+  | '!' expr                                            -> expression
+  | expr o=('*' | '/') expr                             -> expr_Binary
+  | expr o=('+' | '-') expr                             -> expr_Binary
+  | expr o=('!=' | '==' | '<' | '>' | '<=' | '>=') expr -> expr_Binary
+  | primary                                             -> expr_Primary 
+  | '(' expr ')'                                        -> expr_Group
   ;
 
 primary
