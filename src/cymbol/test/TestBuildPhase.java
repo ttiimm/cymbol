@@ -48,6 +48,7 @@ public class TestBuildPhase {
         VariableDeclaration y = src.vars.get(1);
         assertEquals("int y;", y.toString());
     }
+
     
     @Test
     public void struct() {
