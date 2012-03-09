@@ -79,9 +79,9 @@ statement
 expr
   : expr '(' ( expr (',' expr)* )? ')'                  -> expression              
   | expr '[' expr ']'                                   -> expression
-  | expr '.' expr                                       -> expression         
+  | expr '.' expr                                       -> expr_Member         
   | '-' expr                                            -> expr_Unary
-  | '!' expr                                            -> expression
+  | '!' expr                                            -> expr_Unary
   | expr o=('*' | '/') expr                             -> expr_Binary
   | expr o=('+' | '-') expr                             -> expr_Binary
   | expr o=('!=' | '==' | '<' | '>' | '<=' | '>=') expr -> expr_Binary

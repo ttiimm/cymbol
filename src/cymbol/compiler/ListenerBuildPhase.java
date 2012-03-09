@@ -13,6 +13,7 @@ import cymbol.compiler.CymbolParser.CompilationUnitContext;
 import cymbol.compiler.CymbolParser.Expr_BinaryContext;
 import cymbol.compiler.CymbolParser.Expr_GroupContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
+import cymbol.compiler.CymbolParser.Expr_UnaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
 import cymbol.compiler.CymbolParser.StatContext;
 import cymbol.compiler.CymbolParser.Stat_BlockContext;
@@ -114,6 +115,13 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         models.put(ctx, statement);
     }
     
+    @Override
+    public void exitExpr_Unary(Expr_UnaryContext ctx) {
+        OutputModelObject expr = models.get(ctx.expr());
+        OutputModelObject unary = new Expression(ctx.start.getText() + " " + expr.toString());
+        models.put(ctx, unary);
+    }
+
     @Override
     public void exitExpr_Binary(Expr_BinaryContext ctx) {
         OutputModelObject left = models.get(ctx.expr(0));

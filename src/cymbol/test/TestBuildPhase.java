@@ -178,6 +178,34 @@ public class TestBuildPhase {
         assertEquals("void foo[]", f.toString());
         assertEquals(block, f.block.toString());
     }
+
+    @Test
+    public void funcWithNegationExpr() {
+        String source = "void foo() {\n" +
+                "    -(1 + 2);" +
+                "}";
+        String block = "{\n" +
+                "    - (1 + 2);\n" +
+                "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+    
+    @Test
+    public void funcWithComplimentExpr() {
+        String source = "void foo() {\n" +
+                "    ! true;" +
+                "}";
+        String block = "{\n" +
+                "    ! true;\n" +
+                "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
     
     public SourceFile runCompilerOn(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);
