@@ -2,18 +2,19 @@ package cymbol.model;
 
 import org.antlr.v4.codegen.model.OutputModelObject;
 
-public interface Statement {
+public class Statement extends OutputModelObject {
 
-    public boolean isStruct();
+    public String theStatement;
 
-    public boolean isVariableDeclaration();
+    public Statement(String theStatement) {
+        this.theStatement = theStatement;
+    }
+
+    @Override
+    public String toString() {
+        return theStatement;
+    }
     
 }
 
-abstract class NonDeclarationStatement extends OutputModelObject implements Statement{
-    
-    public boolean isStruct() { return false; }
-
-    public boolean isVariableDeclaration() { return false; }
-}
 

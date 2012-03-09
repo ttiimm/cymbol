@@ -5,7 +5,7 @@ import org.antlr.v4.codegen.model.OutputModelObject;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
 
-public class VariableDeclaration extends OutputModelObject implements Statement {
+public class VariableDeclaration extends OutputModelObject {
     
     public Type type;
     public String name;
@@ -23,16 +23,6 @@ public class VariableDeclaration extends OutputModelObject implements Statement 
     
     public void add(OutputModelObject expr) {
         this.expr = expr;
-    }
-    
-    @Override
-    public boolean isStruct() {
-        return false;
-    }
-
-    @Override
-    public boolean isVariableDeclaration() {
-        return true;
     }
 
     @Override

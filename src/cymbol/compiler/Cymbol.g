@@ -67,13 +67,13 @@ block
   ;
 
 statement
-  : block                                            -> stat
+  : block                                            -> stat_Block
   | structDeclaration                                -> stat_StructDecl
   | varDeclaration                                   -> stat_VarDecl
   | 'if' '(' expr ')' statement ('else' statement)?  -> stat
   | 'return' expr? ';'                               -> stat
   | expr '=' expr ';'                                -> stat
-  | expr ';'                                         -> stat
+  | expr ';'                                         -> stat_Simple
   ;
 
 expr
@@ -86,7 +86,7 @@ expr
   | expr ('+' | '-') expr                             -> expr_Binary
   | expr ('!=' | '==' | '<' | '>' | '<=' | '>=') expr -> expr_Binary
   | primary                                           -> expr_Primary 
-  | '(' expr ')'                                      -> expression
+  | '(' expr ')'                                      -> expr_Group
   ;
 
 primary

@@ -10,17 +10,21 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import cymbol.compiler.CymbolParser.BlockContext;
 import cymbol.compiler.CymbolParser.CompilationUnitContext;
+import cymbol.compiler.CymbolParser.Expr_GroupContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
-import cymbol.compiler.CymbolParser.StatContext;
+import cymbol.compiler.CymbolParser.Stat_BlockContext;
+import cymbol.compiler.CymbolParser.Stat_SimpleContext;
 import cymbol.compiler.CymbolParser.Stat_StructDeclContext;
 import cymbol.compiler.CymbolParser.Stat_VarDeclContext;
+import cymbol.compiler.CymbolParser.StatementContext;
 import cymbol.compiler.CymbolParser.StructDeclarationContext;
 import cymbol.compiler.CymbolParser.VarDeclarationContext;
 import cymbol.model.Block;
-import cymbol.model.Expression.Primary;
+import cymbol.model.Expression;
 import cymbol.model.MethodFunction;
 import cymbol.model.SourceFile;
+import cymbol.model.Statement;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 import cymbol.symtab.Symbol;
@@ -76,18 +80,20 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     @Override
     public void exitBlock(BlockContext ctx) {
         Block block = new Block();
-        block.addAll(getAll(ctx.getRuleContexts(Stat_VarDeclContext.class)));
-        block.addAll(getAll(ctx.getRuleContexts(Stat_StructDeclContext.class)));
-        block.addAll(getAll(ctx.getRuleContexts(StatContext.class)));
+        List<OutputModelObject> vars = getAll(ctx.getRuleContexts(Stat_VarDeclContext.class));
+        block.addAll(vars);
+        List<OutputModelObject> structs = getAll(ctx.getRuleContexts(Stat_StructDeclContext.class));
+        block.addAll(structs);
+        List<OutputModelObject> all = getAll(ctx.getRuleContexts(StatementContext.class));
+        all.removeAll(vars);
+        all.removeAll(structs);
+        block.addAll(all);
         models.put(ctx, block);
     }
 
     @Override
-    public void exitStat(StatContext ctx) {
-        BlockContext block = ctx.getRuleContext(BlockContext.class, 0);
-        if(block != null) {
-            copyModel(block, ctx);
-        }
+    public void exitStat_Block(Stat_BlockContext ctx) {
+        copyModel(ctx.block(), ctx);
     }
 
     @Override
@@ -101,9 +107,23 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     }
 
     @Override
+    public void exitStat_Simple(Stat_SimpleContext ctx) {
+        Expression expr = (Expression) models.get(ctx.expr());
+        Statement statement = new Statement(expr.toString() + ";");
+        models.put(ctx, statement);
+    }
+
+    @Override
+    public void exitExpr_Group(Expr_GroupContext ctx) {
+        Expression expr = (Expression) models.get(ctx.expr());
+        Expression group = new Expression("(" + expr.toString() + ")");
+        models.put(ctx, group);
+    }
+
+    @Override
     public void enterExpr_Primary(Expr_PrimaryContext ctx) {
-       Primary p = new Primary(ctx.getStart().getText());
-       models.put(ctx, p);
+       Expression primary = new Expression(ctx.getStart().getText());
+       models.put(ctx, primary);
     }
     
     private List<OutputModelObject> getAll(List<? extends ParserRuleContext<Token>> ctxs) {

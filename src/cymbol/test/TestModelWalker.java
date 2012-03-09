@@ -7,10 +7,11 @@ import org.stringtemplate.v4.ST;
 
 import cymbol.compiler.Compiler;
 import cymbol.model.Block;
-import cymbol.model.Expression.Primary;
+import cymbol.model.Expression;
 import cymbol.model.MethodFunction;
 import cymbol.model.ModelTemplateWalker;
 import cymbol.model.SourceFile;
+import cymbol.model.Statement;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 import cymbol.symtab.MethodSymbol;
@@ -50,7 +51,7 @@ public class TestModelWalker {
         
         SourceFile src = new SourceFile("<Test>");
         VariableDeclaration var = new VariableDeclaration(SymbolTable.INT, "x");
-        var.add(new Primary("1"));
+        var.add(new Expression("1"));
         src.add(var);
         ST result = runTest(src);
         assertEquals(expected, result.render());
@@ -192,9 +193,9 @@ public class TestModelWalker {
                 "    }\n" + 
                 "}\n";
         
-        Block block = new Block();
         StructSymbol struct = new StructSymbol("A", null, null);
         struct.define(new VariableSymbol("x", SymbolTable.INT));
+        Block block = new Block();
         block.add(new Struct(struct));
         MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
         MethodFunction foo = new MethodFunction(mfoo, block);
@@ -203,6 +204,59 @@ public class TestModelWalker {
         ST result = runTest(src);
         assertEquals(expected, result.render());
     }
+    
+    @Test
+    public void testFuncWithNested() {
+        String expected = "// Cymbol generated C\n" + 
+                          "// <Test>\n" + 
+                          "\n" + 
+                          "\n" + 
+                          "void foo();\n" + 
+                          "\n" + 
+                          "\n" + 
+                          "\n" + 
+                          "void foo() {\n" + 
+                          "    {\n" +
+                          "        int x;\n" +
+                          "    }\n" +
+                          "\n" + 
+                          "}\n";
+        Block nested = new Block();
+        nested.add(new VariableDeclaration(SymbolTable.INT, "x"));
+        Block block = new Block();
+        block.add(nested);
+        MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
+        MethodFunction foo = new MethodFunction(mfoo, block);
+        SourceFile src = new SourceFile("<Test>");
+        src.add(foo);
+        ST result = runTest(src);
+        assertEquals(expected, result.render());
+    }
+    
+    @Test
+    public void testFuncWithStatement() {
+        String expected = "// Cymbol generated C\n" + 
+                "// <Test>\n" + 
+                "\n" + 
+                "\n" + 
+                "void foo();\n" + 
+                "\n" + 
+                "\n" + 
+                "\n" + 
+                "void foo() {\n" + 
+                "    (1);\n" +
+                "}\n";
+        
+        Block block = new Block();
+        block.add(new Statement("(1);"));
+        MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
+        MethodFunction foo = new MethodFunction(mfoo, block);
+        SourceFile src = new SourceFile("<Test>");
+        src.add(foo);
+        ST result = runTest(src);
+        assertEquals(expected, result.render());
+    }
+
     
     public ST runTest(SourceFile src) {
         Compiler compiler = new Compiler();

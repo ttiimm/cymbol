@@ -10,7 +10,7 @@ import cymbol.symtab.StructSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.VariableSymbol;
 
-public class Struct extends OutputModelObject implements Statement {
+public class Struct extends OutputModelObject {
 
     public String name;
     
@@ -27,16 +27,6 @@ public class Struct extends OutputModelObject implements Statement {
                nested.add(new Struct((StructSymbol) s));
            }
        }
-    }
-
-    @Override
-    public boolean isStruct() {
-        return true;
-    }
-
-    @Override
-    public boolean isVariableDeclaration() {
-        return false;
     }
 
     @Override

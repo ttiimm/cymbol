@@ -8,17 +8,17 @@ import org.antlr.v4.codegen.model.OutputModelObject;
 
 import cymbol.symtab.Symbol;
 
-public class Block extends NonDeclarationStatement {
+public class Block extends OutputModelObject {
     
     @ModelElement public List<Struct> structs = new ArrayList<Struct>();
     @ModelElement public List<VariableDeclaration> vars = new ArrayList<VariableDeclaration>();
     
-    public List<Statement> statements = new ArrayList<Statement>();
+    public List<OutputModelObject> statements = new ArrayList<OutputModelObject>();
     
-    public void add(Statement statement) {
-        if(statement.isStruct()) {
+    public void add(OutputModelObject statement) {
+        if(statement instanceof Struct) {
             structs.add((Struct) statement);
-        } else if(statement.isVariableDeclaration()) {
+        } else if(statement instanceof VariableDeclaration) {
             vars.add((VariableDeclaration) statement);
         } else {
             statements.add(statement);
@@ -27,7 +27,7 @@ public class Block extends NonDeclarationStatement {
 
     public void addAll(List<OutputModelObject> all) {
         for(OutputModelObject omo : all) {
-            add((Statement) omo);
+            add(omo);
         }
     }
 
