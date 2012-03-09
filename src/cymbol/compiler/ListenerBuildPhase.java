@@ -10,13 +10,20 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import cymbol.compiler.CymbolParser.BlockContext;
 import cymbol.compiler.CymbolParser.CompilationUnitContext;
+import cymbol.compiler.CymbolParser.ExprContext;
+import cymbol.compiler.CymbolParser.Expr_ArrayContext;
 import cymbol.compiler.CymbolParser.Expr_BinaryContext;
+import cymbol.compiler.CymbolParser.Expr_CallContext;
 import cymbol.compiler.CymbolParser.Expr_GroupContext;
+import cymbol.compiler.CymbolParser.Expr_MemberContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.Expr_UnaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
 import cymbol.compiler.CymbolParser.StatContext;
+import cymbol.compiler.CymbolParser.Stat_AssignContext;
 import cymbol.compiler.CymbolParser.Stat_BlockContext;
+import cymbol.compiler.CymbolParser.Stat_ConditionalContext;
+import cymbol.compiler.CymbolParser.Stat_ReturnContext;
 import cymbol.compiler.CymbolParser.Stat_StructDeclContext;
 import cymbol.compiler.CymbolParser.Stat_VarDeclContext;
 import cymbol.compiler.CymbolParser.StatementContext;
@@ -109,6 +116,37 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     }
 
     @Override
+    public void exitStat_Conditional(Stat_ConditionalContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("if(");
+        OutputModelObject ifExpr = models.get(ctx.expr());
+        sb.append(ifExpr + ") ");
+        OutputModelObject ifStatement = models.get(ctx.statement(0));
+        sb.append(ifStatement);
+        StatementContext elseStatement = ctx.statement(1);
+        if(elseStatement != null) {
+            sb.append(" else " + models.get(elseStatement).toString());
+        }
+        
+        models.put(ctx, new Statement(sb.toString()));
+    }
+    
+    @Override
+    public void exitStat_Return(Stat_ReturnContext ctx) {
+        OutputModelObject expr = models.get(ctx.expr());
+        String optional = expr != null ? " " + expr.toString() : "";
+        models.put(ctx, new Statement("return" + optional + ";"));
+    }
+
+    @Override
+    public void exitStat_Assign(Stat_AssignContext ctx) {
+        OutputModelObject left = models.get(ctx.expr(0));
+        OutputModelObject right = models.get(ctx.expr(1));
+        Statement assign = new Statement(left + " = " + right + ";");
+        models.put(ctx, assign);
+    }
+    
+    @Override
     public void exitStat(StatContext ctx) {
         OutputModelObject expr = models.get(ctx.expr());
         Statement statement = new Statement(expr.toString() + ";");
@@ -116,9 +154,45 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     }
     
     @Override
+    public void exitExpr_Call(Expr_CallContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        OutputModelObject method = models.get(ctx.expr(0));
+        sb.append(method.toString() + "(");
+        List<? extends ExprContext> args = ctx.expr();
+        for(int i = 1; i < args.size(); i++) {
+            OutputModelObject arg = models.get(args.get(i));
+            sb.append(arg.toString() + ", ");
+        }
+        if(args.size() > 1) {
+            sb.setLength(sb.length() - 2);
+            sb.append(")");
+        } 
+        sb.append(")");
+        
+        models.put(ctx, new Expression(sb.toString()));
+    }
+
+    @Override
+    public void exitExpr_Array(Expr_ArrayContext ctx) {
+        OutputModelObject array = models.get(ctx.expr(0));
+        OutputModelObject index = models.get(ctx.expr(1));
+        OutputModelObject access = new Expression(array.toString() + "[" + index + "]");
+        models.put(ctx, access);
+    }
+
+    @Override
+    public void exitExpr_Member(Expr_MemberContext ctx) {
+        OutputModelObject struct = models.get(ctx.expr(0));
+        OutputModelObject member = models.get(ctx.getChild(1));
+        String accessOp = ctx.o.getText();
+        OutputModelObject memberAccess = new Expression(struct.toString() + accessOp + member.toString());
+        models.put(ctx, memberAccess);
+    }
+
+    @Override
     public void exitExpr_Unary(Expr_UnaryContext ctx) {
         OutputModelObject expr = models.get(ctx.expr());
-        OutputModelObject unary = new Expression(ctx.start.getText() + " " + expr.toString());
+        OutputModelObject unary = new Expression(ctx.start.getText() + expr.toString());
         models.put(ctx, unary);
     }
 
@@ -139,7 +213,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     }
 
     @Override
-    public void enterExpr_Primary(Expr_PrimaryContext ctx) {
+    public void exitExpr_Primary(Expr_PrimaryContext ctx) {
        Expression primary = new Expression(ctx.getStart().getText());
        models.put(ctx, primary);
     }

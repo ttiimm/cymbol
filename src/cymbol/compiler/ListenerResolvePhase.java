@@ -6,7 +6,6 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.Expr_UnaryContext;
-import cymbol.compiler.CymbolParser.ExpressionContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
 import cymbol.compiler.CymbolParser.ParameterContext;
 import cymbol.compiler.CymbolParser.PrimaryContext;
@@ -65,24 +64,10 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         method.type = method.scope.lookup(returnType);
     }
 
-
-    @Override
-    public void enterExpression(ExpressionContext ctx) {
-//        System.out.println(ctx.start + " " + ctx.stop);
-//        ctx.props = new CymbolProperties();
-        // if struct ref, then scope is not set correctly on member
-//        if(ctx.member != null) {
-//            Symbol structVar = resolve(ctx.e1.p.id.getText(), ctx.e1.p.props.scope, ctx);
-//            StructSymbol struct = (StructSymbol) structVar.type;
-//            ctx.member.p.props.scope = struct;
-//        }
-    }
-
-    @Override
-    public void exitExpression(ExpressionContext ctx) {
-//        System.out.println("BYE: " +ctx.start + " " + ctx.stop);
-        copyType(ctx.expr(0), ctx);
-    }
+//    @Override
+//    public void exitExpression(<? extends ExpressionContext> ctx) {
+//        copyType(ctx.expr(0), ctx);
+//    }
 
     @Override
     public void exitExpr_Unary(Expr_UnaryContext ctx) {

@@ -70,16 +70,16 @@ statement
   : block                                            -> stat_Block
   | structDeclaration                                -> stat_StructDecl
   | varDeclaration                                   -> stat_VarDecl
-  | 'if' '(' expr ')' statement ('else' statement)?  -> stat
-  | 'return' expr? ';'                               -> stat
-  | expr '=' expr ';'                                -> stat
+  | 'if' '(' expr ')' statement ('else' statement)?  -> stat_Conditional
+  | 'return' expr? ';'                               -> stat_Return
+  | expr '=' expr ';'                                -> stat_Assign
   | expr ';'                                         -> stat
   ;
 
 expr
-  : expr '(' ( expr (',' expr)* )? ')'                  -> expression              
-  | expr '[' expr ']'                                   -> expression
-  | expr '.' expr                                       -> expr_Member         
+  : expr '(' ( expr (',' expr)* )? ')'                  -> expr_Call              
+  | expr '[' expr ']'                                   -> expr_Array
+  | expr o='.' expr                                     -> expr_Member         
   | '-' expr                                            -> expr_Unary
   | '!' expr                                            -> expr_Unary
   | expr o=('*' | '/') expr                             -> expr_Binary

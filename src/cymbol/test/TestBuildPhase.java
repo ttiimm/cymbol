@@ -185,7 +185,7 @@ public class TestBuildPhase {
                 "    -(1 + 2);" +
                 "}";
         String block = "{\n" +
-                "    - (1 + 2);\n" +
+                "    -(1 + 2);\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -196,10 +196,131 @@ public class TestBuildPhase {
     @Test
     public void funcWithComplimentExpr() {
         String source = "void foo() {\n" +
-                "    ! true;" +
+                "    !true;" +
                 "}";
         String block = "{\n" +
-                "    ! true;\n" +
+                "    !true;\n" +
+                "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+
+    @Test
+    public void funcWithMemberAccessExpr() {
+        String source = "struct A { int x; }" +
+                		"void foo() {\n" +
+                		"    A a;" +
+                        "    a.x;" +
+                        "}";
+        String block = "{\n" +
+        		"     A a;" +
+                "    a.x;\n" +
+                "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+
+    @Test
+    public void funcWithArrayAccessExpr() {
+        String source = "void foo() {\n" +
+                        "    int a[];" +
+                        "    a[0];" +
+                        "}";
+        String block = "{\n" +
+                       "    int a[];\n" +
+                       "    a[0];\n" +
+                       "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+
+    @Test
+    public void funcWithCallExpr() {
+        String source = "void foo() {\n" +
+                        "    foo();" +
+                        "}";
+        String block = "{\n" +
+                       "    foo();\n" +
+                       "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+    
+    @Test
+    public void funcWithAssignment() {
+        String source = "void foo() {\n" +
+        		        "    int y = 0;" +
+                        "    int x;" +
+                        "    x = y;" +
+                        "}";
+        String block = "{\n" +
+                       "    int y = 0;\n" +
+                       "    int x;\n" +
+                       "    x = y;\n" +
+                       "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+    
+    @Test
+    public void funcWithConditional() {
+        String source = "void foo() {\n" +
+                "    if(true) 1;" +
+                "}";
+        String block = "{\n" +
+                "    if(true) 1;\n" +
+                "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+
+    @Test
+    public void funcWithConditionalWithElse() {
+        String source = "void foo() {\n" +
+                "    if(true) 1; else 2;" +
+                "}";
+        String block = "{\n" +
+                "    if(true) 1; else 2;\n" +
+                "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+
+    @Test
+    public void funcWithReturn() {
+        String source = "void foo() {\n" +
+                "    return;" +
+                "}";
+        String block = "{\n" +
+                "    return;\n" +
+                "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+    
+    @Test
+    public void funcWithReturnWithExpr() {
+        String source = "void foo() {\n" +
+                "    return 42;" +
+                "}";
+        String block = "{\n" +
+                "    return 42;\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);

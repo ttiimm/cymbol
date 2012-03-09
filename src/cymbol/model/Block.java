@@ -36,7 +36,9 @@ public class Block extends OutputModelObject {
         StringBuffer sb = new StringBuffer();
         sb.append("{\n");
         if(structs.size() > 0) { sb.append("    " + Symbol.stripBrackets(structs.toString()) + "\n"); }
-        if(vars.size() > 0) { sb.append("    " + Symbol.stripBrackets(vars.toString()) + "\n"); }
+        if(vars.size() > 0) { 
+            for(VariableDeclaration var : vars){ sb.append("    "); sb.append(var.toString() + "\n");} 
+        }
         if(statements.size() > 0) { sb.append("    " + Symbol.stripBrackets(statements.toString()) + "\n"); } 
         sb.append("}\n");
             
