@@ -104,6 +104,25 @@ public class TestBuildPhase {
         assertEquals(struct, f.block.structs.get(0).toString());
     }
     
+    @Test
+    public void funcWithNested() {
+        String source = "void foo(){\n" +
+                        "    {\n" +
+                        "        int x;\n" +
+                        "    }\n" +
+                        "}";
+        String block = "{\n" +
+        		       "    {\n" +
+                       "    int x;\n" +
+                       "}\n" +
+                       "\n" +
+                       "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+    
     public SourceFile runCompilerOn(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);
         in.name = "<String>";

@@ -12,6 +12,7 @@ import cymbol.compiler.CymbolParser.BlockContext;
 import cymbol.compiler.CymbolParser.CompilationUnitContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
+import cymbol.compiler.CymbolParser.StatContext;
 import cymbol.compiler.CymbolParser.Stat_StructDeclContext;
 import cymbol.compiler.CymbolParser.Stat_VarDeclContext;
 import cymbol.compiler.CymbolParser.StructDeclarationContext;
@@ -77,9 +78,17 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         Block block = new Block();
         block.addAll(getAll(ctx.getRuleContexts(Stat_VarDeclContext.class)));
         block.addAll(getAll(ctx.getRuleContexts(Stat_StructDeclContext.class)));
+        block.addAll(getAll(ctx.getRuleContexts(StatContext.class)));
         models.put(ctx, block);
     }
 
+    @Override
+    public void exitStat(StatContext ctx) {
+        BlockContext block = ctx.getRuleContext(BlockContext.class, 0);
+        if(block != null) {
+            copyModel(block, ctx);
+        }
+    }
 
     @Override
     public void exitStat_StructDecl(Stat_StructDeclContext ctx) {
