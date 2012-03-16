@@ -2,8 +2,14 @@ package cymbol.compiler;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree.TerminalNode;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
+import cymbol.compiler.CymbolParser.Expr_ArrayContext;
+import cymbol.compiler.CymbolParser.Expr_BinaryContext;
+import cymbol.compiler.CymbolParser.Expr_CallContext;
+import cymbol.compiler.CymbolParser.Expr_GroupContext;
+import cymbol.compiler.CymbolParser.Expr_MemberContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.Expr_UnaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
@@ -13,12 +19,21 @@ import cymbol.compiler.CymbolParser.PrimitiveTypeContext;
 import cymbol.compiler.CymbolParser.StructMemberContext;
 import cymbol.compiler.CymbolParser.VarDeclarationContext;
 import cymbol.symtab.Scope;
+import cymbol.symtab.StructSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.SymbolTable;
 import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
 public class ListenerResolvePhase extends CymbolBaseListener {
+    
+    private static final int LEFT = 0;
+    private static final int RIGHT = 1;
+    private static final int ARRAY_EXPR = 0;
+    private static final int FUNC_EXPR = 0;
+    private static final int STRUCT = 0;
+    private static final int MEMBER_PARENT = 2;
+    private static final int MEMBER = 0;
     
     private ScopeUtil scopes;
     public ParseTreeProperty<Type> types;
@@ -64,10 +79,45 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         method.type = method.scope.lookup(returnType);
     }
 
-//    @Override
-//    public void exitExpression(<? extends ExpressionContext> ctx) {
-//        copyType(ctx.expr(0), ctx);
-//    }
+
+
+    @Override
+    public void exitExpr_Call(Expr_CallContext ctx) {
+        copyType(ctx.expr(FUNC_EXPR), ctx);
+    }
+
+
+    @Override
+    public void exitExpr_Array(Expr_ArrayContext ctx) {
+        copyType(ctx.expr(ARRAY_EXPR), ctx);
+    }
+
+    @Override
+    public void exitExpr_Group(Expr_GroupContext ctx) {
+        copyType(ctx.expr(), ctx);
+    }
+
+    @Override
+    public void visitTerminal(TerminalNode<Token> node) {
+        if(node.getSymbol().getText().equals(".")) {
+            ParserRuleContext<Token> parent = (ParserRuleContext<Token>) node.getParent();
+            StructSymbol struct = (StructSymbol) types.get(parent.getChild(STRUCT));
+            ParserRuleContext<Token> member = (ParserRuleContext<Token>) parent.getChild(MEMBER_PARENT).getChild(MEMBER);
+            String name = member.start.getText();
+            Type memberType = struct.resolveMember(name).type;
+            stashType(member, memberType);
+        }
+    }
+
+    @Override
+    public void exitExpr_Member(Expr_MemberContext ctx) {
+        copyType(ctx.expr(RIGHT), ctx);
+    }
+
+    @Override
+    public void exitExpr_Binary(Expr_BinaryContext ctx) {
+        copyType(ctx.expr(LEFT), ctx);
+    }
 
     @Override
     public void exitExpr_Unary(Expr_UnaryContext ctx) {
@@ -78,7 +128,7 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     public void exitExpr_Primary(Expr_PrimaryContext ctx) {
         copyType(ctx.primary(), ctx);
     }
-
+    
     @Override
     public void enterPrimitiveType(PrimitiveTypeContext ctx) {
         setType(ctx);
@@ -90,6 +140,8 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     }
 
     private void setType(ParserRuleContext<Token> ctx) {
+        if(types.get(ctx) != null) { return; }
+        
         int tokenValue = ctx.start.getType();
         String tokenName = ctx.start.getText();
         if(tokenValue == CymbolParser.ID) {

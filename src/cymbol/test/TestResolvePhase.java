@@ -7,7 +7,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import cymbol.compiler.Compiler;
@@ -233,7 +232,6 @@ public class TestResolvePhase {
         assertEquals(SymbolTable.CHAR, types.get(block.getChild(2).getChild(0)));
      }
     
-    @Ignore
     @Test
     public void testResolveStructRef() {
         String source = "struct A{ int x;}" +
@@ -245,11 +243,10 @@ public class TestResolvePhase {
         Type A = (Type) c.table.globals.resolve("A");
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
         ParserRuleContext<Token> block = getBlock(m);
-        assertEquals(A, types.get(block.getChild(2).getChild(0)));
-        assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(2)));
+        assertEquals(A, types.get(block.getChild(2).getChild(0).getChild(0)));
+        assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(0).getChild(2)));
     }
     
-    @Ignore
     @Test
     public void testResolveNestedStructRef() {
         String source = "struct A{" +
@@ -263,10 +260,13 @@ public class TestResolvePhase {
                         "    a.b.x;" +
                         "}";
         Compiler c = runCompilerOn(source);
-//        Type A = (Type) c.table.globals.resolve("A");
+        StructSymbol A = (StructSymbol) c.table.globals.resolve("A");
+        Type B = (Type) A.resolveMember("B");
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
         ParserRuleContext<Token> block = getBlock(m);
-        assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(4)));
+        assertEquals(A, types.get(block.getChild(2).getChild(0).getChild(0).getChild(0)));
+        assertEquals(B, types.get(block.getChild(2).getChild(0).getChild(0).getChild(2).getChild(0)));
+        assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(0).getChild(2)));
     }
     
     @Test
