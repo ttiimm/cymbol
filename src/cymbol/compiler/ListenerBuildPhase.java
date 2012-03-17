@@ -37,6 +37,7 @@ import cymbol.model.Statement;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 import cymbol.symtab.Symbol;
+import cymbol.symtab.VariableSymbol;
 
 public class ListenerBuildPhase extends CymbolBaseListener {
 
@@ -71,7 +72,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     @Override
     public void exitVarDeclaration(VarDeclarationContext ctx) {
         Symbol s = scopes.resolve(ctx);
-        VariableDeclaration var = new VariableDeclaration(s);
+        VariableDeclaration var = new VariableDeclaration((VariableSymbol) s);
         OutputModelObject expr = models.get(ctx.expr());
         var.add(expr);
         models.put(ctx, var);

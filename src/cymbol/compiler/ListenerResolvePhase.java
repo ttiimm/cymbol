@@ -47,9 +47,8 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     @Override
     public void exitVarDeclaration(VarDeclarationContext ctx) {
         Type type = scopes.lookup(ctx.type());
-        String varName = Util.name(ctx);
-        VariableSymbol var = new VariableSymbol(varName, type);
-        
+        VariableSymbol var = new VariableSymbol(Util.name(ctx), type);
+        var.isArray = Util.isArrayDeclaration(ctx); 
         Scope scope = scopes.get(ctx);
         scope.define(var);
     }
@@ -68,6 +67,7 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     public void exitParameter(ParameterContext ctx) {
         Type type = scopes.lookup(ctx.type());
         VariableSymbol var = new VariableSymbol(Util.name(ctx), type);
+        var.isArray = Util.isArrayDeclaration(ctx);
         Scope scope = scopes.get(ctx);
         scope.define(var);
     }

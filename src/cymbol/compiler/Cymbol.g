@@ -27,7 +27,7 @@ structDeclaration
   
 structMember
   : type ID ';'
-  | type ID '[]' ';'
+  | type ID array='[]' ';'
   | structDeclaration
   ;
 
@@ -41,7 +41,7 @@ formalParameters
     
 parameter
   : type ID 
-  | type ID '[]'
+  | type ID array='[]'
   ;
 
 type 
@@ -59,7 +59,7 @@ primitiveType
 
 varDeclaration
   : type ID ('=' expr)? ';'
-  | type ID '[]' ('=' expr)? ';'
+  | type ID array='[]' ('=' expr)? ';'
   ;
 
 block 

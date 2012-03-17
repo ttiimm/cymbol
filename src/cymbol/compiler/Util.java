@@ -1,5 +1,7 @@
 package cymbol.compiler;
 
+import java.lang.reflect.Field;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree.TerminalNode;
@@ -15,6 +17,16 @@ public class Util {
         } catch (Throwable e) {
             throw new IllegalStateException("Context does not have an ID to derive name from "
                     + ctx.getClass() + "\nCause was\n" + e);
+        }
+    }
+    
+    public static boolean isArrayDeclaration(ParserRuleContext<Token> ctx) {
+        try {
+            Field array = ctx.getClass().getField("array");
+            return array.get(ctx) != null;
+        } catch (Throwable e) {
+            throw new IllegalStateException("Context does not have an array field ["
+                    + ctx.getClass() + "]\nCause was\n" + e);
         }
     }
 

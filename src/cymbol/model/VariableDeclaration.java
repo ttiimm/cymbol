@@ -2,13 +2,14 @@ package cymbol.model;
 
 import org.antlr.v4.codegen.model.OutputModelObject;
 
-import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
+import cymbol.symtab.VariableSymbol;
 
 public class VariableDeclaration extends OutputModelObject {
     
     public Type type;
     public String name;
+    public boolean isArray = false;
     public OutputModelObject expr;
     
     public VariableDeclaration(Type type, String name) {
@@ -16,9 +17,10 @@ public class VariableDeclaration extends OutputModelObject {
         this.name = name;
     }
 
-    public VariableDeclaration(Symbol symbol) {
+    public VariableDeclaration(VariableSymbol symbol) {
         this.type = symbol.type;
         this.name = symbol.getName();
+        this.isArray = symbol.isArray;
     }
     
     public void add(OutputModelObject expr) {
@@ -28,6 +30,7 @@ public class VariableDeclaration extends OutputModelObject {
     @Override
     public String toString() {
         String left = type.getName() + " " + name;
+        if(isArray) { left += "[]"; }
         String right = expr != null ? " = " + expr : "";
         return left + right + ";";
     }

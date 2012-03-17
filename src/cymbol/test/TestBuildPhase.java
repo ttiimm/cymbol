@@ -40,6 +40,14 @@ public class TestBuildPhase {
     }
 
     @Test
+    public void varDeclAsArrat() {
+        String source = "int x[];";
+        SourceFile src = runCompilerOn(source);
+        VariableDeclaration var = src.vars.get(0);
+        assertEquals("int x[];", var.toString());
+    }
+
+    @Test
     public void multipleVarDecls() {
         String source = "int x; int y;";
         SourceFile src = runCompilerOn(source);
@@ -216,9 +224,9 @@ public class TestBuildPhase {
                         "    a.x;" +
                         "}";
         String block = "{\n" +
-        		"     A a;" +
-                "    a.x;\n" +
-                "}\n";
+                	   "    A a;" +
+                       "    a.x;\n" +
+                       "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
         assertEquals("void foo[]", f.toString());
@@ -231,10 +239,12 @@ public class TestBuildPhase {
                         "    int a[];" +
                         "    a[0];" +
                         "}";
+        
         String block = "{\n" +
                        "    int a[];\n" +
                        "    a[0];\n" +
                        "}\n";
+        
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
         assertEquals("void foo[]", f.toString());

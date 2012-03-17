@@ -65,6 +65,7 @@ public class ListenerDefinePhase extends CymbolBaseListener {
         if (ctx.ID() != null) {
             stashScope(ctx);
             VariableSymbol member = new VariableSymbol(Util.name(ctx));
+            member.isArray = Util.isArrayDeclaration(ctx);
             theScope.define(member);
         }
     }

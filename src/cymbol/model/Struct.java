@@ -21,8 +21,8 @@ public class Struct extends OutputModelObject {
        this.name = struct.getName();
        
        for(Symbol s : ((StructSymbol) struct).getMembers().values()) {
-           if(s instanceof VariableSymbol || s instanceof BuiltInTypeSymbol) { 
-               vars.add(new VariableDeclaration(s)); 
+           if(s instanceof VariableSymbol) { 
+               vars.add(new VariableDeclaration((VariableSymbol) s)); 
            } else if (s instanceof StructSymbol) {
                nested.add(new Struct((StructSymbol) s));
            }
