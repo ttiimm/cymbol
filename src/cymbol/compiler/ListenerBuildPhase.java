@@ -184,7 +184,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     @Override
     public void exitExpr_Member(Expr_MemberContext ctx) {
         OutputModelObject struct = models.get(ctx.expr(0));
-        OutputModelObject member = models.get(ctx.getChild(1));
+        OutputModelObject member = models.get(ctx.getChild(2));
         String accessOp = ctx.o.getText();
         OutputModelObject memberAccess = new Expression(struct.toString() + accessOp + member.toString());
         models.put(ctx, memberAccess);

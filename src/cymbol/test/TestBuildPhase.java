@@ -224,7 +224,7 @@ public class TestBuildPhase {
                         "    a.x;" +
                         "}";
         String block = "{\n" +
-                	   "    A a;" +
+                	   "    A a;\n" +
                        "    a.x;\n" +
                        "}\n";
         SourceFile src = runCompilerOn(source);
