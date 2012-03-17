@@ -48,7 +48,7 @@ public class TestDefinePhase {
         String source = "void M(){ }";
         SymbolTable t = runTest(source);
         MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
-        assertEquals("global.M()", m.toString());
+        assertEquals("<global.M():global.undefined>", m.toString());
     }
     
     @Test
@@ -58,7 +58,7 @@ public class TestDefinePhase {
         		        "}";
         SymbolTable t = runTest(source);
         MethodSymbol m = (MethodSymbol) t.globals.resolve("M");
-        assertEquals("global.M()", m.toString());
+        assertEquals("<global.M():global.undefined>", m.toString());
         BlockContext ctx = (BlockContext) m.tree.getChild(4);
         assertEquals("local[A]", scopes.get(ctx).toString());
     }

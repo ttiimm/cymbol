@@ -15,6 +15,7 @@ public class SymbolTable {
     public static final BuiltInTypeSymbol BOOLEAN = new BuiltInTypeSymbol("boolean");
     public static final BuiltInTypeSymbol CHAR = new BuiltInTypeSymbol("char");
     public static final BuiltInTypeSymbol VOID = new BuiltInTypeSymbol("void");
+    public static final BuiltInTypeSymbol UNDEFINED = new BuiltInTypeSymbol("undefined");
 
     
     public GlobalScope globals = new GlobalScope();
@@ -25,6 +26,7 @@ public class SymbolTable {
         globals.define(BOOLEAN);
         globals.define(CHAR);
         globals.define(VOID);
+        globals.define(UNDEFINED);
     }
 
     public String toString() {

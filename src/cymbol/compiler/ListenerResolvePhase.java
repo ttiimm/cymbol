@@ -37,10 +37,12 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     
     private ScopeUtil scopes;
     public ParseTreeProperty<Type> types;
+    private Compiler compiler;
 
-    public ListenerResolvePhase(ScopeUtil scopes) {
+    public ListenerResolvePhase(ScopeUtil scopes, Compiler compiler) {
         this.scopes = scopes;
         this.types = new ParseTreeProperty<Type>();
+        this.compiler = compiler;
     }
 
 
@@ -49,6 +51,7 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         Type type = scopes.lookup(ctx.type());
         VariableSymbol var = new VariableSymbol(Util.name(ctx), type);
         var.isArray = Util.isArrayDeclaration(ctx); 
+        if(type == null) { compiler.reportError(ctx, "Unknown type when declaring variable: " + var); }
         Scope scope = scopes.get(ctx);
         scope.define(var);
     }

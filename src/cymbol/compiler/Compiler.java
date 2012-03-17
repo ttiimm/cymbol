@@ -81,7 +81,7 @@ public class Compiler {
 
     public ParseTreeProperty<Type> resolve(ParseTreeProperty<Scope> scopes) {
         ParseTreeWalker walker = new ParseTreeWalker();
-        ListenerResolvePhase refl = new ListenerResolvePhase(new ScopeUtil(this, scopes));
+        ListenerResolvePhase refl = new ListenerResolvePhase(new ScopeUtil(this, scopes), this);
         walker.walk(refl, tree);
         return refl.types;
     }

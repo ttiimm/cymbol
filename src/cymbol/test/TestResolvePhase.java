@@ -137,8 +137,9 @@ public class TestResolvePhase {
         String source = "A a;";
         Compiler c = runCompilerOn(source);
         VariableSymbol a = (VariableSymbol) c.table.globals.resolve("a");
-        assertEquals("global.a", a.toString());
+        assertEquals("<global.a:global.undefined>", a.toString());
         assertEquals("1:0: unknown type: A", c.errors.get(0));
+        assertEquals("1:0: Unknown type when declaring variable: <a:global.undefined>", c.errors.get(1));
     }
     
     @Test

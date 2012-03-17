@@ -16,11 +16,12 @@ public class Symbol { // A generic programming language symbol
 
     public Symbol(String name) {
         this.name = name;
+        this.type = SymbolTable.UNDEFINED;
     }
 
     public Symbol(String name, Type type) {
         this(name);
-        this.type = type;
+        this.type = type != null ? type : SymbolTable.UNDEFINED;
     }
 
     public String getName() {
