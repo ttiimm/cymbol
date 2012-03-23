@@ -82,13 +82,10 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         method.type = method.scope.lookup(returnType);
     }
 
-
-
     @Override
     public void exitExpr_Call(Expr_CallContext ctx) {
         copyType(ctx.expr(FUNC_EXPR), ctx);
     }
-
 
     @Override
     public void exitExpr_Array(Expr_ArrayContext ctx) {
@@ -143,6 +140,7 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     }
 
     private void setType(ParserRuleContext<Token> ctx) {
+        // already defined type as in the case of struct members
         if(types.get(ctx) != null) { return; }
         
         int tokenValue = ctx.start.getType();

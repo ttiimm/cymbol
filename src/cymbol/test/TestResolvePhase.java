@@ -1,6 +1,7 @@
 package cymbol.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -13,6 +14,7 @@ import cymbol.compiler.Compiler;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Scope;
 import cymbol.symtab.StructSymbol;
+import cymbol.symtab.Symbol;
 import cymbol.symtab.SymbolTable;
 import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
@@ -37,8 +39,9 @@ public class TestResolvePhase {
         assertEquals("<global.c:global.float>", t.globals.resolve("c").toString());
         assertEquals("<global.d:struct D:{x}>", t.globals.resolve("d").toString());
         assertEquals("<global.e:global.boolean>", t.globals.resolve("e").toString());
-        // TODO create Array type
-        assertEquals("<global.f:global.int>", t.globals.resolve("f").toString());
+        Symbol f = t.globals.resolve("f");
+        assertEquals("<global.f:global.int>", f.toString());
+        assertTrue(((VariableSymbol) f).isArray);
     }
     
     @Test
