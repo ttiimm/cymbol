@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 /* same as Java */
 #define MAX_FIELDS 65535
@@ -17,7 +18,7 @@ struct TypeDescriptor {
 
   /* offset from ptr to object of only fields that are managed ptrs
      e.g., don't want to gc ptrs to functions, say */
-  const int field_offsets[MAX_FIELDS]; 
+  int field_offsets[MAX_FIELDS]; 
 
 };
 
@@ -48,22 +49,47 @@ struct TypeDescriptor User_type = {
 };
 
 struct TypeDescriptor *type_table;
+int type_table_length;
 
 void **roots; 
 
-void *space1;
-void *space2;
-void *current_space;
+typedef unsigned char byte;
 
-void gc_init(struct TypeDescriptor types[])
+byte *space1;
+byte *space2;
+byte *current_space;
+
+void gc_init(struct TypeDescriptor types[], int length)
 {
   type_table = types;
-  /* alloc both spaces */
+  type_table_length = length;
+  space1 = malloc(8);
+  space2 = NULL;
+  current_space = space1;
+  /*  printf("gc_init: current_space(%p)\n", current_space);*/ 
+}
+
+int space_allocated()
+{
+  return current_space != NULL;
 }
 
 void *alloc(int descriptor_index)
 {
+  struct TypeDescriptor t;
+  void *p;
+  
+  if(descriptor_index > type_table_length 
+     || descriptor_index < 0 ) 
+    return NULL;
+
+  t = type_table[descriptor_index];
+  p = current_space;
+  current_space += t.size;
+  /* printf("alloc: current_space(%p)\n", current_space);*/
+  return p;
 }
+
 
 void *alloc_string(int size)
 {
