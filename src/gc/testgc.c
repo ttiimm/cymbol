@@ -30,6 +30,11 @@ void test_alloc_user()
   ASSERT(User_type.size, (after - before));
 }
 
+void test_alloc_string()
+{
+  
+}
+
 void test_alloc_outofmemory()
 {
   int heap_space_left, num_to_alloc;

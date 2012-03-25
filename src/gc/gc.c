@@ -63,6 +63,16 @@ int is_space_allocated()
   return current_space != NULL;
 }
 
+void alloc_space(int size)
+{
+  if(current_space + size > end_of_heap)
+    return NULL;
+
+  p = current_space;
+  current_space += size;
+  return p;
+}
+
 void *alloc(int descriptor_index)
 {
   struct TypeDescriptor t;
@@ -74,18 +84,13 @@ void *alloc(int descriptor_index)
 
   t = type_table[descriptor_index];
 
-  if(current_space + t.size > end_of_heap)
-    return NULL;
-
-  p = current_space;
-  current_space += t.size;
-  return p;
+  return alloc_space(t.size);
 }
 
 
 void *alloc_string(int size)
 {
-  return NULL;
+  return alloc_space(size);
 }
 
 void add_root(void **root)
