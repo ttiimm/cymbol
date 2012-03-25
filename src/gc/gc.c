@@ -1,25 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* same as Java */
-#define MAX_FIELDS 65535
+#define MAX_FIELDS 65535 
 
 struct TypeDescriptor {
-
   char *name;
-
-  /* same as position in table */
-  int id; 
-
-  /* size in bytes */
-  int size;
-
+  int id; /* same as position in table */
+  int size; /* size in bytes */
   int num_fields;
-
   /* offset from ptr to object of only fields that are managed ptrs
      e.g., don't want to gc ptrs to functions, say */
   int field_offsets[MAX_FIELDS]; 
-
 };
 
 #define STRING 0
@@ -28,12 +19,9 @@ struct TypeDescriptor {
 /* string def */
 struct TypeDescriptor string_type = {
   "string",
-  /* first type index */
-  STRING,
-  /* size */
-  0,
-  /* no fields */ 
-  0,
+  STRING,  /* first type index */ 
+  0,       /* size */
+  0,       /* no fields */ 
   {0}
 };
 
@@ -41,11 +29,9 @@ struct TypeDescriptor string_type = {
 struct TypeDescriptor User_type = {
   "user",
   USER,
-  /* hmm...size here */
-  4+4,
-  1,
-  /* offset of 2nd field */
-  {4}
+  4+4,  /* hmm...size here */
+  1,    /* name field? */
+  {4}   /* offset of 2nd field */
 };
 
 struct TypeDescriptor *type_table;
@@ -58,18 +44,21 @@ typedef unsigned char byte;
 byte *space1;
 byte *space2;
 byte *current_space;
+byte *end_of_heap;
 
-void gc_init(struct TypeDescriptor types[], int length)
+#define MAX_HEAP_SIZE 8 /* bytes */
+
+void gc_init(struct TypeDescriptor types[], int n)
 {
   type_table = types;
-  type_table_length = length;
-  space1 = malloc(8);
+  type_table_length = n;
+  space1 = malloc(MAX_HEAP_SIZE);
+  end_of_heap = space1 + MAX_HEAP_SIZE;
   space2 = NULL;
   current_space = space1;
-  /*  printf("gc_init: current_space(%p)\n", current_space);*/ 
 }
 
-int space_allocated()
+int is_space_allocated()
 {
   return current_space != NULL;
 }
@@ -84,16 +73,19 @@ void *alloc(int descriptor_index)
     return NULL;
 
   t = type_table[descriptor_index];
+
+  if(current_space + t.size > end_of_heap)
+    return NULL;
+
   p = current_space;
   current_space += t.size;
-  /* printf("alloc: current_space(%p)\n", current_space);*/
   return p;
 }
 
 
 void *alloc_string(int size)
 {
-  /* use type_table[STRING] */
+  return NULL;
 }
 
 void add_root(void **root)
