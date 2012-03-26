@@ -32,7 +32,11 @@ void test_alloc_user()
 
 void test_alloc_string()
 {
-  
+  byte *before, *after;
+  before = current_space;
+  alloc_string(12);
+  after = current_space;
+  ASSERT(12, (after - before));
 }
 
 void test_alloc_outofmemory()
@@ -57,6 +61,7 @@ int main()
 
   test_alloc_invalid_type_idx();
   test_alloc_user();
+  test_alloc_string();
   test_alloc_outofmemory();
   
   return EXIT_SUCCESS;

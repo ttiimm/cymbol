@@ -46,7 +46,7 @@ byte *space2;
 byte *current_space;
 byte *end_of_heap;
 
-#define MAX_HEAP_SIZE 8 /* bytes */
+#define MAX_HEAP_SIZE 32 /* bytes */
 
 void gc_init(struct TypeDescriptor types[], int n)
 {
@@ -63,8 +63,10 @@ int is_space_allocated()
   return current_space != NULL;
 }
 
-void alloc_space(int size)
+void *alloc_space(int size)
 {
+  void *p;
+
   if(current_space + size > end_of_heap)
     return NULL;
 
@@ -76,7 +78,6 @@ void alloc_space(int size)
 void *alloc(int descriptor_index)
 {
   struct TypeDescriptor t;
-  void *p;
   
   if(descriptor_index > type_table_length 
      || descriptor_index < 0 ) 
