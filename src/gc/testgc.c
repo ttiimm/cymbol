@@ -88,7 +88,17 @@ void test_couple_add_removes()
 
 void test_gc()
 {
-  
+  void *a, *b;
+  rp = 0; /* reset roots list */
+  a = alloc_string(4);
+  a = "abcd";
+  b = alloc_string(5);
+  add_root(a);
+  add_root(b);
+  remove_root(b);
+  ASSERT_NE(4, heap_size())
+  gc();
+  ASSERT(4, heap_size())
 }
 
 void test_alloc_outofmemory()

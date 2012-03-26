@@ -49,7 +49,7 @@ byte *space2;
 byte *current_space;
 byte *end_of_heap;
 
-#define MAX_HEAP_SIZE 32 /* bytes */
+#define MAX_HEAP_SIZE 64 /* bytes */
 
 void gc_init(struct TypeDescriptor types[], int n)
 {
@@ -64,6 +64,11 @@ void gc_init(struct TypeDescriptor types[], int n)
 int is_space_allocated()
 {
   return current_space != NULL;
+}
+
+int heap_size()
+{
+  return end_of_heap - current_space;
 }
 
 void *alloc_space(int size)
@@ -114,4 +119,5 @@ void remove_root(void *root)
 
 void gc()
 {
+  
 }
