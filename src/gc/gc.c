@@ -37,7 +37,10 @@ struct TypeDescriptor User_type = {
 struct TypeDescriptor *type_table;
 int type_table_length;
 
-void **roots; 
+#define MAX_ROOTS 100
+
+void *roots[MAX_ROOTS];
+int rp; /* index of last root added in roots */
 
 typedef unsigned char byte;
 
@@ -94,12 +97,19 @@ void *alloc_string(int size)
   return alloc_space(size);
 }
 
-void add_root(void **root)
+void add_root(void *root)
 {
+  roots[rp++] = root;    
 }
 
-void rm_root(void **root)
+void remove_root(void *root)
 {
+  int i;
+
+  for(i = 0; i < rp; i++) 
+    if(root == roots[i]) 
+      /* overwrite with last root */
+      roots[i] = roots[--rp];
 }
 
 void gc()
