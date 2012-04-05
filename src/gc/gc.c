@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
 
 #define MAX_FIELDS 65535 
 
 struct TypeDescriptor {
   char *name;
-  int id; /* same as position in table */
-  int size; /* size in bytes */
+  int id;          /* same as position in table */
+  int size;        /* size in bytes of struct */
   int num_fields;
   /* offset from ptr to object of only fields that are managed ptrs
      e.g., don't want to gc ptrs to functions, say */
@@ -16,22 +18,38 @@ struct TypeDescriptor {
 #define STRING 0
 #define USER 1
 
+
+#define LENGTH_INDEX 0
+
+struct String {
+  int type;
+  int length;
+  char *str;
+};
+
 /* string def */
 struct TypeDescriptor string_type = {
   "string",
-  STRING,  /* first type index */ 
-  0,       /* size */
-  0,       /* no fields */ 
-  {0}
+  STRING,                /* first type index */ 
+  sizeof(struct String), /* size of field */
+  2,                     /* fields */
+  {offsetof(struct String, length),
+   offsetof(struct String, str)}
+};
+
+struct User {
+  int type; 
+  int id;
+  char *user;
 };
 
 /* sample def of User object (id, name) */
 struct TypeDescriptor User_type = {
   "user",
   USER,
-  4+4,  /* hmm...size here */
-  1,    /* name field? */
-  {4}   /* offset of 2nd field */
+  sizeof(struct User),          /* hmm...size here */
+  1,                            /* name field? */
+  {offsetof(struct User, user)} /* offset of 2nd field */
 };
 
 struct TypeDescriptor *type_table;
@@ -39,8 +57,8 @@ int type_table_length;
 
 #define MAX_ROOTS 100
 
-void *roots[MAX_ROOTS];
-int rp; /* index of last root added in roots */
+void **roots[MAX_ROOTS];
+int rp; /* index of next free space in array for a root */
 
 typedef unsigned char byte;
 
@@ -49,7 +67,7 @@ byte *space2;
 byte *current_space;
 byte *end_of_heap;
 
-#define MAX_HEAP_SIZE 64 /* bytes */
+#define MAX_HEAP_SIZE 512 /* bytes */
 
 void gc_init(struct TypeDescriptor types[], int n)
 {
@@ -99,18 +117,19 @@ void *alloc(int descriptor_index)
 
 void *alloc_string(int size)
 {
-  return alloc_space(size);
+  /* size for struct String, the String itself, 
+     and null char */
+  return alloc_space(sizeof(struct String) + size + 1);
 }
 
 void add_root(void *root)
 {
-  roots[rp++] = root;    
+  roots[rp++] = root;
 }
 
 void remove_root(void *root)
 {
   int i;
-
   for(i = 0; i < rp; i++) 
     if(root == roots[i]) 
       /* overwrite with last root */
@@ -119,5 +138,26 @@ void remove_root(void *root)
 
 void gc()
 {
-  
+  int i, type_idx, length, len_offset;
+  void *new, **old;
+  struct TypeDescriptor desc;
+  space2 = malloc(MAX_HEAP_SIZE);
+  end_of_heap = space2 + MAX_HEAP_SIZE;
+  current_space = space2;
+  for(i = 0; i < rp; i++){
+    old = roots[i]; 
+    /* type descriptor index is always
+       stored at first location */
+    type_idx = *((int *) old); 
+    desc = type_table[type_idx];
+    len_offset = desc.field_offsets[LENGTH_INDEX];
+    length = *(int *) ((char *)old + len_offset);
+    new = alloc_string(length);
+    printf("new %p\n", new);
+    /* handle failures */
+    /* *old = &new; */
+    /* printf("old %p\n", old); */
+  }
+
+  free(space1);
 }
