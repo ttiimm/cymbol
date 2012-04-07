@@ -94,24 +94,51 @@ void test_couple_add_removes()
 
 void test_gc_string()
 {
-  struct String *a, *b, *old;
+  void *old;
+  struct String *a, *b;
   int a_len;
   rp = 0; /* reset roots list */
   a = alloc_string(4);
-  old = a;
-  printf("a %p\n", a);
+  old = &*a; 
   a->type = string_type.id;
   a->length = 4;
   a->str  = "abcd";
   b = alloc_string(5);
-  add_root(a);
-  add_root(b);
-  remove_root(b);
+  add_root(&a);
+  add_root(&b);
+  remove_root(&b);
   a_len = 4 + sizeof(struct String) + 1;
-  ASSERT_NE(a_len, MAX_HEAP_SIZE - heap_size())
+  ASSERT_NE(a_len, MAX_HEAP_SIZE - heap_size());
   gc();
-  ASSERT(a_len, MAX_HEAP_SIZE - heap_size())
-  ASSERT_NE(old, a)
+  ASSERT(a_len, MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(old, &*a);
+  ASSERT(0, a->type);
+  ASSERT(4, a->length);
+  ASSERT(0, strcmp("abcd", a->str));
+}
+
+void test_gc_user()
+{
+  struct User *a, *b;
+  int id, a_len;
+  rp = 0; /* reset roots list */
+  a = alloc(User_type.id);
+  a->type = User_type.id;
+  a->id = (long int) &*a;
+  id = (long int) &*a;
+  a->user  = "tim";
+  b = alloc_string(5);
+  add_root(&a);
+  add_root(&b);
+  a_len = sizeof(struct User);
+  remove_root(&b);
+  ASSERT_NE(a_len, MAX_HEAP_SIZE - heap_size());
+  gc();
+  ASSERT(a_len, MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(id, (long int) &*a);
+  ASSERT(id, a->id);
+  ASSERT(1, a->type);
+  ASSERT(0, strcmp(a->user, "tim"));
 }
 
 void test_alloc_outofmemory()
@@ -142,6 +169,7 @@ int main()
   test_remove_root(); 
   test_couple_add_removes();
   test_gc_string();
+  test_gc_user();
   test_alloc_outofmemory();
   
   return EXIT_SUCCESS;

@@ -69,7 +69,7 @@ byte *end_of_heap;
 
 #define MAX_HEAP_SIZE 512 /* bytes */
 
-void gc_init(struct TypeDescriptor types[], int n)
+void gc_init(struct TypeDescriptor *types, int n)
 {
   type_table = types;
   type_table_length = n;
@@ -136,28 +136,47 @@ void remove_root(void *root)
       roots[i] = roots[--rp];
 }
 
+void gc_string(void **old, int length_offset)
+{
+  int length, total_length;
+  void *new;
+  /* find length of string to alloc correct size*/
+  length = *(int *) ((byte *) *old + length_offset);
+  new = alloc_string(length);
+  /* handle failures */
+  total_length = sizeof(struct String) + length + 1;
+  memcpy(new, *old, total_length); 
+  *old = new;
+}
+
+void gc_other(void **old, struct TypeDescriptor desc)
+{
+  printf("%s\n", desc.name);
+}
+
 void gc()
 {
-  int i, type_idx, length, len_offset;
-  void *new, **old;
-  struct TypeDescriptor desc;
+  int i, type_idx, length_offset;
+  struct TypeDescriptor type;
+  void **old;
   space2 = malloc(MAX_HEAP_SIZE);
   end_of_heap = space2 + MAX_HEAP_SIZE;
   current_space = space2;
   for(i = 0; i < rp; i++){
-    old = roots[i]; 
+    old = roots[i];  
     /* type descriptor index is always
        stored at first location */
-    type_idx = *((int *) old); 
-    desc = type_table[type_idx];
-    len_offset = desc.field_offsets[LENGTH_INDEX];
-    length = *(int *) ((char *)old + len_offset);
-    new = alloc_string(length);
-    printf("new %p\n", new);
-    /* handle failures */
-    /* *old = &new; */
-    /* printf("old %p\n", old); */
+    type_idx = **(int **)old; 
+    /* printf("**%s\n", type_table[1].name); */
+    type = type_table[type_idx];
+    /* printf("**%s\n", type_table[1].name); */
+    
+    if(type.id == string_type.id) {
+      length_offset = type.field_offsets[0];
+      gc_string(old, length_offset);
+    } else {
+      gc_other(old, type);
+    }
   }
-
   free(space1);
 }
