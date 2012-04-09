@@ -3,17 +3,25 @@
 #define TYPES_LENGTH 2
 
 #define ASSERT(EXPECTED, RESULT)\
-  if(EXPECTED == RESULT){ printf("."); } else { printf("\n%-30s %4s line %d\n", __func__, "fail", __LINE__); }
+  if(EXPECTED == RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
 #define ASSERT_NE(EXPECTED, RESULT)\
-  if(EXPECTED != RESULT){ printf("."); } else { printf("\n%-30s %4s line %d\n", __func__, "fail", __LINE__); }
+  if(EXPECTED != RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
 void init() 
 {
-  struct TypeDescriptor types[2];
+  struct TypeDescriptor types[3];
   types[0] = String_type;
   types[1] = User_type;
+  types[2] = Array_type;
   gc_init(types, TYPES_LENGTH);
+}
+
+void test_not_on_heap()
+{
+  int x;
+  x = 5;
+  ASSERT(0, on_heap(&x));
 }
 
 void test_alloc_invalid_type_idx() 
@@ -30,11 +38,13 @@ void test_alloc_invalid_type_idx()
 void test_alloc_user() 
 {
   byte *before, *after;
+  struct User *u;
   before = next_free;
-  alloc(User_type.id);
+  u = alloc(User_type.id);
   after = next_free;
 
   ASSERT(User_type.size, (after - before));
+  ASSERT(1, on_heap(u));
 }
 
 void test_alloc_string()
@@ -49,8 +59,9 @@ void test_alloc_string()
   str_length = sizeof(struct String) + 12 + 1;
 
   ASSERT(str_length, (after - before));
+  ASSERT(1, on_heap(s));
   ASSERT(0, strcmp("abcdefghijkl", s->str));
-  ASSERT(1, on_heap((byte *) s->str));
+  ASSERT(1, on_heap(s->str));
 }
 
 void test_add_root()
@@ -170,6 +181,54 @@ void test_gc_user()
   ASSERT(0, strcmp(a->user, "tim"));
 }
 
+void test_gc_array()
+{
+  void *old_a;
+  struct Array *a;
+  struct String *s1, *s2, *strings[2];
+  int total_size;
+  char * s1str;
+  rp = 0; /* reset roots list */
+
+  a = alloc(Array_type.id);
+  old_a = &*a;
+
+  a->type = Array_type.id;
+  a->length = 2;
+  a->arr  = (void *) &strings;
+  printf("\n%p", &*a);
+  printf("\n%p", &(*a).arr);
+
+  s1 = alloc_string(3);
+  s1->type = String_type.id;
+  s1->length = 3;
+  strcpy(s1->str, "abc");
+  strings[0] = s1;
+
+  s2 = alloc_string(3);
+  s2->type = String_type.id;
+  s2->length = 3;
+  strcpy(s2->str, "def");
+  strings[1] = s2;
+
+  total_size = 2 * (sizeof(struct String) + 3 + 1) + sizeof(struct Array);
+
+  add_root(&a);
+  /* add_root(&s1); */
+  /* add_root(&s2); */
+  /* remove_root(&s2); */
+  ASSERT(1, on_heap(&s1->str));
+
+  gc();
+
+  ASSERT(total_size, MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(old_a, &*a);
+  ASSERT(2, a->length);
+  s1str = ((struct String *) (*a->arr)[0])->str;
+  ASSERT(0, strcmp("abc", s1str));
+  ASSERT(1, on_heap(&s1->str));
+}
+
 void test_alloc_outofmemory()
 {
   int heap_space_left, num_to_alloc;
@@ -191,14 +250,16 @@ int main()
   if(!is_space_allocated()) 
     return EXIT_FAILURE;
 
+  test_not_on_heap();
   test_alloc_invalid_type_idx();
   test_alloc_user();
   test_alloc_string();
   test_add_root();
   test_remove_root(); 
   test_couple_add_removes();
-  test_gc_string();
-  test_gc_user();
+  /* test_gc_string(); */
+  /* test_gc_user(); */
+  test_gc_array(); 
   test_alloc_outofmemory();
 
   printf("\n");

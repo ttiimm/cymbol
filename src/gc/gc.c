@@ -18,9 +18,7 @@ struct TypeDescriptor {
 #define STRING 0
 #define USER 1
 #define ARRAY 2
-
-
-#define LENGTH_INDEX 0
+#define GROUP 3
 
 struct String {
   int type;
@@ -28,31 +26,29 @@ struct String {
   char *str;
 };
 
+#define LENGTH_INDEX 0
+
 struct TypeDescriptor String_type = {
   "string",
   STRING,                /* first type index */ 
-  sizeof(struct String), /* size of field */
-  2,                     /* fields */
-  {offsetof(struct String, length),
-   offsetof(struct String, str)}
+  sizeof(struct String), /* size of string obj, not string */
+  0,                     /* fields */
+  {offsetof(struct String, length)}
 };    
 
 
 struct Array {
   int type;
   int length;
-  int member_type;
-  void *first;
+  void *(*arr)[];
 };
 
 struct TypeDescriptor Array_type = {
   "array",
   ARRAY,
   sizeof(struct Array),
-  3, 
-  {offsetof(struct Array, length),
-   offsetof(struct Array, member_type),
-   offsetof(struct Array, first)}
+  1, 
+  {offsetof(struct Array, arr)}
 };
 
 
@@ -70,6 +66,14 @@ struct TypeDescriptor User_type = {
   1,                            /* name field? */
   {offsetof(struct User, user)} /* offset of 2nd field */
 };
+
+
+struct Group {
+  int type;
+  char *name;
+  struct User users[];
+}
+
 
 
 struct TypeDescriptor *type_table;
@@ -102,9 +106,9 @@ void gc_init(struct TypeDescriptor *types, int n)
   alloc_heap();
 }
 
-int on_heap(byte *p)
+int on_heap(void *p)
 {
-  return start_of_heap <= p && p <= end_of_heap;
+  return start_of_heap <= (byte *) p && (byte *) p <= end_of_heap;
 }
 
 int is_space_allocated()
@@ -181,12 +185,22 @@ void move_string(void **old, int length_offset)
   *old = new;
 }
 
-void move_obj(void **old, int size)
+void move(void **old);
+
+void move_obj(void **old, int size, int num_fields, int offsets[])
 {
-  void *new;
+  int i;
+  void *new, *field;
   new = alloc_space(size);
   memcpy(new, *old, size);
   *old = new;
+
+  for(i = 0; i < num_fields; i++){
+    field = (void *) ((char *) new + offsets[i]); 
+    if(!on_heap(field)){
+      printf("here");
+      move(field);
+    }}
 }
 
 void move(void **old) 
@@ -196,12 +210,14 @@ void move(void **old)
   /* type descriptor index is always
      stored at first location */
   type_idx = **(int **)old; 
+  /* printf("\n%d\n", type_table[2].id); */
   type = type_table[type_idx];
+  /* printf("\ntype.id %d\ntype_idx %d\n", type.id, type_idx); */
   if(type.id == String_type.id) {
     length_offset = type.field_offsets[LENGTH_INDEX];
     move_string(old, length_offset);
   } else {
-    move_obj(old, type.size);
+    move_obj(old, type.size, type.num_fields, type.field_offsets);
   }
 }
 
@@ -210,7 +226,10 @@ void move_roots()
   int i;
 
   for(i = 0; i < rp; i++){
-    move(roots[i]);
+    if(on_heap(*roots[i]))
+       continue;
+    else
+      move(roots[i]);
   }
 }
 
