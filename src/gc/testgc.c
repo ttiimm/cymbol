@@ -3,10 +3,10 @@
 #define TYPES_LENGTH 2
 
 #define ASSERT(EXPECTED, RESULT)\
-  if(EXPECTED == RESULT){ printf("%-30s %4s\n", __func__, "ok"); } else { printf("%-30s %4s\n", __func__, "fail"); }
+  if(EXPECTED == RESULT){ printf("."); } else { printf("\n%-30s %4s line %d\n", __func__, "fail", __LINE__); }
 
 #define ASSERT_NE(EXPECTED, RESULT)\
-  if(EXPECTED != RESULT){ printf("%-30s %4s\n", __func__, "ok"); } else { printf("%-30s %4s\n", __func__, "fail"); }
+  if(EXPECTED != RESULT){ printf("."); } else { printf("\n%-30s %4s line %d\n", __func__, "fail", __LINE__); }
 
 void init() 
 {
@@ -171,6 +171,8 @@ int main()
   test_gc_string();
   test_gc_user();
   test_alloc_outofmemory();
-  
+
+  printf("\n");
+
   return EXIT_SUCCESS;
 }
