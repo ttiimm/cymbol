@@ -41,12 +41,16 @@ void test_alloc_string()
 {
   int str_length;
   byte *before, *after;
+  struct String *s;
   before = next_free;
-  alloc_string(12);
+  s = alloc_string(12);
   after = next_free;
+  strcpy(s->str, "abcdefghijkl");
   str_length = sizeof(struct String) + 12 + 1;
 
   ASSERT(str_length, (after - before));
+  ASSERT(0, strcmp("abcdefghijkl", s->str));
+  ASSERT(1, on_heap((byte *) s->str));
 }
 
 void test_add_root()
@@ -106,17 +110,17 @@ void test_couple_add_removes()
 
 void test_gc_string()
 {
-  void *old;
+  void *old_a;
   struct String *a, *b;
   int a_len;
   rp = 0; /* reset roots list */
 
   a = alloc_string(4);
-  old = &*a; 
+  old_a = &*a; 
 
   a->type = string_type.id;
   a->length = 4;
-  a->str  = "abcd";
+  strcpy(a->str, "abcd");
 
   b = alloc_string(5);
 
@@ -130,7 +134,7 @@ void test_gc_string()
   gc();
 
   ASSERT(a_len, MAX_HEAP_SIZE - heap_size());
-  ASSERT_NE(old, &*a);
+  ASSERT_NE(old_a, &*a);
   ASSERT(0, a->type);
   ASSERT(4, a->length);
   ASSERT(0, strcmp("abcd", a->str));
@@ -138,12 +142,12 @@ void test_gc_string()
 
 void test_gc_user()
 {
-  void *old;
+  void *old_a;
   struct User *a, *b;
   rp = 0; /* reset roots list */
 
   a = alloc(User_type.id);
-  old = &*a;
+  old_a = &*a;
 
   a->type = User_type.id;
   a->id = 103;
@@ -160,7 +164,7 @@ void test_gc_user()
   gc();
 
   ASSERT(User_type.size, MAX_HEAP_SIZE - heap_size());
-  ASSERT_NE(old, &*a);
+  ASSERT_NE(old_a, &*a);
   ASSERT(103, a->id);
   ASSERT(1, a->type);
   ASSERT(0, strcmp(a->user, "tim"));

@@ -35,7 +35,7 @@ struct TypeDescriptor string_type = {
   2,                     /* fields */
   {offsetof(struct String, length),
    offsetof(struct String, str)}
-};
+};    
 
 struct User {
   int type; 
@@ -82,6 +82,11 @@ void gc_init(struct TypeDescriptor *types, int n)
   alloc_heap();
 }
 
+int on_heap(byte *p)
+{
+  return start_of_heap <= p && p <= end_of_heap;
+}
+
 int is_space_allocated()
 {
   return  start_of_heap != NULL;
@@ -120,9 +125,13 @@ void *alloc(int descriptor_index)
 
 void *alloc_string(int size)
 {
+  struct String *string;
   /* size for struct String, the String itself, 
      and null char */
-  return alloc_space(sizeof(struct String) + size + 1);
+  string = alloc_space(sizeof(struct String) + size + 1);
+  /* set str pointer to point into heap */
+  string->str = (char *) string + sizeof(struct String);
+  return string;
 }
 
 void add_root(void *root)
