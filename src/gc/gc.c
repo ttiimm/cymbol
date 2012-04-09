@@ -139,7 +139,7 @@ void remove_root(void *root)
       roots[i] = roots[--rp];
 }
 
-void gc_string(void **old, int length_offset)
+void move_string(void **old, int length_offset)
 {
   int length, total_length;
   void *new;
@@ -152,7 +152,7 @@ void gc_string(void **old, int length_offset)
   *old = new;
 }
 
-void gc_obj(void **old, int size)
+void move_obj(void **old, int size)
 {
   void *new;
   new = alloc_space(size);
@@ -160,28 +160,36 @@ void gc_obj(void **old, int size)
   *old = new;
 }
 
+void move(void **old) 
+{
+  int type_idx, length_offset;
+  struct TypeDescriptor type;
+  /* type descriptor index is always
+     stored at first location */
+  type_idx = **(int **)old; 
+  type = type_table[type_idx];
+  if(type.id == string_type.id) {
+    length_offset = type.field_offsets[LENGTH_INDEX];
+    move_string(old, length_offset);
+  } else {
+    move_obj(old, type.size);
+  }
+}
+
+void move_roots()
+{
+  int i;
+
+  for(i = 0; i < rp; i++){
+    move(roots[i]);
+  }
+}
+
 void gc()
 {
-  int i, type_idx, length_offset;
-  struct TypeDescriptor type;
-  void **old;
   byte *heap_to_free;
   heap_to_free = start_of_heap;
   alloc_heap();
-
-  for(i = 0; i < rp; i++){
-    old = roots[i];  
-    /* type descriptor index is always
-       stored at first location */
-    type_idx = **(int **)old; 
-    type = type_table[type_idx];
-    if(type.id == string_type.id) {
-      length_offset = type.field_offsets[LENGTH_INDEX];
-      gc_string(old, length_offset);
-    } else {
-      gc_obj(old, type.size);
-    }
-  }
-
+  move_roots();
   free(heap_to_free);
 }
