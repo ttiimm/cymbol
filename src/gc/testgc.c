@@ -28,9 +28,9 @@ void test_alloc_invalid_type_idx()
 void test_alloc_user() 
 {
   byte *before, *after;
-  before = current_space;
+  before = next_free;
   alloc(User_type.id);
-  after = current_space;
+  after = next_free;
   ASSERT(User_type.size, (after - before));
 }
 
@@ -38,9 +38,9 @@ void test_alloc_string()
 {
   int str_length;
   byte *before, *after;
-  before = current_space;
+  before = next_free;
   alloc_string(12);
-  after = current_space;
+  after = next_free;
   str_length = sizeof(struct String) + 12 + 1;
   ASSERT(str_length, (after - before));
 }
@@ -119,24 +119,24 @@ void test_gc_string()
 
 void test_gc_user()
 {
+  void *old;
   struct User *a, *b;
-  int id, a_len;
   rp = 0; /* reset roots list */
   a = alloc(User_type.id);
+  old = &*a;
   a->type = User_type.id;
-  a->id = (long int) &*a;
-  id = (long int) &*a;
+  a->id = 103;
   a->user  = "tim";
+
   b = alloc_string(5);
   add_root(&a);
   add_root(&b);
-  a_len = sizeof(struct User);
   remove_root(&b);
-  ASSERT_NE(a_len, MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(User_type.size, MAX_HEAP_SIZE - heap_size());
   gc();
-  ASSERT(a_len, MAX_HEAP_SIZE - heap_size());
-  ASSERT_NE(id, (long int) &*a);
-  ASSERT(id, a->id);
+  ASSERT(User_type.size, MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(old, &*a);
+  ASSERT(103, a->id);
   ASSERT(1, a->type);
   ASSERT(0, strcmp(a->user, "tim"));
 }
@@ -145,10 +145,10 @@ void test_alloc_outofmemory()
 {
   int heap_space_left, num_to_alloc;
   void *result;
-  heap_space_left = end_of_heap - current_space;
+  heap_space_left = end_of_heap - next_free;
   num_to_alloc = (heap_space_left / User_type.size) + 1;
   
-  result = current_space;
+  result = next_free;
   for( ; num_to_alloc > 0; num_to_alloc--) {
     result = alloc(User_type.id);
   }

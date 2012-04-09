@@ -62,42 +62,45 @@ int rp; /* index of next free space in array for a root */
 
 typedef unsigned char byte;
 
-byte *space1;
-byte *space2;
-byte *current_space;
+byte *start_of_heap;
 byte *end_of_heap;
+byte *next_free;
 
 #define MAX_HEAP_SIZE 512 /* bytes */
+
+void alloc_heap()
+{
+  start_of_heap = malloc(MAX_HEAP_SIZE);
+  end_of_heap = start_of_heap + MAX_HEAP_SIZE;
+  next_free = start_of_heap;
+}
 
 void gc_init(struct TypeDescriptor *types, int n)
 {
   type_table = types;
   type_table_length = n;
-  space1 = malloc(MAX_HEAP_SIZE);
-  end_of_heap = space1 + MAX_HEAP_SIZE;
-  space2 = NULL;
-  current_space = space1;
+  alloc_heap();
 }
 
 int is_space_allocated()
 {
-  return current_space != NULL;
+  return  start_of_heap != NULL;
 }
 
 int heap_size()
 {
-  return end_of_heap - current_space;
+  return end_of_heap - next_free;
 }
 
 void *alloc_space(int size)
 {
   void *p;
 
-  if(current_space + size > end_of_heap)
+  if(next_free + size > end_of_heap)
     return NULL;
 
-  p = current_space;
-  current_space += size;
+  p = next_free;
+  next_free += size;
   return p;
 }
 
@@ -149,9 +152,12 @@ void gc_string(void **old, int length_offset)
   *old = new;
 }
 
-void gc_other(void **old, struct TypeDescriptor desc)
+void gc_obj(void **old, int size)
 {
-  printf("%s\n", desc.name);
+  void *new;
+  new = alloc_space(size);
+  memcpy(new, *old, size);
+  *old = new;
 }
 
 void gc()
@@ -159,24 +165,23 @@ void gc()
   int i, type_idx, length_offset;
   struct TypeDescriptor type;
   void **old;
-  space2 = malloc(MAX_HEAP_SIZE);
-  end_of_heap = space2 + MAX_HEAP_SIZE;
-  current_space = space2;
+  byte *heap_to_free;
+  heap_to_free = start_of_heap;
+  alloc_heap();
+
   for(i = 0; i < rp; i++){
     old = roots[i];  
     /* type descriptor index is always
        stored at first location */
     type_idx = **(int **)old; 
-    /* printf("**%s\n", type_table[1].name); */
     type = type_table[type_idx];
-    /* printf("**%s\n", type_table[1].name); */
-    
     if(type.id == string_type.id) {
-      length_offset = type.field_offsets[0];
+      length_offset = type.field_offsets[LENGTH_INDEX];
       gc_string(old, length_offset);
     } else {
-      gc_other(old, type);
+      gc_obj(old, type.size);
     }
   }
-  free(space1);
+
+  free(heap_to_free);
 }
