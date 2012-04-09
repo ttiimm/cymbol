@@ -11,7 +11,7 @@
 void init() 
 {
   struct TypeDescriptor types[2];
-  types[0] = string_type;
+  types[0] = String_type;
   types[1] = User_type;
   gc_init(types, TYPES_LENGTH);
 }
@@ -118,7 +118,7 @@ void test_gc_string()
   a = alloc_string(4);
   old_a = &*a; 
 
-  a->type = string_type.id;
+  a->type = String_type.id;
   a->length = 4;
   strcpy(a->str, "abcd");
 

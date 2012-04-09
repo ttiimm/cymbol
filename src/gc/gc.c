@@ -17,6 +17,7 @@ struct TypeDescriptor {
 
 #define STRING 0
 #define USER 1
+#define ARRAY 2
 
 
 #define LENGTH_INDEX 0
@@ -27,8 +28,7 @@ struct String {
   char *str;
 };
 
-/* string def */
-struct TypeDescriptor string_type = {
+struct TypeDescriptor String_type = {
   "string",
   STRING,                /* first type index */ 
   sizeof(struct String), /* size of field */
@@ -36,6 +36,25 @@ struct TypeDescriptor string_type = {
   {offsetof(struct String, length),
    offsetof(struct String, str)}
 };    
+
+
+struct Array {
+  int type;
+  int length;
+  int member_type;
+  void *first;
+};
+
+struct TypeDescriptor Array_type = {
+  "array",
+  ARRAY,
+  sizeof(struct Array),
+  3, 
+  {offsetof(struct Array, length),
+   offsetof(struct Array, member_type),
+   offsetof(struct Array, first)}
+};
+
 
 struct User {
   int type; 
@@ -51,6 +70,7 @@ struct TypeDescriptor User_type = {
   1,                            /* name field? */
   {offsetof(struct User, user)} /* offset of 2nd field */
 };
+
 
 struct TypeDescriptor *type_table;
 int type_table_length;
@@ -177,7 +197,7 @@ void move(void **old)
      stored at first location */
   type_idx = **(int **)old; 
   type = type_table[type_idx];
-  if(type.id == string_type.id) {
+  if(type.id == String_type.id) {
     length_offset = type.field_offsets[LENGTH_INDEX];
     move_string(old, length_offset);
   } else {
