@@ -3,9 +3,7 @@
 #include <stddef.h>
 #include <string.h>
 
-typedef unsigned char byte;
-
-struct TypeDescriptor {
+typedef struct TypeDescriptor {
   char *name;
   int id;          /* same as position in table */
   int size;        /* size in bytes of struct */
@@ -13,84 +11,81 @@ struct TypeDescriptor {
   /* offset from ptr to object of only fields that are managed ptrs
      e.g., don't want to gc ptrs to functions, say */
   int *field_offsets; 
-};
+} TypeDescriptor;
 
-#define STRING     0
-#define PRIM_ARRAY 1
-#define OBJ_ARRAY  2
-#define USER       3
+#define PRIM_ARRAY 0
+#define OBJ_ARRAY  1
+#define USER       2
 
-struct String {
-  int type;
-  int length;
-  /* pointer to start of chars 
-     in heap */
-  char *str;
-};
-
-struct TypeDescriptor String_type = {
-  "string",
-  STRING,                /* first type index */ 
-  sizeof(struct String), /* size of string obj, not string */
-  0,                     /* fields */
-  NULL
-};    
-
-struct PrimitiveArray {
+/* An array of ints, floats, or chars.  
+   Note, like in C, a string is just an 
+   array of chars */
+typedef struct PrimitiveArray {
   int type;
   int length;
   /* pointer to start of array 
      elements in heap */
-  byte *elements;
+  char *elements;
+} PrimitiveArray;
+
+#define LENGTH_INDEX 0
+
+int primarray_field_offsets[2] = {
+  offsetof(PrimitiveArray, length),
+  offsetof(PrimitiveArray, elements)
 };
 
-struct TypeDescriptor PrimitiveArray_type = {
+TypeDescriptor PrimitiveArray_type = {
   "prim_array",
   PRIM_ARRAY,
-  sizeof(struct PrimitiveArray),
-  0, 
-  NULL
+  sizeof(PrimitiveArray),
+  2, 
+  primarray_field_offsets
 };
 
-struct ObjArray {
+
+typedef PrimitiveArray String;
+/* set in main() to PrimitiveArray_type */
+TypeDescriptor String_type;
+
+
+typedef struct ObjArray {
   int type;
   int length;
   /* A pointer to an array of pointers to managed objs. */
   void *(*p)[];
-};
+} ObjArray;
 
-/* must define array outside of struct b/c
-   no int[] literal? */
-int objarray_field_offsets[1] = {offsetof(struct ObjArray, p)};
+int objarray_field_offsets[1] = {offsetof(ObjArray, p)};
 
-struct TypeDescriptor ObjArray_type = {
+TypeDescriptor ObjArray_type = {
   "obj_array",
   OBJ_ARRAY,
-  sizeof(struct ObjArray),
+  sizeof(ObjArray),
   1, 
   objarray_field_offsets
 };
 
-struct User {
+
+typedef struct User {
   int type; 
   int id;
-  struct String *name;
-};
+  String *name;
+} User;
 
-/* must define array outside of struct b/c
-   no int[] literal? */
-int user_field_offsets[1] = {offsetof(struct User, name)};
+int user_field_offsets[1] = {offsetof(User, name)};
 
 /* sample def of User object (id, name) */
-struct TypeDescriptor User_type = {
+TypeDescriptor User_type = {
   "user",
   USER,
-  sizeof(struct User),          
+  sizeof(User),          
   1,                            
   user_field_offsets
 };
 
-struct TypeDescriptor *type_table;
+
+TypeDescriptor *type_table;
 int type_table_length;
 
 #define MAX_ROOTS 100
@@ -98,8 +93,10 @@ int type_table_length;
 void **roots[MAX_ROOTS];
 int rp; /* index of next free space in array for a root */
 
-const byte *heap1;
-const byte *heap2;
+typedef unsigned char byte;
+
+byte *heap1;
+byte *heap2;
 
 /* these point to whichever is the 
    currently used heap */
@@ -109,23 +106,33 @@ byte *next_free;
 
 #define MAX_HEAP_SIZE 512 /* bytes */
 
-void switch_to_heap(byte *current)
+void switch_to_heap(byte *next)
 {
-  start_of_heap = heap1;
+  start_of_heap = next;
   end_of_heap = start_of_heap + MAX_HEAP_SIZE;
   next_free = start_of_heap;
 }
 
-void gc_init(struct TypeDescriptor *types, int n)
+void print_type_table()
+{
+  int i;
+  printf("Types in table\n");
+  for(i = 0; i <= type_table_length; i++)
+    printf("%s\n", type_table[i].name);
+}
+
+void gc_init(TypeDescriptor *types, int n)
 {
   type_table = types;
   type_table_length = n;
+  print_type_table();
+
   heap1 = malloc(MAX_HEAP_SIZE);
   heap2 = malloc(MAX_HEAP_SIZE);
-  switch_to_heap(&heap1);
+  switch_to_heap(heap1);
 }
 
-int in_current_heap(void *p)
+int in_heap(void *p)
 {
   return start_of_heap <= (byte *) p && (byte *) p <= end_of_heap;
 }
@@ -140,26 +147,34 @@ int heap_size()
   return end_of_heap - next_free;
 }
 
+int align(int size)
+{
+    /* word align allocation */
+  if(size % sizeof(int) != 0)
+    size += sizeof(int) - size % sizeof(int);
+  
+  return size;
+}
+
 void *alloc_space(int size)
 {
   void *p;
-
-  /* word align allocation */
-  if(size % sizeof(int) != 0)
-    size += sizeof(int) - size % sizeof(int);
-
-  if(next_free + size > end_of_heap)
+  int aligned_size;
+  
+  aligned_size = align(size);
+  printf("\naligned_size %d", size);
+  if(next_free + aligned_size > end_of_heap)
     return NULL;
 
   p = next_free;
-  next_free += size;
+  next_free += aligned_size;
   return p;
 }
 
 void *alloc(int descriptor_index)
 {
-  struct TypeDescriptor t;
-  
+  TypeDescriptor t;
+
   if(descriptor_index > type_table_length 
      || descriptor_index < 0 ) 
     return NULL;
@@ -170,15 +185,19 @@ void *alloc(int descriptor_index)
 }
 
 
+void *alloc_primarray(int size)
+{
+  PrimitiveArray *array;
+  /* size for struct, primitive elems, and null char */
+  array = alloc_space(sizeof(PrimitiveArray) + size + 1);
+  /* set pointer to point into heap */
+  array->elements = (char *) array + sizeof(PrimitiveArray);
+  return array;
+}
+
 void *alloc_string(int size)
 {
-  struct String *string;
-  /* size for struct String, the String itself, 
-     and null char */
-  string = alloc_space(sizeof(struct String) + size + 1);
-  /* set str pointer to point into heap */
-  string->str = (char *) string + sizeof(struct String);
-  return string;
+  return alloc_primarray(size);
 }
 
 void add_root(void *root)
@@ -198,15 +217,15 @@ void remove_root(void *root)
   }
 }
 
-void move_string(void **old, int length_offset)
+void move_primarray(void **old, int length_offset)
 {
   int length, total_length;
   void *new;
   /* find length of string to alloc correct size*/
   length = *(int *) ((byte *) *old + length_offset);
-  new = alloc_string(length);
+  new = alloc_primarray(length);
   /* handle failures */
-  total_length = sizeof(struct String) + length + 1;
+  total_length = sizeof(PrimitiveArray) + length + 1;
   memcpy(new, *old, total_length); 
   *old = new;
 }
@@ -223,25 +242,25 @@ void move_obj(void **old, int size, int num_fields, int offsets[])
 
   for(i = 0; i < num_fields; i++){
     field = (void *) ((char *) new + offsets[i]); 
-    if(!on_heap(field)){
-      printf("here");
+    if(!in_heap(field)){
       move(field);
-    }}
+    }
+  }
 }
 
 void move(void **old) 
 {
   int type_idx, length_offset;
-  struct TypeDescriptor type;
+  TypeDescriptor type;
   /* type descriptor index is always
      stored at first location */
   type_idx = **(int **)old; 
   /* printf("\n%d\n", type_table[2].id); */
   type = type_table[type_idx];
   /* printf("\ntype.id %d\ntype_idx %d\n", type.id, type_idx); */
-  if(type.id == String_type.id) {
-    length_offset = type.field_offsets[STR_LENGTH_INDEX];
-    move_string(old, length_offset);
+  if(type.id == PrimitiveArray_type.id) {
+    length_offset = type.field_offsets[LENGTH_INDEX];
+    move_primarray(old, length_offset);
   } else {
     move_obj(old, type.size, type.num_fields, type.field_offsets);
   }
@@ -252,7 +271,7 @@ void move_roots()
   int i;
 
   for(i = 0; i < rp; i++){
-    if(on_heap(*roots[i]))
+    if(in_heap(*roots[i]))
        continue;
     else
       move(roots[i]);
