@@ -45,7 +45,8 @@ TypeDescriptor PrimitiveArray_type = {
 
 
 typedef PrimitiveArray String;
-/* set in main() to PrimitiveArray_type */
+/* String_type set to PrimitiveArray_type in 
+   type_init() */
 TypeDescriptor String_type;
 
 
@@ -85,15 +86,22 @@ TypeDescriptor User_type = {
 };
 
 
-TypeDescriptor *type_table;
-int type_table_length;
-
-#define MAX_ROOTS 100
-
-void **roots[MAX_ROOTS];
-int rp; /* index of next free space in array for a root */
-
 typedef unsigned char byte;
+
+
+typedef struct Object {
+  TypeDescriptor *type;
+  /* address of reallocated obj */
+  byte *forward;
+} Object;
+
+
+
+TypeDescriptor *type_table[100];
+int type_table_length = 0;
+
+void **roots[100];
+int rp; /* index of next free space in array for a root */
 
 byte *heap1;
 byte *heap2;
@@ -106,6 +114,33 @@ byte *next_free;
 
 #define MAX_HEAP_SIZE 512 /* bytes */
 
+
+void print_type_table()
+{
+  int i;
+  printf("Types in table [%d]\n", type_table_length);
+  for(i = 0; i < type_table_length; i++)
+    printf("%s\n", type_table[i]->name);
+
+  printf("\n");
+}
+
+void add_type(TypeDescriptor *type) 
+{
+  type_table[type_table_length++] = type;
+}
+
+void type_init()
+{
+  add_type(&PrimitiveArray_type);
+  add_type(&ObjArray_type);
+  add_type(&User_type);
+  String_type = PrimitiveArray_type;
+  add_type(&String_type);
+
+  /* print_type_table(); */
+}
+
 void switch_to_heap(byte *next)
 {
   start_of_heap = next;
@@ -113,20 +148,9 @@ void switch_to_heap(byte *next)
   next_free = start_of_heap;
 }
 
-void print_type_table()
+void gc_init()
 {
-  int i;
-  printf("Types in table\n");
-  for(i = 0; i <= type_table_length; i++)
-    printf("%s\n", type_table[i].name);
-}
-
-void gc_init(TypeDescriptor *types, int n)
-{
-  type_table = types;
-  type_table_length = n;
-  print_type_table();
-
+  type_init();
   heap1 = malloc(MAX_HEAP_SIZE);
   heap2 = malloc(MAX_HEAP_SIZE);
   switch_to_heap(heap1);
@@ -162,7 +186,7 @@ void *alloc_space(int size)
   int aligned_size;
   
   aligned_size = align(size);
-  printf("\naligned_size %d", size);
+ 
   if(next_free + aligned_size > end_of_heap)
     return NULL;
 
@@ -173,7 +197,7 @@ void *alloc_space(int size)
 
 void *alloc(int descriptor_index)
 {
-  TypeDescriptor t;
+  TypeDescriptor *t;
 
   if(descriptor_index > type_table_length 
      || descriptor_index < 0 ) 
@@ -181,7 +205,7 @@ void *alloc(int descriptor_index)
 
   t = type_table[descriptor_index];
 
-  return alloc_space(t.size);
+  return alloc_space(t->size);
 }
 
 
@@ -251,18 +275,18 @@ void move_obj(void **old, int size, int num_fields, int offsets[])
 void move(void **old) 
 {
   int type_idx, length_offset;
-  TypeDescriptor type;
+  TypeDescriptor *type;
   /* type descriptor index is always
      stored at first location */
   type_idx = **(int **)old; 
   /* printf("\n%d\n", type_table[2].id); */
   type = type_table[type_idx];
   /* printf("\ntype.id %d\ntype_idx %d\n", type.id, type_idx); */
-  if(type.id == PrimitiveArray_type.id) {
-    length_offset = type.field_offsets[LENGTH_INDEX];
+  if(type->id == PrimitiveArray_type.id) {
+    length_offset = type->field_offsets[LENGTH_INDEX];
     move_primarray(old, length_offset);
   } else {
-    move_obj(old, type.size, type.num_fields, type.field_offsets);
+    move_obj(old, type->size, type->num_fields, type->field_offsets);
   }
 }
 

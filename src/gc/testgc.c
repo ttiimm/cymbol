@@ -8,24 +8,13 @@
 #define ASSERT_NE(EXPECTED, RESULT)\
   if(EXPECTED != RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
-void init() 
-{
-  TypeDescriptor types[3];
-  String_type = PrimitiveArray_type;
-  types[PRIM_ARRAY] = PrimitiveArray_type;
-  types[OBJ_ARRAY] = ObjArray_type;
-  types[USER] = User_type;
-
-  gc_init(types, TYPES_LENGTH);
-}
-
 void test_alloc_invalid_type_idx() 
 {
   void *pos_idx, *neg_idx;
-  print_type_table();
-  pos_idx = alloc(3);
+
+  pos_idx = alloc(100);
   ASSERT(NULL, pos_idx);
-  print_type_table();
+
   neg_idx = alloc(-1);
   ASSERT(NULL, neg_idx);
 }
@@ -54,7 +43,7 @@ void test_alloc_string()
   strcpy(s->elements, "abcdefghijkl");
   str_length = sizeof(String) + 12 + 1;
 
-  ASSERT(str_length, (after - before));
+  ASSERT(align(str_length), (after - before));
   ASSERT(1, in_heap(s));
   ASSERT(0, strcmp("abcdefghijkl", s->elements));
   ASSERT(1, in_heap(s->elements));
@@ -140,7 +129,7 @@ void test_gc_string()
 
   gc();
 
-  ASSERT(a_len, MAX_HEAP_SIZE - heap_size());
+  ASSERT(align(a_len), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
   ASSERT(0, a->type);
   ASSERT(4, a->length);
@@ -152,12 +141,14 @@ void test_gc_user()
   void *old_a;
   User *a; 
   String *b;
+  int userlen, strlen;
+
   rp = 0; /* reset roots list */
 
   b = alloc_string(5);
   b->type = String_type.id;
-  b->length = 4;
-  strcpy(b->elements, "abcd");
+  b->length = 3;
+  strcpy(b->elements, "tim");
 
   a = alloc(User_type.id);
   old_a = &*a;
@@ -169,15 +160,15 @@ void test_gc_user()
   add_root(&a);
   add_root(&b);
 
-
   ASSERT_NE(User_type.size, MAX_HEAP_SIZE - heap_size());
 
   gc();
-
-  ASSERT(User_type.size, MAX_HEAP_SIZE - heap_size());
+  userlen = align(User_type.size);
+  strlen = String_type.size + 3 + 1;
+  ASSERT(align(userlen + strlen), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
   ASSERT(103, a->id);
-  ASSERT(1, a->type);
+  ASSERT(2, a->type);
   ASSERT(0, strcmp(a->name->elements, "tim"));
 }
 
@@ -246,7 +237,7 @@ void test_alloc_outofmemory()
 
 int main()
 {
-  init();
+  gc_init();
   if(!is_space_allocated()) 
     return EXIT_FAILURE;
 
