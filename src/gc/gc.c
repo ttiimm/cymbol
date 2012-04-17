@@ -99,6 +99,23 @@ TypeDescriptor User_type = {
   user_field_offsets
 };
 
+/* Used for testing cycles */ 
+typedef struct Node {
+  TypeDescriptor *type;
+  byte *forward;
+  char *payload;
+  struct Node *neighbor;
+} Node;
+
+int node_field_offsets[1] = {offsetof(Node, neighbor)};
+
+TypeDescriptor Node_type = {
+  "node",
+  sizeof(Node),
+  1,
+  node_field_offsets
+};
+
 
 typedef struct Object {
   TypeDescriptor *type;
@@ -259,32 +276,36 @@ void copy_primarray(PrimitiveArray **old)
 
 void copy(Object **old);
 
+void set_to_forward_or_copy(Object **chkobj, Object **setobj)
+{
+  if((*chkobj)->forward != NULL)
+    *setobj = (Object *) (*chkobj)->forward;
+  else
+    copy(chkobj);
+}
+
 void copy_obj(Object **old, TypeDescriptor *type)
 {
   int i;
   void *new;
-  Object **field;
-
-  for(i = 0; i < type->num_fields; i++){
-    field = (Object **) ((char *) *old + type->field_offsets[i]); 
-    if(!in_heap(*field)){
-      copy(field);
-    }
-  }
+  Object **old_f, *new_f;
 
   new = alloc_space(type->size);
   memcpy(new, *old, type->size);
   (*old)->forward = new;
   *old = new;
+
+  for(i = 0; i < type->num_fields; i++){
+    old_f = (Object **) ((char *) *old + type->field_offsets[i]); 
+    new_f = (Object *) ((char *) new + type->field_offsets[i]);
+    set_to_forward_or_copy(old_f, &new_f);    
+  }
 }
 
 void copy(Object **old) 
 {
   TypeDescriptor *type;
   type = (*old)->type;
-  /* print_s(type->name); */
-  /* print_p(*old); */
-  /* print_p((*old)->forward); */
   if(&*type == &PrimitiveArray_type
      || &*type == &String_type) {
     copy_primarray((PrimitiveArray **) old);
@@ -298,14 +319,11 @@ void copy_roots()
   int i;
 
   for(i = 0; i < rp; i++){
-    /* printf("root\n"); */
-    /* print_p(*roots[i]); */
-    /* printf("root forward\n"); */
-    /* print_p((*roots[i])->forward); */
-    if((*roots[i])->forward != NULL)
-      *roots[i] = (Object *) (*roots[i])->forward;
-    else
-      copy(roots[i]);
+    /* if((*roots[i])->forward != NULL) */
+    /*   *roots[i] = (Object *) (*roots[i])->forward; */
+    /* else */
+    /*   copy(roots[i]); */
+    set_to_forward_or_copy(roots[i], roots[i]);
   }
 }
 

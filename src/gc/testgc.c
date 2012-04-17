@@ -154,12 +154,7 @@ void test_gc_user()
 
   userlen = align(User_type.size);
   strlen = String_type.size + 3 + 1;
-  
-  /* print_int(align(userlen + strlen)); */
-  /* print_int(strlen); */
-  /* print_int(userlen); */
-  /* print_int(MAX_HEAP_SIZE - heap_size()); */
-
+ 
   ASSERT(align(userlen + strlen), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
   ASSERT(103, a->id);
@@ -194,10 +189,6 @@ void test_gc_user_single_root()
 
   userlen = align(User_type.size);
   strlen = String_type.size + 3 + 1;
-  /* print_int(align(userlen + strlen)); */
-  /* print_int(strlen); */
-  /* print_int(userlen); */
-  /* print_int(MAX_HEAP_SIZE - heap_size()); */
 
   ASSERT(align(userlen + strlen), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
@@ -206,6 +197,31 @@ void test_gc_user_single_root()
   ASSERT(0, strcmp(a->name->elements, "tim"));
 }
 
+void test_gc_with_cycle()
+{
+  Node *a, *b;
+
+  rp = 0; /* reset roots list */
+  gc();
+
+  a = (Node *) alloc(&Node_type);
+  b = (Node *) alloc(&Node_type);
+  a->payload = "a";
+  b->payload = "b";
+  a->neighbor = b;
+  b->neighbor = a;
+ 
+  add_root((Object **) &a);
+  add_root((Object **) &b);
+
+  ASSERT(align(2 * Node_type.size), MAX_HEAP_SIZE - heap_size());
+
+  gc();
+
+  ASSERT(align(2 * Node_type.size), MAX_HEAP_SIZE - heap_size());
+  ASSERT(0, strcmp("a", b->neighbor->payload));
+  ASSERT(0, strcmp("b", a->neighbor->payload));
+}
 
 /* void test_gc_objarray() */
 /* { */
@@ -278,6 +294,7 @@ int main()
   test_gc_string();
   test_gc_user();
   test_gc_user_single_root();
+  test_gc_with_cycle();
   /* test_gc_objarray(); */
   test_alloc_outofmemory();
 
