@@ -3,6 +3,25 @@
 #include <stddef.h>
 #include <string.h>
 
+
+void print_int(int i)
+{
+  printf("%d\n", i);
+}
+
+void print_p(void *p)
+{
+  printf("%p\n", p);
+}
+
+void print_s(char *c)
+{
+  printf("%s\n", c);
+}
+
+
+
+
 typedef unsigned char byte;
 
 typedef struct TypeDescriptor {
@@ -118,6 +137,11 @@ void gc_init()
   switch_to_heap(heap1);
 }
 
+void print_heap()
+{
+  printf("heap[%p %p]\n", start_of_heap, end_of_heap);
+}
+
 int in_heap(Object *p)
 {
   return (Object *) start_of_heap <= p && p <= (Object *) end_of_heap;
@@ -171,27 +195,35 @@ Object *alloc(TypeDescriptor *type)
   return p;
 }
 
-
-void *alloc_primarray(int size)
+/* len
+       length of the array to alloc */
+void *alloc_primarray(int len)
 {
   PrimitiveArray *array;
   /* size for struct, primitive elems, and null char */
-  array = alloc_space(sizeof(PrimitiveArray) + size + 1);
+  array = alloc_space(sizeof(PrimitiveArray) + len + 1);
 
   if(array == NULL)
     return NULL;
 
   array->type = &PrimitiveArray_type;
   array->forward = NULL;
+  array->length = len;
   /* set pointer to point into heap */
   array->elements = (char *) array + sizeof(PrimitiveArray);
   return array;
 }
 
-void *alloc_string(int size)
+/* len 
+       number of chars in the string */
+void *alloc_string(int len)
 {
   String *s;
-  s = alloc_primarray(size);
+  s = alloc_primarray(len);
+
+  if(s == NULL)
+    return NULL;
+
   s->type = &String_type;
   return s;
 }
@@ -221,6 +253,7 @@ void copy_primarray(PrimitiveArray **old)
   /* handle failures */
   total_length = sizeof(PrimitiveArray) + (*old)->length + 1;
   memcpy(new, *old, total_length); 
+  (*old)->forward = new;
   *old = new;
 }
 
@@ -229,23 +262,29 @@ void copy(Object **old);
 void copy_obj(Object **old, TypeDescriptor *type)
 {
   int i;
-  void *new, *field;
-  new = alloc_space(type->size);
-  memcpy(new, *old, type->size);
-  *old = new;
+  void *new;
+  Object **field;
 
   for(i = 0; i < type->num_fields; i++){
-    field = (Object *) ((char *) new + type->field_offsets[i]); 
-    if(!in_heap(field)){
+    field = (Object **) ((char *) *old + type->field_offsets[i]); 
+    if(!in_heap(*field)){
       copy(field);
     }
   }
+
+  new = alloc_space(type->size);
+  memcpy(new, *old, type->size);
+  (*old)->forward = new;
+  *old = new;
 }
 
 void copy(Object **old) 
 {
   TypeDescriptor *type;
   type = (*old)->type;
+  /* print_s(type->name); */
+  /* print_p(*old); */
+  /* print_p((*old)->forward); */
   if(&*type == &PrimitiveArray_type
      || &*type == &String_type) {
     copy_primarray((PrimitiveArray **) old);
@@ -259,8 +298,12 @@ void copy_roots()
   int i;
 
   for(i = 0; i < rp; i++){
-    if(in_heap(*roots[i]))
-       continue;
+    /* printf("root\n"); */
+    /* print_p(*roots[i]); */
+    /* printf("root forward\n"); */
+    /* print_p((*roots[i])->forward); */
+    if((*roots[i])->forward != NULL)
+      *roots[i] = (Object *) (*roots[i])->forward;
     else
       copy(roots[i]);
   }

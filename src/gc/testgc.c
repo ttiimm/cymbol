@@ -9,6 +9,7 @@
   if(EXPECTED != RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
 
+
 void test_alloc_user() 
 {
   byte *before, *after;
@@ -96,7 +97,7 @@ void test_couple_add_removes()
 
 void test_gc_string()
 {
-  void *old_a;
+  void *old_a, *old_b;
   String *a, *b;
   int a_len;
   rp = 0; /* reset roots list */
@@ -104,10 +105,10 @@ void test_gc_string()
   a = alloc_string(4);
   old_a = &*a; 
 
-  a->length = 4;
   strcpy(a->elements, "abcd");
 
   b = alloc_string(5);
+  old_b = &*b;
 
   add_root((Object **) &a);
   add_root((Object **) &b);
@@ -120,6 +121,7 @@ void test_gc_string()
 
   ASSERT(align(a_len), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
+  ASSERT(old_b, &*b);
   ASSERT(0, strcmp("prim_array", a->type->name));
   ASSERT(4, a->length);
   ASSERT(0, strcmp("abcd", a->elements));
@@ -135,7 +137,6 @@ void test_gc_user()
   rp = 0; /* reset roots list */
 
   b = alloc_string(3);
-  b->length = 3;
   strcpy(b->elements, "tim");
 
   a = (User *) alloc(&User_type);
@@ -150,8 +151,54 @@ void test_gc_user()
   ASSERT_NE(User_type.size, MAX_HEAP_SIZE - heap_size());
 
   gc();
+
   userlen = align(User_type.size);
   strlen = String_type.size + 3 + 1;
+  
+  /* print_int(align(userlen + strlen)); */
+  /* print_int(strlen); */
+  /* print_int(userlen); */
+  /* print_int(MAX_HEAP_SIZE - heap_size()); */
+
+  ASSERT(align(userlen + strlen), MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(old_a, &*a);
+  ASSERT(103, a->id);
+  ASSERT(&User_type, a->type);
+  ASSERT(0, strcmp(a->name->elements, "tim"));
+  ASSERT(NULL, a->forward);
+}
+
+void test_gc_user_single_root()
+{
+  void *old_a;
+  User *a; 
+  String *b;
+  int userlen, strlen;
+
+  rp = 0; /* reset roots list */
+
+  b = alloc_string(3);
+  strcpy(b->elements, "tim");
+
+  a = (User *) alloc(&User_type);
+  old_a = &*a;
+
+  a->id = 103;
+  a->name  = b;
+ 
+  add_root((Object **) &a);
+
+  ASSERT_NE(User_type.size, MAX_HEAP_SIZE - heap_size());
+
+  gc();
+
+  userlen = align(User_type.size);
+  strlen = String_type.size + 3 + 1;
+  /* print_int(align(userlen + strlen)); */
+  /* print_int(strlen); */
+  /* print_int(userlen); */
+  /* print_int(MAX_HEAP_SIZE - heap_size()); */
+
   ASSERT(align(userlen + strlen), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
   ASSERT(103, a->id);
@@ -159,52 +206,48 @@ void test_gc_user()
   ASSERT(0, strcmp(a->name->elements, "tim"));
 }
 
-/* void test_gc_array() */
+
+/* void test_gc_objarray() */
 /* { */
 /*   void *old_a; */
-/*   struct Array *a; */
-/*   struct String *s1, *s2, *strings[2]; */
+/*   ObjArray *a; */
+/*   String *s1, *s2, *strings[2]; */
 /*   int total_size; */
 /*   char * s1str; */
+/*   gc_init(); */
 /*   rp = 0; /\* reset roots list *\/ */
 
-/*   a = alloc(Array_type.id); */
+/*   a = (ObjArray *) alloc(&ObjArray_type); */
 /*   old_a = &*a; */
 
-/*   a->type = Array_type.id; */
-/*   a->length = 2; */
-/*   a->arr  = (void *) &strings; */
-/*   /\* printf("\n%p", &*a); *\/ */
-/*   /\* printf("\n%p", &(*a).arr); *\/ */
+/*   a->p = (void *) &strings; */
 
 /*   s1 = alloc_string(3); */
-/*   s1->type = String_type.id; */
-/*   s1->length = 3; */
-/*   strcpy(s1->str, "abc"); */
+/*   strcpy(s1->elements, "abc"); */
 /*   strings[0] = s1; */
 
 /*   s2 = alloc_string(3); */
-/*   s2->type = String_type.id; */
-/*   s2->length = 3; */
-/*   strcpy(s2->str, "def"); */
+/*   strcpy(s2->elements, "def"); */
 /*   strings[1] = s2; */
 
-/*   total_size = 2 * (sizeof(struct String) + 3 + 1) + sizeof(struct Array); */
+/*   total_size = 2 * (sizeof(String) + 3 + 1) + sizeof(ObjArray); */
 
-/*   add_root(&a); */
-/*   /\* add_root(&s1); *\/ */
-/*   /\* add_root(&s2); *\/ */
-/*   /\* remove_root(&s2); *\/ */
-/*   ASSERT(1, on_heap(&s1->str)); */
+/*   add_root((Object **) &a); */
+  
+/*   ASSERT(1, in_heap((Object *) &s1->elements)); */
+/*   ASSERT(align(total_size), MAX_HEAP_SIZE - heap_size()); */
 
 /*   gc(); */
 
-/*   ASSERT(total_size, MAX_HEAP_SIZE - heap_size()); */
+/*   printf("\n%d", align(total_size)); */
+/*   printf("\n%d", MAX_HEAP_SIZE - heap_size()); */
+
+/*   ASSERT(align(total_size), MAX_HEAP_SIZE - heap_size()); */
 /*   ASSERT_NE(old_a, &*a); */
 /*   ASSERT(2, a->length); */
-/*   s1str = ((struct String *) (*a->arr)[0])->str; */
+/*   s1str = ((String *) (*a->p)[0])->elements; */
 /*   ASSERT(0, strcmp("abc", s1str)); */
-/*   ASSERT(1, on_heap(&s1->str)); */
+/*   ASSERT(1, in_heap((Object *) &s1->elements)); */
 /* } */
 
 void test_alloc_outofmemory()
@@ -234,7 +277,8 @@ int main()
   test_couple_add_removes();
   test_gc_string();
   test_gc_user();
-  /* test_gc_array();  */
+  test_gc_user_single_root();
+  /* test_gc_objarray(); */
   test_alloc_outofmemory();
 
   printf("\n");
