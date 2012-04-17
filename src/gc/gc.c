@@ -275,14 +275,7 @@ void copy_primarray(PrimitiveArray **old)
 }
 
 void copy(Object **old);
-
-void set_to_forward_or_copy(Object **chkobj, Object **setobj)
-{
-  if((*chkobj)->forward != NULL)
-    *setobj = (Object *) (*chkobj)->forward;
-  else
-    copy(chkobj);
-}
+void check_forward_or_copy(Object **chkobj, Object **setobj);
 
 void copy_obj(Object **old, TypeDescriptor *type)
 {
@@ -298,7 +291,7 @@ void copy_obj(Object **old, TypeDescriptor *type)
   for(i = 0; i < type->num_fields; i++){
     old_f = (Object **) ((char *) *old + type->field_offsets[i]); 
     new_f = (Object *) ((char *) new + type->field_offsets[i]);
-    set_to_forward_or_copy(old_f, &new_f);    
+    check_forward_or_copy(old_f, &new_f);    
   }
 }
 
@@ -314,17 +307,21 @@ void copy(Object **old)
   }
 }
 
+void check_forward_or_copy(Object **chkobj, Object **setobj)
+{
+  if((*chkobj)->forward != NULL)
+    *setobj = (Object *) (*chkobj)->forward;
+  else
+    copy(chkobj);
+}
+
 void copy_roots()
 {
   int i;
 
-  for(i = 0; i < rp; i++){
-    /* if((*roots[i])->forward != NULL) */
-    /*   *roots[i] = (Object *) (*roots[i])->forward; */
-    /* else */
-    /*   copy(roots[i]); */
-    set_to_forward_or_copy(roots[i], roots[i]);
-  }
+  for(i = 0; i < rp; i++)
+    check_forward_or_copy(roots[i], roots[i]);
+
 }
 
 void gc()
