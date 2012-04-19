@@ -34,18 +34,48 @@ bool gc_init()
   return heap1 != NULL && heap2 != NULL;
 }
 
+void dump_roots(char *buf)
+{
+  Object * o;
+  int i, addr, len;
+  for(i = 0; i < _rp; i++) {
+    o = *_roots[i];
+    if(&*o->type == &String_type) {
+      char *str;
+      str = ((String *) o)->elements;
+      addr = (byte *)&*o - start_of_heap;
+      len = ((String *)o)->length;
+      sprintf(buf, "%04d:String[%lu+%d]=\"%s\"\n", addr, sizeof(String), len, str);
+    } else if(&*o->type == &PrimitiveArray_type) {
+
+    } else {
+
+    }
+  }
+
+}
+
 void heap_dump(char *buf)
 {
   int heap_num, size, total;
-  char *template;
+  char *header_buf, *root_buf, *template;
 
   heap_num = start_of_heap == heap1 ? 1: 2;
   size = next_free - start_of_heap;
   total = end_of_heap - start_of_heap;
+  template = "heap%d[%d,%d]\n";
 
-  template = "heap%d[0,%d,%d]\n";
+  header_buf = malloc(24);
+  sprintf(header_buf, template, heap_num, size, total);
 
-  sprintf(buf, template, heap_num, size, total);
+  root_buf = malloc(1000);
+  dump_roots(root_buf);
+
+  strcat(buf, header_buf);
+  strcat(buf, root_buf);
+
+  free(root_buf);
+  free(header_buf);
 }
 
 byte *heap_address()

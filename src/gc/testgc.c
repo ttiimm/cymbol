@@ -69,6 +69,7 @@ void test_heap_dump()
   char *expected, *result;
   User *u;
   String *s;
+
   GC_SAVE_RP;
   gc();
 
@@ -76,13 +77,16 @@ void test_heap_dump()
   strcpy(s->elements, "tim");
   u = (User *) alloc(&User_type);
   u->name = s;
+  ADD_ROOT(s);
+//  ADD_ROOT(u);
 
-  expected = "heap2[0,68,512]\n";
+  expected = "heap2[68,512]\n"
+             "0000:String[32+3]=\"tim\"\n";
 
-  result = malloc(100);
+  result = malloc(1024);
   heap_dump(result);
 
-//  printf("\n%s", result);
+  printf("\n%s", result);
   ASSERT_STR(expected, result);
 
   GC_RESTORE_RP;
