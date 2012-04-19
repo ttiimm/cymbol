@@ -7,6 +7,9 @@
 #define ASSERT(EXPECTED, RESULT)\
   if(EXPECTED == RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
+#define ASSERT_TRUE(RESULT)\
+  if(1 == RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
+
 #define ASSERT_STR(EXPECTED, RESULT)\
    if(0 == strcmp(EXPECTED, RESULT)) { printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
@@ -24,7 +27,7 @@ void test_alloc_user()
   after = heap_address();
 
   ASSERT(align(User_type.size), (after - before));
-  ASSERT(1, in_heap((Object *) u));
+  ASSERT_TRUE(in_heap((Object *) u));
 }
 
 void test_alloc_string()
@@ -36,12 +39,13 @@ void test_alloc_string()
   s = alloc_string(12);
   after = heap_address();
   strcpy(s->elements, "abcdefghijkl");
-  str_length = sizeof(String) + 12 + 1;
+  str_length = sizeof_String(12);
 
   ASSERT(align(str_length), (after - before));
-  ASSERT(1, in_heap((Object *) s));
+  ASSERT(12, s->length);
+  ASSERT_TRUE(in_heap((Object *) s));
   ASSERT_STR("abcdefghijkl", s->elements);
-  ASSERT(1, in_heap((Object *) s->elements));
+  ASSERT_TRUE(in_heap((Object *) s->elements));
 }
 
 void test_root_management()
@@ -63,11 +67,17 @@ void test_root_management()
 void test_heap_dump()
 {
   char *expected, *result;
+  User *u;
+  String *s;
+  GC_SAVE_RP;
   gc();
 
-  expected = "heap2[0,32,512]\n";
+  s = alloc_string(3);
+  strcpy(s->elements, "tim");
+  u = (User *) alloc(&User_type);
+  u->name = s;
 
-  alloc(&User_type);
+  expected = "heap2[0,68,512]\n";
 
   result = malloc(100);
   heap_dump(result);
@@ -75,6 +85,7 @@ void test_heap_dump()
 //  printf("\n%s", result);
   ASSERT_STR(expected, result);
 
+  GC_RESTORE_RP;
   free(result);
 }
 
@@ -95,7 +106,7 @@ void test_gc_string()
 
   ADD_ROOT(a);
 
-  a_len = 4 + sizeof(String) + 1;
+  a_len = sizeof_String(4);
 
   ASSERT_NE(a_len, MAX_HEAP_SIZE - heap_size());
 
@@ -104,7 +115,7 @@ void test_gc_string()
   ASSERT(align(a_len), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
   ASSERT(old_b, &*b);
-  ASSERT(0, strcmp("prim_array", a->type->name));
+  ASSERT_STR("prim_array", a->type->name);
   ASSERT(4, a->length);
   ASSERT_STR("abcd", a->elements);
   GC_RESTORE_RP;

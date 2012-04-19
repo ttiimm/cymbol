@@ -32,10 +32,11 @@ void heap_dump(char *buf);
 /**
  * Allocation
  */
-int align(int size);
 Object *alloc(TypeDescriptor *type);
 PrimitiveArray *alloc_primarray(int len);
 String *alloc_string(int len);
+int align(int size);
+int sizeof_String(int len);
 
 
 /**

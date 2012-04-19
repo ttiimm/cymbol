@@ -65,6 +65,11 @@ int heap_size()
 
 
 
+int sizeof_String(int len)
+{
+  /* size for struct, primitive elems, and null char */
+  return sizeof(PrimitiveArray) + len + 1;
+}
 
 int align(int size)
 {
@@ -109,8 +114,7 @@ Object *alloc(TypeDescriptor *type)
 PrimitiveArray *alloc_primarray(int len)
 {
   PrimitiveArray *array;
-  /* size for struct, primitive elems, and null char */
-  array = alloc_space(sizeof(PrimitiveArray) + len + 1);
+  array = alloc_space(sizeof_String(len));
 
   if(array == NULL)
     return NULL;
@@ -143,7 +147,7 @@ void copy_primarray(PrimitiveArray **old)
   void *new;
   new = alloc_primarray((*old)->length);
   /* handle failures */
-  total_length = sizeof(PrimitiveArray) + (*old)->length + 1;
+  total_length = sizeof_String((*old)->length);
   memcpy(new, *old, total_length); 
   (*old)->forward = new;
   *old = new;
