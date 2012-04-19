@@ -7,6 +7,9 @@
 #define ASSERT(EXPECTED, RESULT)\
   if(EXPECTED == RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
+#define ASSERT_STR(EXPECTED, RESULT)\
+   if(0 == strcmp(EXPECTED, RESULT)) { printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
+
 #define ASSERT_NE(EXPECTED, RESULT)\
   if(EXPECTED != RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
@@ -37,12 +40,31 @@ void test_alloc_string()
 
   ASSERT(align(str_length), (after - before));
   ASSERT(1, in_heap((Object *) s));
-  ASSERT(0, strcmp("abcdefghijkl", s->elements));
+  ASSERT_STR("abcdefghijkl", s->elements);
   ASSERT(1, in_heap((Object *) s->elements));
 }
 
 void test_root_management()
 {
+  Object *a, *b, *c;
+  ASSERT(0, _rp);
+  GC_SAVE_RP;
+
+  ADD_ROOT(a);
+  ADD_ROOT(b);
+  ADD_ROOT(c);
+
+  ASSERT(3, _rp);
+
+  GC_RESTORE_RP;
+  ASSERT(0, _rp);
+}
+
+void test_heap_print()
+{
+  char *expected, *result;
+
+  expected = "heap1[0,40,512]";
 
 }
 
@@ -62,7 +84,6 @@ void test_gc_string()
   old_b = &*b;
 
   ADD_ROOT(a);
-  ADD_ROOT(b);
 
   a_len = 4 + sizeof(String) + 1;
 
@@ -75,7 +96,7 @@ void test_gc_string()
   ASSERT(old_b, &*b);
   ASSERT(0, strcmp("prim_array", a->type->name));
   ASSERT(4, a->length);
-  ASSERT(0, strcmp("abcd", a->elements));
+  ASSERT_STR("abcd", a->elements);
   GC_RESTORE_RP;
 }
 
@@ -111,7 +132,7 @@ void test_gc_user()
   ASSERT_NE(old_a, &*a);
   ASSERT(103, a->id);
   ASSERT(&User_type, a->type);
-  ASSERT(0, strcmp(a->name->elements, "tim"));
+  ASSERT_STR("tim", a->name->elements);
   ASSERT(NULL, a->forward);
   GC_RESTORE_RP;
 }
@@ -147,7 +168,7 @@ void test_gc_user_single_root()
   ASSERT_NE(old_a, &*a);
   ASSERT(103, a->id);
   ASSERT(&User_type, a->type);
-  ASSERT(0, strcmp(a->name->elements, "tim"));
+  ASSERT_STR("tim", a->name->elements);
   GC_RESTORE_RP;
 }
 
@@ -173,8 +194,8 @@ void test_gc_with_cycle()
   gc();
 
   ASSERT(align(2 * Node_type.size), MAX_HEAP_SIZE - heap_size());
-  ASSERT(0, strcmp("a", b->neighbor->payload));
-  ASSERT(0, strcmp("b", a->neighbor->payload));
+  ASSERT_STR("a", b->neighbor->payload);
+  ASSERT_STR("b", a->neighbor->payload);
   GC_RESTORE_RP;
 }
 
@@ -242,6 +263,7 @@ int main()
   test_alloc_user();
   test_alloc_string();
   test_root_management();
+  test_heap_print();
   test_gc_string();
   test_gc_user();
   test_gc_user_single_root();
