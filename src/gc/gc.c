@@ -34,14 +34,18 @@ bool gc_init()
   return heap1 != NULL && heap2 != NULL;
 }
 
-bool is_space_allocated()
+void heap_dump(char *buf)
 {
-  return start_of_heap != NULL;
-}
+  int heap_num, size, total;
+  char *template;
 
-void print_heap()
-{
-  printf("heap[%p %p]\n", start_of_heap, end_of_heap);
+  heap_num = start_of_heap == heap1 ? 1: 2;
+  size = next_free - start_of_heap;
+  total = end_of_heap - start_of_heap;
+
+  template = "heap%d[0,%d,%d]\n";
+
+  sprintf(buf, template, heap_num, size, total);
 }
 
 byte *heap_address()
@@ -58,6 +62,9 @@ int heap_size()
 {
   return end_of_heap - next_free;
 }
+
+
+
 
 int align(int size)
 {

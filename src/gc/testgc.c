@@ -60,12 +60,22 @@ void test_root_management()
   ASSERT(0, _rp);
 }
 
-void test_heap_print()
+void test_heap_dump()
 {
   char *expected, *result;
+  gc();
 
-  expected = "heap1[0,40,512]";
+  expected = "heap2[0,32,512]\n";
 
+  alloc(&User_type);
+
+  result = malloc(100);
+  heap_dump(result);
+
+//  printf("\n%s", result);
+  ASSERT_STR(expected, result);
+
+  free(result);
 }
 
 void test_gc_string()
@@ -263,7 +273,7 @@ int main()
   test_alloc_user();
   test_alloc_string();
   test_root_management();
-  test_heap_print();
+  test_heap_dump();
   test_gc_string();
   test_gc_user();
   test_gc_user_single_root();
