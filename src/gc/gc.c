@@ -1,19 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
 
-#include "types.h"
+#include "gc.h"
 
-typedef struct Object {
-  TypeDescriptor *type;
-  /* address of obj after copy */
-  byte *forward;
-} Object;
-
-
-Object **roots[100];
-int rp = 0; /* index of next free space in array for a root */
+extern int _rp;
+extern Object **_roots[100];
 
 byte *heap1;
 byte *heap2;
@@ -24,9 +16,6 @@ byte *start_of_heap;
 byte *end_of_heap;
 byte *next_free;
 
-#define MAX_HEAP_SIZE 512 /* bytes */
-
-
 void switch_to_heap(byte *next)
 {
   start_of_heap = next;
@@ -34,12 +23,20 @@ void switch_to_heap(byte *next)
   next_free = start_of_heap;
 }
 
-void gc_init()
+bool gc_init()
 {
+  _rp = 0;
   String_type = PrimitiveArray_type;
   heap1 = malloc(MAX_HEAP_SIZE);
   heap2 = malloc(MAX_HEAP_SIZE);
   switch_to_heap(heap1);
+
+  return heap1 != NULL && heap2 != NULL;
+}
+
+bool is_space_allocated()
+{
+  return start_of_heap != NULL;
 }
 
 void print_heap()
@@ -47,14 +44,14 @@ void print_heap()
   printf("heap[%p %p]\n", start_of_heap, end_of_heap);
 }
 
-int in_heap(Object *p)
+byte *heap_address()
 {
-  return (Object *) start_of_heap <= p && p <= (Object *) end_of_heap;
+  return next_free;
 }
 
-int is_space_allocated()
+bool in_heap(Object *p)
 {
-  return start_of_heap != NULL;
+  return (Object *) start_of_heap <= p && p <= (Object *) end_of_heap;
 }
 
 int heap_size()
@@ -102,7 +99,7 @@ Object *alloc(TypeDescriptor *type)
 
 /* len
        length of the array to alloc */
-void *alloc_primarray(int len)
+PrimitiveArray *alloc_primarray(int len)
 {
   PrimitiveArray *array;
   /* size for struct, primitive elems, and null char */
@@ -121,7 +118,7 @@ void *alloc_primarray(int len)
 
 /* len 
        number of chars in the string */
-void *alloc_string(int len)
+String *alloc_string(int len)
 {
   String *s;
   s = alloc_primarray(len);
@@ -131,23 +128,6 @@ void *alloc_string(int len)
 
   s->type = &String_type;
   return s;
-}
-
-void add_root(Object **root)
-{
-  roots[rp++] = root;
-}
-
-void remove_root(Object **root)
-{
-  int i;
-  for(i = 0; i < rp; i++) {
-    if(root == roots[i]) {
-      /* overwrite with last root */
-      roots[i] = roots[--rp];
-      break;
-    }
-  }
 }
 
 void copy_primarray(PrimitiveArray **old)
@@ -207,9 +187,8 @@ void copy_roots()
 {
   int i;
 
-  for(i = 0; i < rp; i++)
-    check_forward_or_copy(roots[i], roots[i]);
-
+  for(i = 0; i < _rp; i++)
+    check_forward_or_copy(_roots[i], _roots[i]);
 }
 
 void gc()

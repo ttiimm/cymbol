@@ -1,4 +1,5 @@
 typedef unsigned char byte;
+typedef unsigned int bool;
 
 typedef struct TypeDescriptor {
   char *name;
@@ -22,16 +23,7 @@ typedef struct PrimitiveArray {
   char *elements;
 } PrimitiveArray;
 
-int primarray_field_offsets[1] = {
-  offsetof(PrimitiveArray, elements)
-};
-
-TypeDescriptor PrimitiveArray_type = {
-  "prim_array",
-  sizeof(PrimitiveArray),
-  1, 
-  primarray_field_offsets
-};
+TypeDescriptor PrimitiveArray_type;
 
 
 typedef PrimitiveArray String;
@@ -48,14 +40,7 @@ typedef struct ObjArray {
   void *(*p)[];
 } ObjArray;
 
-int objarray_field_offsets[1] = {offsetof(ObjArray, p)};
-
-TypeDescriptor ObjArray_type = {
-  "obj_array",
-  sizeof(ObjArray),
-  1, 
-  objarray_field_offsets
-};
+TypeDescriptor ObjArray_type;
 
 
 typedef struct User {
@@ -65,15 +50,8 @@ typedef struct User {
   String *name;
 } User;
 
-int user_field_offsets[1] = {offsetof(User, name)};
+TypeDescriptor User_type;
 
-/* sample def of User object (id, name) */
-TypeDescriptor User_type = {
-  "user",
-  sizeof(User),          
-  1,                            
-  user_field_offsets
-};
 
 /* Used for testing cycles */ 
 typedef struct Node {
@@ -83,11 +61,4 @@ typedef struct Node {
   struct Node *neighbor;
 } Node;
 
-int node_field_offsets[1] = {offsetof(Node, neighbor)};
-
-TypeDescriptor Node_type = {
-  "node",
-  sizeof(Node),
-  1,
-  node_field_offsets
-};
+TypeDescriptor Node_type;

@@ -1,6 +1,8 @@
-#include "gc.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define TYPES_LENGTH 2
+#include "gc.h"
 
 #define ASSERT(EXPECTED, RESULT)\
   if(EXPECTED == RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
@@ -9,15 +11,14 @@
   if(EXPECTED != RESULT){ printf("."); } else { printf("\n%-30s failure on line %d\n", __func__, __LINE__); }
 
 
-
 void test_alloc_user() 
 {
   byte *before, *after;
   User *u;
-  before = next_free;
+  before = heap_address();
 
   u = (User *) alloc(&User_type);
-  after = next_free;
+  after = heap_address();
 
   ASSERT(align(User_type.size), (after - before));
   ASSERT(1, in_heap((Object *) u));
@@ -28,9 +29,9 @@ void test_alloc_string()
   int str_length;
   byte *before, *after;
   String *s;
-  before = next_free;
+  before = heap_address();
   s = alloc_string(12);
-  after = next_free;
+  after = heap_address();
   strcpy(s->elements, "abcdefghijkl");
   str_length = sizeof(String) + 12 + 1;
 
@@ -40,59 +41,9 @@ void test_alloc_string()
   ASSERT(1, in_heap((Object *) s->elements));
 }
 
-void test_add_root()
+void test_root_management()
 {
-  String *s, **p;
-  rp = 0;
-  s = alloc_string(4);
-  add_root((Object **) &s);
-  p = (String **) roots[rp - 1];
 
-  ASSERT(s, *p);
-}
-
-void test_remove_root()
-{
-  String *s, **p;
-  rp = 0;
-  s = alloc_string(3);
-
-  add_root((Object **) &s);
-  p = (String **) roots[rp - 1];
-  ASSERT(s, *p);
-
-  remove_root((Object **) &s);
-  ASSERT(0, rp);
-}
-
-void test_couple_add_removes() 
-{
-  void *a, *b, *c, *d;
-  int ap, bp, cp;
-  rp = 0; /* reset roots list */
-
-  a = alloc_string(3);
-  b = alloc_string(3);
-  c = alloc_string(3);
-  d = alloc_string(3);
-
-  add_root((Object **) &a);
-  ap = rp - 1;
-  add_root((Object **) &b);
-  bp = rp - 1;
-  add_root((Object **) &c);
-  cp = rp - 1;
-
-  remove_root((Object **) &b);
-
-  ASSERT(a, *roots[ap]);
-  ASSERT(c, *roots[bp]);
-
-  add_root((Object **) &d);
-  ASSERT(d, *roots[cp]);
-
-  remove_root((Object **) &a);
-  ASSERT(d, *roots[ap]);
 }
 
 void test_gc_string()
@@ -100,7 +51,7 @@ void test_gc_string()
   void *old_a, *old_b;
   String *a, *b;
   int a_len;
-  rp = 0; /* reset roots list */
+  GC_SAVE_RP;
 
   a = alloc_string(4);
   old_a = &*a; 
@@ -110,9 +61,9 @@ void test_gc_string()
   b = alloc_string(5);
   old_b = &*b;
 
-  add_root((Object **) &a);
-  add_root((Object **) &b);
-  remove_root((Object **) &b);
+  ADD_ROOT(a);
+  ADD_ROOT(b);
+
   a_len = 4 + sizeof(String) + 1;
 
   ASSERT_NE(a_len, MAX_HEAP_SIZE - heap_size());
@@ -125,6 +76,7 @@ void test_gc_string()
   ASSERT(0, strcmp("prim_array", a->type->name));
   ASSERT(4, a->length);
   ASSERT(0, strcmp("abcd", a->elements));
+  GC_RESTORE_RP;
 }
 
 void test_gc_user()
@@ -134,7 +86,7 @@ void test_gc_user()
   String *b;
   int userlen, strlen;
 
-  rp = 0; /* reset roots list */
+  GC_SAVE_RP;
 
   b = alloc_string(3);
   strcpy(b->elements, "tim");
@@ -145,8 +97,8 @@ void test_gc_user()
   a->id = 103;
   a->name  = b;
 
-  add_root((Object **) &a);
-  add_root((Object **) &b);
+  ADD_ROOT(a);
+  ADD_ROOT(b);
 
   ASSERT_NE(User_type.size, MAX_HEAP_SIZE - heap_size());
 
@@ -161,6 +113,7 @@ void test_gc_user()
   ASSERT(&User_type, a->type);
   ASSERT(0, strcmp(a->name->elements, "tim"));
   ASSERT(NULL, a->forward);
+  GC_RESTORE_RP;
 }
 
 void test_gc_user_single_root()
@@ -170,7 +123,7 @@ void test_gc_user_single_root()
   String *b;
   int userlen, strlen;
 
-  rp = 0; /* reset roots list */
+  GC_SAVE_RP;
 
   b = alloc_string(3);
   strcpy(b->elements, "tim");
@@ -181,7 +134,7 @@ void test_gc_user_single_root()
   a->id = 103;
   a->name  = b;
  
-  add_root((Object **) &a);
+  ADD_ROOT(a);
 
   ASSERT_NE(User_type.size, MAX_HEAP_SIZE - heap_size());
 
@@ -195,13 +148,14 @@ void test_gc_user_single_root()
   ASSERT(103, a->id);
   ASSERT(&User_type, a->type);
   ASSERT(0, strcmp(a->name->elements, "tim"));
+  GC_RESTORE_RP;
 }
 
 void test_gc_with_cycle()
 {
   Node *a, *b;
 
-  rp = 0; /* reset roots list */
+  GC_SAVE_RP;
   gc();
 
   a = (Node *) alloc(&Node_type);
@@ -211,8 +165,8 @@ void test_gc_with_cycle()
   a->neighbor = b;
   b->neighbor = a;
  
-  add_root((Object **) &a);
-  add_root((Object **) &b);
+  ADD_ROOT(a);
+  ADD_ROOT(b);
 
   ASSERT(align(2 * Node_type.size), MAX_HEAP_SIZE - heap_size());
 
@@ -221,6 +175,7 @@ void test_gc_with_cycle()
   ASSERT(align(2 * Node_type.size), MAX_HEAP_SIZE - heap_size());
   ASSERT(0, strcmp("a", b->neighbor->payload));
   ASSERT(0, strcmp("b", a->neighbor->payload));
+  GC_RESTORE_RP;
 }
 
 /* void test_gc_objarray() */
@@ -248,7 +203,7 @@ void test_gc_with_cycle()
 
 /*   total_size = 2 * (sizeof(String) + 3 + 1) + sizeof(ObjArray); */
 
-/*   add_root((Object **) &a); */
+/*   ADD_ROOT((Object **) &a); */
   
 /*   ASSERT(1, in_heap((Object *) &s1->elements)); */
 /*   ASSERT(align(total_size), MAX_HEAP_SIZE - heap_size()); */
@@ -268,12 +223,11 @@ void test_gc_with_cycle()
 
 void test_alloc_outofmemory()
 {
-  int heap_space_left, num_to_alloc;
+  int num_to_alloc;
   void *result;
-  heap_space_left = end_of_heap - next_free;
-  num_to_alloc = (heap_space_left / User_type.size) + 1;
+  num_to_alloc = ( heap_size() / User_type.size) + 1;
   
-  result = next_free;
+  result = heap_address();
   for( ; num_to_alloc > 0; num_to_alloc--) 
     result = alloc(&User_type);
 
@@ -282,15 +236,12 @@ void test_alloc_outofmemory()
 
 int main()
 {
-  gc_init();
-  if(!is_space_allocated()) 
+  if(!gc_init())
     return EXIT_FAILURE;
 
   test_alloc_user();
   test_alloc_string();
-  test_add_root();
-  test_remove_root(); 
-  test_couple_add_removes();
+  test_root_management();
   test_gc_string();
   test_gc_user();
   test_gc_user_single_root();
