@@ -66,7 +66,7 @@ void test_root_management()
 
 void test_heap_dump()
 {
-  char *expected, *result;
+  char *expected, result[1000];
   User *u;
   String *s;
 
@@ -78,19 +78,18 @@ void test_heap_dump()
   u = (User *) alloc(&User_type);
   u->name = s;
   ADD_ROOT(s);
-//  ADD_ROOT(u);
+  ADD_ROOT(u);
 
   expected = "heap2[68,512]\n"
-             "0000:String[32+3]=\"tim\"\n";
+             "0000:String[32+4]=\"tim\"\n"
+             "0036:User[32]->[0]\n";
 
-  result = malloc(1024);
   heap_dump(result);
 
-  printf("\n%s", result);
+//  printf("\n%s", result);
   ASSERT_STR(expected, result);
 
   GC_RESTORE_RP;
-  free(result);
 }
 
 void test_gc_string()
@@ -119,7 +118,7 @@ void test_gc_string()
   ASSERT(align(a_len), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
   ASSERT(old_b, &*b);
-  ASSERT_STR("prim_array", a->type->name);
+  ASSERT_STR("PrimitiveArray", a->type->name);
   ASSERT(4, a->length);
   ASSERT_STR("abcd", a->elements);
   GC_RESTORE_RP;

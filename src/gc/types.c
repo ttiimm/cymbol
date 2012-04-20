@@ -7,7 +7,7 @@ int primarray_field_offsets[1] = {
 };
 
 TypeDescriptor PrimitiveArray_type = {
-  "prim_array",
+  "PrimitiveArray",
   sizeof(PrimitiveArray),
   1,
   primarray_field_offsets
@@ -17,7 +17,7 @@ TypeDescriptor PrimitiveArray_type = {
 int objarray_field_offsets[1] = {offsetof(ObjArray, p)};
 
 TypeDescriptor ObjArray_type = {
-  "obj_array",
+  "ObjArray",
   sizeof(ObjArray),
   1,
   objarray_field_offsets
@@ -28,7 +28,7 @@ int user_field_offsets[1] = {offsetof(User, name)};
 
 /* sample def of User object (id, name) */
 TypeDescriptor User_type = {
-  "user",
+  "User",
   sizeof(User),
   1,
   user_field_offsets
@@ -38,7 +38,7 @@ TypeDescriptor User_type = {
 int node_field_offsets[1] = {offsetof(Node, neighbor)};
 
 TypeDescriptor Node_type = {
-  "node",
+  "Node",
   sizeof(Node),
   1,
   node_field_offsets

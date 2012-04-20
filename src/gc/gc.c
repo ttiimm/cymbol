@@ -4,6 +4,10 @@
 
 #include "gc.h"
 
+void copy(Object **old);
+void check_forward_or_copy(Object **chkobj, Object **setobj);
+void *get_field_pointer(Object *obj, int i);
+
 extern int _rp;
 extern Object **_roots[100];
 
@@ -34,23 +38,58 @@ bool gc_init()
   return heap1 != NULL && heap2 != NULL;
 }
 
+
+void dump_string(String *string, int addr, long int size, char *tmp)
+{
+  char *str;
+  int len;
+  str = string->elements;
+  /* count null terminator */
+  len = string->length + 1;
+  sprintf(tmp, "%04d:String[%lu+%d]=\"%s\"\n", addr, size, len, str);
+}
+
+void dump_obj(Object *obj, int addr, long int size, char *buf)
+{
+  int i, f_addr;
+  char *name, tmp[50];
+  name = obj->type->name;
+  sprintf(tmp, "%04d:%s[%lu]->[", addr, name, size);
+  strcpy(buf, tmp);
+
+  if(obj->type->num_fields >= 1) {
+    f_addr = ((byte *) &**(Object **) get_field_pointer(obj, 0)) - start_of_heap;
+    sprintf(tmp, "%d", f_addr);
+    strcat(buf, tmp);
+  }
+
+  for(i = 1; i < obj->type->num_fields; i++) {
+    f_addr = (byte *) get_field_pointer(obj, i) - start_of_heap;
+    sprintf(tmp, ", %d", f_addr);
+    strcat(buf, tmp);
+  }
+
+  strcat(buf, "]\n");
+}
+
 void dump_roots(char *buf)
 {
   Object * o;
-  int i, addr, len;
+  int i, addr, size;
   for(i = 0; i < _rp; i++) {
+    char tmp[50];
     o = *_roots[i];
+    addr = (byte *)&*o - start_of_heap;
+    size = o->type->size;
     if(&*o->type == &String_type) {
-      char *str;
-      str = ((String *) o)->elements;
-      addr = (byte *)&*o - start_of_heap;
-      len = ((String *)o)->length;
-      sprintf(buf, "%04d:String[%lu+%d]=\"%s\"\n", addr, sizeof(String), len, str);
+      dump_string((String *) o, addr, size, tmp);
     } else if(&*o->type == &PrimitiveArray_type) {
 
     } else {
-
+      dump_obj(o, addr, size, tmp);
     }
+
+    strcat(buf, tmp);
   }
 
 }
@@ -58,24 +97,17 @@ void dump_roots(char *buf)
 void heap_dump(char *buf)
 {
   int heap_num, size, total;
-  char *header_buf, *root_buf, *template;
+  char tmp[24], *template;
 
   heap_num = start_of_heap == heap1 ? 1: 2;
   size = next_free - start_of_heap;
   total = end_of_heap - start_of_heap;
   template = "heap%d[%d,%d]\n";
 
-  header_buf = malloc(24);
-  sprintf(header_buf, template, heap_num, size, total);
+  sprintf(tmp, template, heap_num, size, total);
+  strcat(buf, tmp);
 
-  root_buf = malloc(1000);
-  dump_roots(root_buf);
-
-  strcat(buf, header_buf);
-  strcat(buf, root_buf);
-
-  free(root_buf);
-  free(header_buf);
+  dump_roots(buf);
 }
 
 byte *heap_address()
@@ -183,8 +215,11 @@ void copy_primarray(PrimitiveArray **old)
   *old = new;
 }
 
-void copy(Object **old);
-void check_forward_or_copy(Object **chkobj, Object **setobj);
+void *get_field_pointer(Object *obj, int i)
+{
+  return (char *) obj + obj->type->field_offsets[i];
+}
+
 
 void copy_obj(Object **old, TypeDescriptor *type)
 {
@@ -198,8 +233,8 @@ void copy_obj(Object **old, TypeDescriptor *type)
   *old = new;
 
   for(i = 0; i < type->num_fields; i++){
-    old_f = (Object **) ((char *) *old + type->field_offsets[i]); 
-    new_f = (Object *) ((char *) new + type->field_offsets[i]);
+    old_f = (Object **) get_field_pointer(*old, i);
+    new_f = (Object *) get_field_pointer(new, i);
     check_forward_or_copy(old_f, &new_f);    
   }
 }
