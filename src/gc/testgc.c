@@ -39,7 +39,7 @@ void test_alloc_string()
   s = alloc_string(12);
   after = heap_address();
   strcpy(s->elements, "abcdefghijkl");
-  str_length = sizeof_String(12);
+  str_length = sizeof_array(12, ARRAY_CHAR);
 
   ASSERT(align(str_length), (after - before));
   ASSERT(12, s->length);
@@ -109,7 +109,7 @@ void test_gc_string()
 
   ADD_ROOT(a);
 
-  a_len = sizeof_String(4);
+  a_len = sizeof_array(4, ARRAY_CHAR);
 
   ASSERT_NE(a_len, MAX_HEAP_SIZE - heap_size());
 
@@ -118,7 +118,7 @@ void test_gc_string()
   ASSERT(align(a_len), MAX_HEAP_SIZE - heap_size());
   ASSERT_NE(old_a, &*a);
   ASSERT(old_b, &*b);
-  ASSERT_STR("PrimitiveArray", a->type->name);
+  ASSERT_STR("Array", a->type->name);
   ASSERT(4, a->length);
   ASSERT_STR("abcd", a->elements);
   GC_RESTORE_RP;

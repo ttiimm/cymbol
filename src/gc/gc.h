@@ -33,10 +33,10 @@ void heap_dump(char *buf);
  * Allocation
  */
 Object *alloc(TypeDescriptor *type);
-PrimitiveArray *alloc_primarray(int len);
+Array  *alloc_array(int len, int type);
 String *alloc_string(int len);
 int align(int size);
-int sizeof_String(int len);
+int sizeof_array(int len, int type);
 
 
 /**

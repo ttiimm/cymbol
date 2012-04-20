@@ -30,7 +30,7 @@ void switch_to_heap(byte *next)
 bool gc_init()
 {
   _rp = 0;
-  String_type = PrimitiveArray_type;
+  String_type = Array_type;
   heap1 = malloc(MAX_HEAP_SIZE);
   heap2 = malloc(MAX_HEAP_SIZE);
   switch_to_heap(heap1);
@@ -83,7 +83,7 @@ void dump_roots(char *buf)
     size = o->type->size;
     if(&*o->type == &String_type) {
       dump_string((String *) o, addr, size, tmp);
-    } else if(&*o->type == &PrimitiveArray_type) {
+    } else if(&*o->type == &Array_type) {
 
     } else {
       dump_obj(o, addr, size, tmp);
@@ -127,10 +127,28 @@ int heap_size()
 
 
 
-int sizeof_String(int len)
+int sizeof_array(int len, int type)
 {
-  /* size for struct, primitive elems, and null char */
-  return sizeof(PrimitiveArray) + len + 1;
+  int prim_size;
+
+  switch(type)
+  {
+      case ARRAY_CHAR:
+        /* room for null char at end */
+        prim_size = sizeof(char) * len + 1;
+        break;
+      case ARRAY_INT:
+        prim_size = sizeof(int) * len;
+        break;
+      case ARRAY_FLOAT:
+        prim_size = sizeof(float) * len;
+        break;
+      case ARRAY_POINTER:
+        prim_size = sizeof(void *) * len;
+        break;
+  }
+
+  return sizeof(Array) + prim_size;
 }
 
 int align(int size)
@@ -173,19 +191,21 @@ Object *alloc(TypeDescriptor *type)
 
 /* len
        length of the array to alloc */
-PrimitiveArray *alloc_primarray(int len)
+Array *alloc_array(int len, int type)
 {
-  PrimitiveArray *array;
-  array = alloc_space(sizeof_String(len));
+  Array *array;
+  array = alloc_space(sizeof_array(len, type));
 
   if(array == NULL)
     return NULL;
 
-  array->type = &PrimitiveArray_type;
+  array->type = &Array_type;
+  array->array_type = type;
   array->forward = NULL;
   array->length = len;
-  /* set pointer to point into heap */
-  array->elements = (char *) array + sizeof(PrimitiveArray);
+  /* set elements to point into heap right after
+   * meta data */
+  array->elements = (char *) array + sizeof(Array);
   return array;
 }
 
@@ -194,7 +214,7 @@ PrimitiveArray *alloc_primarray(int len)
 String *alloc_string(int len)
 {
   String *s;
-  s = alloc_primarray(len);
+  s = alloc_array(len, ARRAY_CHAR);
 
   if(s == NULL)
     return NULL;
@@ -203,15 +223,17 @@ String *alloc_string(int len)
   return s;
 }
 
-void copy_primarray(PrimitiveArray **old)
+void copy_primarray(Array **old)
 {
   int total_length;
-  void *new;
-  new = alloc_primarray((*old)->length);
+  Array *old_obj;
+  Array *new;
+  old_obj = *old;
+  new = alloc_array(old_obj->length, old_obj->array_type);
   /* handle failures */
-  total_length = sizeof_String((*old)->length);
+  total_length = sizeof_array(old_obj->length, old_obj->array_type);
   memcpy(new, *old, total_length); 
-  (*old)->forward = new;
+  old_obj->forward = (void *) new;
   *old = new;
 }
 
@@ -243,9 +265,9 @@ void copy(Object **old)
 {
   TypeDescriptor *type;
   type = (*old)->type;
-  if(&*type == &PrimitiveArray_type
+  if(&*type == &Array_type
      || &*type == &String_type) {
-    copy_primarray((PrimitiveArray **) old);
+    copy_primarray((Array **) old);
   } else {
     copy_obj(old, type);
   }

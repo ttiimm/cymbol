@@ -2,25 +2,13 @@
 
 #include "types.h"
 
-int primarray_field_offsets[1] = {
-  offsetof(PrimitiveArray, elements)
-};
+int array_field_offsets[1] = { offsetof(Array, elements)};
 
-TypeDescriptor PrimitiveArray_type = {
-  "PrimitiveArray",
-  sizeof(PrimitiveArray),
+TypeDescriptor Array_type = {
+  "Array",
+  sizeof(Array),
   1,
-  primarray_field_offsets
-};
-
-
-int objarray_field_offsets[1] = {offsetof(ObjArray, p)};
-
-TypeDescriptor ObjArray_type = {
-  "ObjArray",
-  sizeof(ObjArray),
-  1,
-  objarray_field_offsets
+  array_field_offsets
 };
 
 

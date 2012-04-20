@@ -11,36 +11,31 @@ typedef struct TypeDescriptor {
 } TypeDescriptor;
 
 
-/* An array of ints, floats, or chars.  
-   Note, like in C, a string is just an 
-   array of chars */
-typedef struct PrimitiveArray {
+#define ARRAY_CHAR    0
+#define ARRAY_INT     1
+#define ARRAY_FLOAT   2
+#define ARRAY_POINTER 3
+
+/* An array of ints, floats, chars, or pointers.
+
+   All pointers must be to objects in the heap.  */
+typedef struct Array {
   TypeDescriptor *type;
   byte *forward;
+  int array_type;
   int length;
   /* pointer to start of array 
      elements in heap */
   char *elements;
-} PrimitiveArray;
+} Array;
 
-TypeDescriptor PrimitiveArray_type;
+TypeDescriptor Array_type;
 
 
-typedef PrimitiveArray String;
-/* String_type set to PrimitiveArray_type in 
-   gc_init() */
+/* Like in C, a string is just an array of chars */
+typedef Array String;
+/* String_type set to Array_type in gc_init() */
 TypeDescriptor String_type;
-
-
-typedef struct ObjArray {
-  TypeDescriptor *type;
-  byte *forward;
-  int length;
-  /* A pointer to an array of pointers to managed objs. */
-  void *(*p)[];
-} ObjArray;
-
-TypeDescriptor ObjArray_type;
 
 
 typedef struct User {
