@@ -56,16 +56,21 @@ void dump_array(Array *array, int addr, long int size, char *buf)
   sprintf(tmp, "%04d:Array[%lu+%d]->[", addr, size, array->length);
   strcpy(buf, tmp);
 
-  if(array->length >= 1) {
-    a_addr = ((byte *) &*(((Object **) array->elements)[0]) - start_of_heap);
-    sprintf(tmp, "%d", a_addr);
-    strcat(buf, tmp);
-  }
+  switch(array->array_type)
+  {
+    case ARRAY_POINTER:
+      if(array->length >= 1) {
+          a_addr = ((byte *) &*(((Object **) array->elements)[0]) - start_of_heap);
+          sprintf(tmp, "%d", a_addr);
+          strcat(buf, tmp);
+        }
 
-  for(i = 1; i < array->length; i++) {
-    a_addr = ((byte *) &*(((Object **) array->elements)[i]) - start_of_heap);
-    sprintf(tmp, ", %d", a_addr);
-    strcat(buf, tmp);
+        for(i = 1; i < array->length; i++) {
+          a_addr = ((byte *) &*(((Object **) array->elements)[i]) - start_of_heap);
+          sprintf(tmp, ", %d", a_addr);
+          strcat(buf, tmp);
+        }
+      break;
   }
 
   strcat(buf, "]\n");
