@@ -39,14 +39,36 @@ bool gc_init()
 }
 
 
-void dump_string(String *string, int addr, long int size, char *tmp)
+void dump_string(String *string, int addr, long int size, char *buf)
 {
   char *str;
   int len;
   str = string->elements;
   /* count null terminator */
   len = string->length + 1;
-  sprintf(tmp, "%04d:String[%lu+%d]=\"%s\"\n", addr, size, len, str);
+  sprintf(buf, "%04d:String[%lu+%d]=\"%s\"\n", addr, size, len, str);
+}
+
+void dump_array(Array *array, int addr, long int size, char *buf)
+{
+  int i, a_addr;
+  char tmp[50];
+  sprintf(tmp, "%04d:Array[%lu+%d]->[", addr, size, array->length);
+  strcpy(buf, tmp);
+
+  if(array->length >= 1) {
+    a_addr = ((byte *) &*(((Object **) array->elements)[0]) - start_of_heap);
+    sprintf(tmp, "%d", a_addr);
+    strcat(buf, tmp);
+  }
+
+  for(i = 1; i < array->length; i++) {
+    a_addr = ((byte *) &*(((Object **) array->elements)[i]) - start_of_heap);
+    sprintf(tmp, ", %d", a_addr);
+    strcat(buf, tmp);
+  }
+
+  strcat(buf, "]\n");
 }
 
 void dump_obj(Object *obj, int addr, long int size, char *buf)
@@ -84,7 +106,7 @@ void dump_roots(char *buf)
     if(&*o->type == &String_type) {
       dump_string((String *) o, addr, size, tmp);
     } else if(&*o->type == &Array_type) {
-
+      dump_array((Array *) o, addr, size, tmp);
     } else {
       dump_obj(o, addr, size, tmp);
     }
@@ -97,15 +119,15 @@ void dump_roots(char *buf)
 void heap_dump(char *buf)
 {
   int heap_num, size, total;
-  char tmp[24], *template;
+  char heap_info[24], *template;
 
   heap_num = start_of_heap == heap1 ? 1: 2;
   size = next_free - start_of_heap;
   total = end_of_heap - start_of_heap;
   template = "heap%d[%d,%d]\n";
 
-  sprintf(tmp, template, heap_num, size, total);
-  strcat(buf, tmp);
+  sprintf(heap_info, template, heap_num, size, total);
+  strcat(buf, heap_info);
 
   dump_roots(buf);
 }

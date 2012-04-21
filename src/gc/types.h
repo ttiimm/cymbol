@@ -24,9 +24,9 @@ typedef struct Array {
   byte *forward;
   int array_type;
   int length;
-  /* pointer to start of array 
-     elements in heap */
-  char *elements;
+  /* pointer to start of array
+     of elements in heap */
+  void *elements;
 } Array;
 
 TypeDescriptor Array_type;

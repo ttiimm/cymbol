@@ -69,20 +69,30 @@ void test_heap_dump()
   char *expected, result[1000];
   User *u;
   String *s;
-
+  Array *a;
   GC_SAVE_RP;
+
   gc();
 
   s = alloc_string(3);
   strcpy(s->elements, "tim");
   u = (User *) alloc(&User_type);
+  u->id = 103;
   u->name = s;
+  a = (Array *) alloc_array(2, ARRAY_POINTER);
+  ((void **) a->elements)[0] = s;
+  ((void **) a->elements)[1] = u;
+//  printf("\n%s", (char *) ((String *) ((void **) a->elements)[0])->elements);
+//  printf("\n%d", ((User *) ((void **) a->elements)[1])->id);
+
   ADD_ROOT(s);
   ADD_ROOT(u);
+  ADD_ROOT(a);
 
-  expected = "heap2[68,512]\n"
+  expected = "heap2[116,512]\n"
              "0000:String[32+4]=\"tim\"\n"
-             "0036:User[32]->[0]\n";
+             "0036:User[32]->[0]\n"
+             "0068:Array[32+2]->[0, 36]\n";
 
   heap_dump(result);
 
@@ -223,49 +233,6 @@ void test_gc_with_cycle()
   GC_RESTORE_RP;
 }
 
-/* void test_gc_objarray() */
-/* { */
-/*   void *old_a; */
-/*   ObjArray *a; */
-/*   String *s1, *s2, *strings[2]; */
-/*   int total_size; */
-/*   char * s1str; */
-/*   gc_init(); */
-/*   rp = 0; /\* reset roots list *\/ */
-
-/*   a = (ObjArray *) alloc(&ObjArray_type); */
-/*   old_a = &*a; */
-
-/*   a->p = (void *) &strings; */
-
-/*   s1 = alloc_string(3); */
-/*   strcpy(s1->elements, "abc"); */
-/*   strings[0] = s1; */
-
-/*   s2 = alloc_string(3); */
-/*   strcpy(s2->elements, "def"); */
-/*   strings[1] = s2; */
-
-/*   total_size = 2 * (sizeof(String) + 3 + 1) + sizeof(ObjArray); */
-
-/*   ADD_ROOT((Object **) &a); */
-  
-/*   ASSERT(1, in_heap((Object *) &s1->elements)); */
-/*   ASSERT(align(total_size), MAX_HEAP_SIZE - heap_size()); */
-
-/*   gc(); */
-
-/*   printf("\n%d", align(total_size)); */
-/*   printf("\n%d", MAX_HEAP_SIZE - heap_size()); */
-
-/*   ASSERT(align(total_size), MAX_HEAP_SIZE - heap_size()); */
-/*   ASSERT_NE(old_a, &*a); */
-/*   ASSERT(2, a->length); */
-/*   s1str = ((String *) (*a->p)[0])->elements; */
-/*   ASSERT(0, strcmp("abc", s1str)); */
-/*   ASSERT(1, in_heap((Object *) &s1->elements)); */
-/* } */
-
 void test_alloc_outofmemory()
 {
   int num_to_alloc;
@@ -292,7 +259,6 @@ int main()
   test_gc_user();
   test_gc_user_single_root();
   test_gc_with_cycle();
-  /* test_gc_objarray(); */
   test_alloc_outofmemory();
 
   printf("\n");
