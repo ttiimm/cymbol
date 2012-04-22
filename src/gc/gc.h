@@ -24,6 +24,7 @@ Object **_roots[100];
 bool in_heap(Object *p);
 byte *heap_address();
 int heap_free();
+int heap_allocated();
 void heap_dump(char *buf);
 
 

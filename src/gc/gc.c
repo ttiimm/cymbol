@@ -6,7 +6,7 @@
 
 void copy(Object **old);
 void check_forward_or_copy(Object **chkobj, Object **setobj);
-void *get_field_pointer(Object *obj, int i);
+Object **get_field_pointer(Object *obj, int i);
 
 extern int _rp;
 extern Object **_roots[100];
@@ -202,8 +202,14 @@ void *alloc_space(int size)
   
   aligned_size = align(size);
 
-  if(next_free + aligned_size > end_of_heap)
-    return NULL;
+  if(next_free + aligned_size > end_of_heap) {
+    gc();
+
+    if(next_free + aligned_size > end_of_heap)
+      return NULL;
+    else
+      return alloc_space(size);
+  }
 
   p = next_free;
   next_free += aligned_size;
@@ -258,7 +264,7 @@ String *alloc_String(int len)
   return s;
 }
 
-void copy_primarray(Array **old)
+void copy_array(Array **old)
 {
   int total_length;
   Array *old_obj;
@@ -272,37 +278,36 @@ void copy_primarray(Array **old)
   *old = new;
 }
 
-void *get_field_pointer(Object *obj, int i)
+Object **get_field_pointer(Object *obj, int i)
 {
-  return (char *) obj + obj->type->field_offsets[i];
+  return (Object **) ((byte *) obj + obj->type->field_offsets[i]);
 }
 
 
 void copy_obj(Object **old, TypeDescriptor *type)
 {
   int i;
-  void *new;
-  Object **old_f, *new_f;
+  Object *new, **old_f, *new_f;
 
   new = alloc_space(type->size);
   memcpy(new, *old, type->size);
-  (*old)->forward = new;
-  *old = new;
+  (*old)->forward = (byte *) new;
 
   for(i = 0; i < type->num_fields; i++){
-    old_f = (Object **) get_field_pointer(*old, i);
+    old_f = get_field_pointer(*old, i);
     new_f = (Object *) get_field_pointer(new, i);
-    check_forward_or_copy(old_f, &new_f);    
+    check_forward_or_copy(old_f, &new_f);
   }
+
+  *old = new;
 }
 
 void copy(Object **old) 
 {
   TypeDescriptor *type;
   type = (*old)->type;
-  if(&*type == &Array_type
-     || &*type == &String_type) {
-    copy_primarray((Array **) old);
+  if(&*type == &Array_type || &*type == &String_type) {
+    copy_array((Array **) old);
   } else {
     copy_obj(old, type);
   }
@@ -310,9 +315,9 @@ void copy(Object **old)
 
 void check_forward_or_copy(Object **chkobj, Object **setobj)
 {
-  if((*chkobj)->forward != NULL)
+  if(*chkobj != NULL && (*chkobj)->forward != NULL)
     *setobj = (Object *) (*chkobj)->forward;
-  else
+  else if(*chkobj != NULL)
     copy(chkobj);
 }
 

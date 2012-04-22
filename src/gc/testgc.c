@@ -240,17 +240,17 @@ void test_big_loop_doesnt_run_out_of_memory() {
    ADD_ROOT(tombu);
 
    int i = 0;
-   while ( i < 10000000 ) {
+   while (i < 10000000) {
        tombu = (User *) alloc(&User_type);
        String *s = alloc_String(3);
        strcpy(s->elements, "Tom");
        tombu->name = s;
        i++;
-       if ( i % 1000000 == 0 ) {
-           char dump[500];
-           heap_dump(dump);
-           printf("%s\n", dump);
-       }
+//       if ( i % 1000000 == 0 ) {
+//           char *dump = calloc(500, sizeof(char));
+//           heap_dump(dump);
+//           printf("%s\n", dump);
+//       }
    }
 
    GC_RESTORE_RP;
@@ -263,7 +263,7 @@ void test_alloc_outofmemory()
   GC_SAVE_RP;
   gc();
 
-  num_to_alloc = ( heap_free() / User_type.size) + 1;
+  num_to_alloc = (heap_free() / User_type.size) + 1;
   
   result = heap_address();
   for( ; num_to_alloc > 0; num_to_alloc--) {
@@ -287,7 +287,7 @@ int main()
   test_gc_user();
   test_gc_user_single_root();
   test_gc_with_cycle();
-//  test_big_loop_doesnt_run_out_of_memory();
+  test_big_loop_doesnt_run_out_of_memory();
   test_alloc_outofmemory();
 
   printf("\n");
