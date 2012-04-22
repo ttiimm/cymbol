@@ -36,7 +36,7 @@ void test_alloc_string()
   byte *before, *after;
   String *s;
   before = heap_address();
-  s = alloc_string(12);
+  s = alloc_String(12);
   after = heap_address();
   strcpy(s->elements, "abcdefghijkl");
   str_length = sizeof_array(12, ARRAY_CHAR);
@@ -74,7 +74,7 @@ void test_heap_dump()
 
   gc();
 
-  s = alloc_string(3);
+  s = alloc_String(3);
   strcpy(s->elements, "tim");
   u = (User *) alloc(&User_type);
   u->id = 103;
@@ -89,7 +89,7 @@ void test_heap_dump()
   ADD_ROOT(u);
   ADD_ROOT(a);
 
-  expected = "heap2[116,512]\n"
+  expected = "heap2[116,1000]\n"
              "0000:String[32+4]=\"tim\"\n"
              "0036:User[32]->[0]\n"
              "0068:Array[32+2]->[0, 36]\n";
@@ -109,23 +109,23 @@ void test_gc_string()
   int a_len;
   GC_SAVE_RP;
 
-  a = alloc_string(4);
+  a = alloc_String(4);
   old_a = &*a; 
 
   strcpy(a->elements, "abcd");
 
-  b = alloc_string(5);
+  b = alloc_String(5);
   old_b = &*b;
 
   ADD_ROOT(a);
 
   a_len = sizeof_array(4, ARRAY_CHAR);
 
-  ASSERT_NE(a_len, MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(a_len, heap_allocated());
 
   gc();
 
-  ASSERT(align(a_len), MAX_HEAP_SIZE - heap_size());
+  ASSERT(align(a_len), heap_allocated());
   ASSERT_NE(old_a, &*a);
   ASSERT(old_b, &*b);
   ASSERT_STR("Array", a->type->name);
@@ -143,7 +143,7 @@ void test_gc_user()
 
   GC_SAVE_RP;
 
-  b = alloc_string(3);
+  b = alloc_String(3);
   strcpy(b->elements, "tim");
 
   a = (User *) alloc(&User_type);
@@ -155,14 +155,14 @@ void test_gc_user()
   ADD_ROOT(a);
   ADD_ROOT(b);
 
-  ASSERT_NE(User_type.size, MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(User_type.size, heap_allocated());
 
   gc();
 
   userlen = align(User_type.size);
   strlen = String_type.size + 3 + 1;
  
-  ASSERT(align(userlen + strlen), MAX_HEAP_SIZE - heap_size());
+  ASSERT(align(userlen + strlen), heap_allocated());
   ASSERT_NE(old_a, &*a);
   ASSERT(103, a->id);
   ASSERT(&User_type, a->type);
@@ -180,7 +180,7 @@ void test_gc_user_single_root()
 
   GC_SAVE_RP;
 
-  b = alloc_string(3);
+  b = alloc_String(3);
   strcpy(b->elements, "tim");
 
   a = (User *) alloc(&User_type);
@@ -191,14 +191,14 @@ void test_gc_user_single_root()
  
   ADD_ROOT(a);
 
-  ASSERT_NE(User_type.size, MAX_HEAP_SIZE - heap_size());
+  ASSERT_NE(User_type.size, heap_allocated());
 
   gc();
 
   userlen = align(User_type.size);
   strlen = String_type.size + 3 + 1;
 
-  ASSERT(align(userlen + strlen), MAX_HEAP_SIZE - heap_size());
+  ASSERT(align(userlen + strlen), heap_allocated());
   ASSERT_NE(old_a, &*a);
   ASSERT(103, a->id);
   ASSERT(&User_type, a->type);
@@ -223,32 +223,60 @@ void test_gc_with_cycle()
   ADD_ROOT(a);
   ADD_ROOT(b);
 
-  ASSERT(align(2 * Node_type.size), MAX_HEAP_SIZE - heap_size());
+  ASSERT(align(2 * Node_type.size), heap_allocated());
 
   gc();
 
-  ASSERT(align(2 * Node_type.size), MAX_HEAP_SIZE - heap_size());
+  ASSERT(align(2 * Node_type.size), heap_allocated());
   ASSERT_STR("a", b->neighbor->payload);
   ASSERT_STR("b", a->neighbor->payload);
   GC_RESTORE_RP;
+}
+
+void test_big_loop_doesnt_run_out_of_memory() {
+   GC_SAVE_RP;
+
+   User *tombu;
+   ADD_ROOT(tombu);
+
+   int i = 0;
+   while ( i < 10000000 ) {
+       tombu = (User *) alloc(&User_type);
+       String *s = alloc_String(3);
+       strcpy(s->elements, "Tom");
+       tombu->name = s;
+       i++;
+       if ( i % 1000000 == 0 ) {
+           char dump[500];
+           heap_dump(dump);
+           printf("%s\n", dump);
+       }
+   }
+
+   GC_RESTORE_RP;
 }
 
 void test_alloc_outofmemory()
 {
   int num_to_alloc;
   void *result;
-  num_to_alloc = ( heap_size() / User_type.size) + 1;
+  GC_SAVE_RP;
+  gc();
+
+  num_to_alloc = ( heap_free() / User_type.size) + 1;
   
   result = heap_address();
-  for( ; num_to_alloc > 0; num_to_alloc--) 
+  for( ; num_to_alloc > 0; num_to_alloc--) {
     result = alloc(&User_type);
+  }
 
   ASSERT(NULL, result);
+  GC_RESTORE_RP;
 }
 
 int main()
 {
-  if(!gc_init())
+  if(!gc_init(1000))
     return EXIT_FAILURE;
 
   test_alloc_user();
@@ -259,6 +287,7 @@ int main()
   test_gc_user();
   test_gc_user_single_root();
   test_gc_with_cycle();
+//  test_big_loop_doesnt_run_out_of_memory();
   test_alloc_outofmemory();
 
   printf("\n");

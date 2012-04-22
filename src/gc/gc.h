@@ -1,7 +1,5 @@
 #include "types.h"
 
-#define MAX_HEAP_SIZE 512 /* bytes */
-
 typedef struct Object {
   TypeDescriptor *type;
   /* address of obj after copy */
@@ -25,7 +23,7 @@ Object **_roots[100];
  */
 bool in_heap(Object *p);
 byte *heap_address();
-int heap_size();
+int heap_free();
 void heap_dump(char *buf);
 
 
@@ -34,7 +32,7 @@ void heap_dump(char *buf);
  */
 Object *alloc(TypeDescriptor *type);
 Array  *alloc_array(int len, int type);
-String *alloc_string(int len);
+String *alloc_String(int len);
 int align(int size);
 int sizeof_array(int len, int type);
 
@@ -42,5 +40,5 @@ int sizeof_array(int len, int type);
 /**
  * Garbage Collection
  */
-bool gc_init();
+bool gc_init(int heap_size);
 void gc();

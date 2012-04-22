@@ -11,6 +11,8 @@ void *get_field_pointer(Object *obj, int i);
 extern int _rp;
 extern Object **_roots[100];
 
+int max_heap_size; /* in bytes */
+
 byte *heap1;
 byte *heap2;
 
@@ -23,16 +25,17 @@ byte *next_free;
 void switch_to_heap(byte *next)
 {
   start_of_heap = next;
-  end_of_heap = start_of_heap + MAX_HEAP_SIZE;
+  end_of_heap = start_of_heap + max_heap_size;
   next_free = start_of_heap;
 }
 
-bool gc_init()
+bool gc_init(int heap_size)
 {
   _rp = 0;
   String_type = Array_type;
-  heap1 = malloc(MAX_HEAP_SIZE);
-  heap2 = malloc(MAX_HEAP_SIZE);
+  max_heap_size = heap_size;
+  heap1 = malloc(max_heap_size);
+  heap2 = malloc(max_heap_size);
   switch_to_heap(heap1);
 
   return heap1 != NULL && heap2 != NULL;
@@ -127,7 +130,7 @@ void heap_dump(char *buf)
   char heap_info[24], *template;
 
   heap_num = start_of_heap == heap1 ? 1: 2;
-  size = next_free - start_of_heap;
+  size = heap_allocated();
   total = end_of_heap - start_of_heap;
   template = "heap%d[%d,%d]\n";
 
@@ -147,7 +150,12 @@ bool in_heap(Object *p)
   return (Object *) start_of_heap <= p && p <= (Object *) end_of_heap;
 }
 
-int heap_size()
+int heap_allocated()
+{
+  return next_free - start_of_heap;
+}
+
+int heap_free()
 {
   return end_of_heap - next_free;
 }
@@ -238,7 +246,7 @@ Array *alloc_array(int len, int type)
 
 /* len 
        number of chars in the string */
-String *alloc_string(int len)
+String *alloc_String(int len)
 {
   String *s;
   s = alloc_array(len, ARRAY_CHAR);
