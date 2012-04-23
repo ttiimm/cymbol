@@ -35,6 +35,22 @@ public class TestParser {
         String expect = "(compilationUnit (varDeclaration (type (primitiveType boolean)) a ;))";
         assertEquals(expect, t);
     }
+    
+    @Test
+    public void stringDeclaration() {
+        String source = "String s;";
+        String t = runTest(source);
+        String expect = "(compilationUnit (varDeclaration (type (primitiveType string)) s ;))";
+        assertEquals(expect, t);
+    }
+    
+    @Test
+    public void stringLiteral() {
+        String source = "string s = \"hello world\";";
+        String t = runTest(source);
+        String expect = "";
+        assertEquals(expect, t);
+    }
 
     public String runTest(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);

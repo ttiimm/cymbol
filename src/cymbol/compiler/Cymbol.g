@@ -54,7 +54,8 @@ primitiveType
   | 'int'    
   | 'char'
   | 'boolean'
-  | 'void' 
+  | 'void'
+  | 'string'
   ;
 
 varDeclaration
@@ -95,7 +96,8 @@ primary
 	| FLOAT   
 	| CHAR    
 	| 'true'
-	| 'false'
+	| 'false'                  
+	| STRING
 	;
 
 // LEXER RULES
@@ -113,6 +115,8 @@ FLOAT
   : INT '.' INT*
   | '.' INT+
   ;
+  
+STRING: '\"' ('\"' | ~('"'))* '\"'; 
 
 WS  
   : (' '|'\r'|'\t'|'\n') {$channel=HIDDEN;}
