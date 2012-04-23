@@ -1,5 +1,5 @@
 // global scope
-float f(int x)
+float f(int x, int y)
 { 
     float i; 
     { float z = x+y; i = z; } 
