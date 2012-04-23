@@ -267,7 +267,10 @@ void test_alloc_outofmemory()
   
   result = heap_address();
   for( ; num_to_alloc > 0; num_to_alloc--) {
+    void *tmp;
     result = alloc(&User_type);
+    tmp = result;
+    ADD_ROOT(tmp);
   }
 
   ASSERT(NULL, result);
