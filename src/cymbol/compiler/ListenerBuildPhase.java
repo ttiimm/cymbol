@@ -164,11 +164,13 @@ public class ListenerBuildPhase extends CymbolBaseListener {
             OutputModelObject arg = models.get(args.get(i));
             sb.append(arg.toString() + ", ");
         }
+        
         if(args.size() > 1) {
             sb.setLength(sb.length() - 2);
             sb.append(")");
-        } 
-        sb.append(")");
+        } else {
+            sb.append(")");            
+        }
         
         models.put(ctx, new Expression(sb.toString()));
     }
