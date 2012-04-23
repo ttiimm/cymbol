@@ -21,7 +21,7 @@ import cymbol.model.ModelTemplateWalker;
 import cymbol.model.SourceFile;
 
 public class Runner {
-    
+
     private static CharStream determineInput(String[] args) throws IOException {
         if (args.length > 0) {
             return new ANTLRFileStream(args[0]);
@@ -31,26 +31,32 @@ public class Runner {
             return in;
         }
     }
-    
-    private static boolean checkErrors(Compiler c) {
+
+    /**
+     * Checks for errors during compilations.
+     * 
+     * If an error is occurred during a stage of compilation, then the error is printed out and compilation halts.
+     */
+    private static void checkErrors(Compiler c) {
         boolean hasErrors = c.errors.size() > 0;
-        if (hasErrors) { for (String e : c.errors) {  System.err.println(e); } }
-        return hasErrors;
+        if (hasErrors) {
+            for (String e : c.errors) { System.err.println(e); }
+            System.exit(-1);
+        }
     }
 
     public static void main(String[] args) throws IOException {
         CharStream in = determineInput(args);
         Compiler c = new Compiler(in);
-        
-        boolean e = checkErrors(c);
-        if(!e){ 
-            SourceFile src = c.compile(); 
-            ModelTemplateWalker walker = new ModelTemplateWalker(c);
-            ST st = walker.walk(src);
-            checkErrors(c);
-            
-            System.out.println(st.render());
-        }
+
+        checkErrors(c);
+        SourceFile src = c.compile();
+        checkErrors(c);
+        ModelTemplateWalker walker = new ModelTemplateWalker(c);
+        ST st = walker.walk(src);
+        checkErrors(c);
+
+        System.out.println(st.render());
     }
 
 }
