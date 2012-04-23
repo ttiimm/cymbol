@@ -53,9 +53,9 @@ primitiveType
   : 'float'  
   | 'int'    
   | 'char'
-  | 'boolean'
+  | 'bool'
   | 'void'
-  | 'string'
+  | 'String'
   ;
 
 varDeclaration

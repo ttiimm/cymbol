@@ -30,9 +30,9 @@ public class TestParser {
     
     @Test
     public void primitiveBooleanType() {
-        String source = "boolean a;";
+        String source = "bool a;";
         String t = runTest(source);
-        String expect = "(compilationUnit (varDeclaration (type (primitiveType boolean)) a ;))";
+        String expect = "(compilationUnit (varDeclaration (type (primitiveType bool)) a ;))";
         assertEquals(expect, t);
     }
     
@@ -40,15 +40,15 @@ public class TestParser {
     public void stringDeclaration() {
         String source = "String s;";
         String t = runTest(source);
-        String expect = "(compilationUnit (varDeclaration (type (primitiveType string)) s ;))";
+        String expect = "(compilationUnit (varDeclaration (type (primitiveType String)) s ;))";
         assertEquals(expect, t);
     }
     
     @Test
     public void stringLiteral() {
-        String source = "string s = \"hello world\";";
+        String source = "String s = \"hello world\";";
         String t = runTest(source);
-        String expect = "";
+        String expect = "(compilationUnit (varDeclaration (type (primitiveType String)) s = (expr (primary \"hello world\")) ;))";
         assertEquals(expect, t);
     }
 
