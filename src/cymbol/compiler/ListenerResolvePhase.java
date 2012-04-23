@@ -147,8 +147,11 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         String tokenName = ctx.start.getText();
         if(tokenValue == CymbolParser.ID) {
             Scope scope = scopes.get(ctx);
-            Symbol s = scope.resolve(ctx.start.getText());
-            stashType(ctx, s.type);
+            Symbol s = scope.resolve(tokenName);
+            
+            if(s == null) { compiler.reportError(ctx, "Unknown type for id: " + tokenName); }
+            else { stashType(ctx, s.type); }
+            
         } else if (tokenValue == CymbolParser.INT || 
                    tokenName.equals("int")) {
             stashType(ctx, SymbolTable.INT);   
