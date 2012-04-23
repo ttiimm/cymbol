@@ -16,10 +16,9 @@ public class SymbolTable {
     public static final BuiltInTypeSymbol CHAR = new BuiltInTypeSymbol("char");
     public static final BuiltInTypeSymbol VOID = new BuiltInTypeSymbol("void");
     public static final BuiltInTypeSymbol UNDEFINED = new BuiltInTypeSymbol("undefined");
-
     
     public GlobalScope globals = new GlobalScope();
-
+    
     public SymbolTable() {
         globals.define(INT);
         globals.define(FLOAT);
@@ -27,6 +26,9 @@ public class SymbolTable {
         globals.define(CHAR);
         globals.define(VOID);
         globals.define(UNDEFINED);
+        
+        MethodSymbol PRINTF = new MethodSymbol("printf", globals, null); 
+        globals.define(PRINTF);
     }
 
     public String toString() {
