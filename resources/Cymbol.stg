@@ -2,6 +2,12 @@ SourceFile(file, functionDeclarations, functionDefinitions) ::= <<
 // Cymbol generated C
 // <file.name>
 
+#include \<stdio.h\>
+#include \<stdlib.h\>
+#include \<string.h\>
+
+#include "gc.h"
+
 <file.structs:struct(); separator="\n">
 
 <functionDeclarations>
@@ -41,9 +47,12 @@ signature(func) ::= <<
 
 Block(block) ::= <<
 {
+    GC_SAVE_RP;
     <block.structs:struct()>
     <block.vars:variableDeclaration()>
+    <block.vars: {v | ADD_ROOT(<v.name>);}; separator="\n">
     <block.statements: {s |<s>}; separator="\n">
+    GC_RESTORE_RP;
 }
 
 >>
