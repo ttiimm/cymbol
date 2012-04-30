@@ -328,14 +328,28 @@ public class TestBuildPhase {
     @Test
     public void funcWithReturnWithExpr() {
         String source = "void foo() {\n" +
-                "    return 42;" +
-                "}";
+                        "    return 42;" +
+                        "}";
         String block = "{\n" +
-                "    return 42;\n" +
-                "}\n";
+                       "    return 42;\n" +
+                       "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
         assertEquals("void foo[]", f.toString());
+        assertEquals(block, f.block.toString());
+    }
+
+    @Test
+    public void funcNamedMainRenamed() {
+        String source = "void main() {\n" +
+                        "    return 42;" +
+                        "}";
+        String block = "{\n" +
+                       "    return 42;\n" +
+                       "}\n";
+        SourceFile src = runCompilerOn(source);
+        MethodFunction f = src.functionDefinitions.get(0);
+        assertEquals("void cymbol_main[]", f.toString());
         assertEquals(block, f.block.toString());
     }
     

@@ -14,6 +14,7 @@ import cymbol.model.SourceFile;
 import cymbol.model.Statement;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
+import cymbol.symtab.BuiltInTypeSymbol;
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.StructSymbol;
 import cymbol.symtab.SymbolTable;
@@ -25,6 +26,12 @@ public class TestModelWalker {
     public void testVarDecl() {
         String expected = "// Cymbol generated C\n" + 
         		          "// <Test>\n" +
+        		          "\n" +
+        		          "#include <stdio.h>\n" + 
+        		          "#include <stdlib.h>\n" + 
+        		          "#include <string.h>\n" + 
+        		          "\n" + 
+        		          "#include \"gc.h\"\n" + 
         		          "\n" +
         		          "\n" +
         		          "\n" +
@@ -42,6 +49,12 @@ public class TestModelWalker {
     public void testVarWithAssignment() {
         String expected = "// Cymbol generated C\n" + 
                 "// <Test>\n" +
+                "\n" +
+                "#include <stdio.h>\n" + 
+                "#include <stdlib.h>\n" + 
+                "#include <string.h>\n" + 
+                "\n" + 
+                "#include \"gc.h\"\n" + 
                 "\n" +
                 "\n" +
                 "\n" +
@@ -62,6 +75,12 @@ public class TestModelWalker {
         String expected = "// Cymbol generated C\n" + 
                           "// <Test>\n" +
                           "\n" +
+                          "#include <stdio.h>\n" + 
+                          "#include <stdlib.h>\n" + 
+                          "#include <string.h>\n" + 
+                          "\n" + 
+                          "#include \"gc.h\"\n" + 
+                          "\n" +
                           "struct A {\n" +
                           "    int x;\n" +
                           "}\n" +
@@ -81,6 +100,12 @@ public class TestModelWalker {
     public void testNestedStruct() {
         String expected = "// Cymbol generated C\n" + 
                 "// <Test>\n" +
+                "\n" +
+                "#include <stdio.h>\n" + 
+                "#include <stdlib.h>\n" + 
+                "#include <string.h>\n" + 
+                "\n" + 
+                "#include \"gc.h\"\n" + 
                 "\n" +
                 "struct A {\n" +
                 "    struct B {\n" +
@@ -106,6 +131,12 @@ public class TestModelWalker {
         String expected = "// Cymbol generated C\n" + 
                           "// <Test>\n" +
                           "\n" +
+                          "#include <stdio.h>\n" + 
+                          "#include <stdlib.h>\n" + 
+                          "#include <string.h>\n" + 
+                          "\n" + 
+                          "#include \"gc.h\"\n" + 
+                          "\n" +
                           "\n" +
                           "void foo(float y);\n" +
                           "\n" +
@@ -128,6 +159,12 @@ public class TestModelWalker {
         String expected = "// Cymbol generated C\n" + 
                     		"// <Test>\n" + 
                     		"\n" + 
+                	        "#include <stdio.h>\n" + 
+                            "#include <stdlib.h>\n" + 
+                            "#include <string.h>\n" + 
+                            "\n" + 
+                            "#include \"gc.h\"\n" + 
+                            "\n" +
                     		"\n" + 
                     		"void foo(float y);\n" + 
                     		"char bar(int x);\n" + 
@@ -157,7 +194,13 @@ public class TestModelWalker {
     public void testFuncWithVarDecl() {
         String expected = "// Cymbol generated C\n" + 
                 "// <Test>\n" + 
+                "\n" +
+                "#include <stdio.h>\n" + 
+                "#include <stdlib.h>\n" + 
+                "#include <string.h>\n" + 
                 "\n" + 
+                "#include \"gc.h\"\n" + 
+                "\n" +
                 "\n" + 
                 "void foo();\n" + 
                 "\n" + 
@@ -181,7 +224,13 @@ public class TestModelWalker {
     public void testFuncWithStructDecl() {
         String expected = "// Cymbol generated C\n" + 
                 "// <Test>\n" + 
+                "\n" +
+                "#include <stdio.h>\n" + 
+                "#include <stdlib.h>\n" + 
+                "#include <string.h>\n" + 
                 "\n" + 
+                "#include \"gc.h\"\n" + 
+                "\n" +
                 "\n" + 
                 "void foo();\n" + 
                 "\n" + 
@@ -209,7 +258,13 @@ public class TestModelWalker {
     public void testFuncWithNested() {
         String expected = "// Cymbol generated C\n" + 
                           "// <Test>\n" + 
+                          "\n" +
+                          "#include <stdio.h>\n" + 
+                          "#include <stdlib.h>\n" + 
+                          "#include <string.h>\n" + 
                           "\n" + 
+                          "#include \"gc.h\"\n" + 
+                          "\n" +
                           "\n" + 
                           "void foo();\n" + 
                           "\n" + 
@@ -237,7 +292,13 @@ public class TestModelWalker {
     public void testFuncWithStatement() {
         String expected = "// Cymbol generated C\n" + 
                 "// <Test>\n" + 
+                "\n" +
+                "#include <stdio.h>\n" + 
+                "#include <stdlib.h>\n" + 
+                "#include <string.h>\n" + 
                 "\n" + 
+                "#include \"gc.h\"\n" + 
+                "\n" +
                 "\n" + 
                 "void foo();\n" + 
                 "\n" + 
@@ -250,6 +311,44 @@ public class TestModelWalker {
         Block block = new Block();
         block.add(new Statement("(1);"));
         MethodSymbol mfoo = new MethodSymbol("foo", SymbolTable.VOID, null, null);
+        MethodFunction foo = new MethodFunction(mfoo, block);
+        SourceFile src = new SourceFile("<Test>");
+        src.add(foo);
+        ST result = runTest(src);
+        assertEquals(expected, result.render());
+    }
+    
+    @Test
+    public void testHelloWorld() {
+        String expected = "// Cymbol generated C\n" + 
+                          "// <Test>\n" + 
+                          "\n" +
+                          "#include <stdio.h>\n" + 
+                          "#include <stdlib.h>\n" + 
+                          "#include <string.h>\n" + 
+                          "\n" + 
+                          "#include \"gc.h\"\n" + 
+                          "\n" +
+                          "\n" + 
+                          "void cymbol_main();\n" + 
+                          "\n" + 
+                          "\n" + 
+                          "\n" + 
+                          "void cymbol_main() {\n" + 
+                          "    GC_SAVE_RP;\n" +
+                          "    String *s;\n" +
+                          "    ADD_ROOT(s);\n" +
+                          "    s = alloc_String(12);\n" +
+                          "    strcpy(s->elements, \"hello world\\n\");\n" +
+                          "    printf(\"%s\", s->elements);\n" +
+                          "    GC_RESTORE_RP;\n" +
+                          "}\n";
+        
+        Block block = new Block();
+        block.add(new VariableDeclaration(SymbolTable.STRING, "s"));
+        block.add(new Statement("s = \"hello world\\n\";"));
+        block.add(new Statement("printf(\"%s\", s);"));
+        MethodSymbol mfoo = new MethodSymbol("main", SymbolTable.VOID, null, null);
         MethodFunction foo = new MethodFunction(mfoo, block);
         SourceFile src = new SourceFile("<Test>");
         src.add(foo);
