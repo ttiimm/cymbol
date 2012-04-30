@@ -15,13 +15,17 @@ public class Block extends OutputModelObject {
     
     public List<OutputModelObject> statements = new ArrayList<OutputModelObject>();
     
-    public void add(OutputModelObject statement) {
-        if(statement instanceof Struct) {
-            structs.add((Struct) statement);
-        } else if(statement instanceof VariableDeclaration) {
-            vars.add((VariableDeclaration) statement);
+    public void prepend(Statement statement) {
+        statements.add(0, statement);
+    }
+    
+    public void add(OutputModelObject omo) {
+        if(omo instanceof Struct) {
+            structs.add((Struct) omo);
+        } else if(omo instanceof VariableDeclaration) {
+            vars.add((VariableDeclaration) omo);
         } else {
-            statements.add(statement);
+            statements.add(omo);
         }
     }
 

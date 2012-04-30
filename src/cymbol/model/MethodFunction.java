@@ -17,7 +17,7 @@ public class MethodFunction extends OutputModelObject {
     public String name;
     public List<Argument> args = new ArrayList<Argument>();
     @ModelElement public Block block;
-
+  
     public MethodFunction(Type type, String name, Block block) {
         this.symbol = new MethodSymbol(name, null, null);
         this.symbol.type = type;
@@ -30,10 +30,10 @@ public class MethodFunction extends OutputModelObject {
         this.symbol = symbol;
         this.type = symbol.type;
         this.block = block;
-        String methodNameAndSignature = symbol.getName();
-        int paranIndex = methodNameAndSignature.indexOf("(");
-        String methodName = methodNameAndSignature.substring(0, paranIndex);
-        this.name = methodName.equals("main") ? "cymbol_main" : methodName;
+        String methodName = symbol.getName();
+        int paranIndex = methodName.indexOf("(");
+        this.name = methodName.substring(0, paranIndex);
+        
         MethodSymbol m = (MethodSymbol) symbol;
         for(Symbol s : m.getMembers().values()) {
             args.add(new Argument(s));

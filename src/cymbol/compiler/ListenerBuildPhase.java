@@ -41,6 +41,8 @@ import cymbol.symtab.VariableSymbol;
 
 public class ListenerBuildPhase extends CymbolBaseListener {
 
+    private static final Statement CALL_CYMBOL_MAIN_STATEMENT = new Statement("_main();");
+    
     private ScopeUtil scopes;
     public ParseTreeProperty<OutputModelObject> models;
     private String sourceName;
@@ -84,6 +86,12 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         BlockContext blockCtx = ctx.block();
         Block block = (Block) models.get(blockCtx);
         MethodFunction func = new MethodFunction(s, block);
+        
+        
+        if(func.name.equals("main")) {
+            block.prepend(CALL_CYMBOL_MAIN_STATEMENT);
+        }
+        
         models.put(ctx, func);
     }
 
