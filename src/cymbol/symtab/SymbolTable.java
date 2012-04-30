@@ -14,6 +14,7 @@ public class SymbolTable {
     public static final BuiltInTypeSymbol FLOAT = new BuiltInTypeSymbol("float");
     public static final BuiltInTypeSymbol BOOLEAN = new BuiltInTypeSymbol("boolean");
     public static final BuiltInTypeSymbol CHAR = new BuiltInTypeSymbol("char");
+    public static final BuiltInTypeSymbol STRING = new BuiltInTypeSymbol("String");
     public static final BuiltInTypeSymbol VOID = new BuiltInTypeSymbol("void");
     public static final BuiltInTypeSymbol UNDEFINED = new BuiltInTypeSymbol("undefined");
     
@@ -24,6 +25,7 @@ public class SymbolTable {
         globals.define(FLOAT);
         globals.define(BOOLEAN);
         globals.define(CHAR);
+        globals.define(STRING);
         globals.define(VOID);
         globals.define(UNDEFINED);
         
