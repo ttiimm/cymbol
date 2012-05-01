@@ -1,12 +1,5 @@
 #include "types-usr.h"
 
-typedef struct Object {
-  TypeDescriptor *type;
-  /* address of obj after copy */
-  byte *forward;
-} Object;
-
-
 /**
  * Root management
  */

@@ -74,16 +74,11 @@ void test_heap_dump()
 
   gc();
 
-  s = alloc_String(3);
-  strcpy(s->elements, "tim");
-  u = (User *) alloc(&User_type);
-  u->id = 103;
-  u->name = s;
+  s = new_String("tim");
+  u = new_User(103, s);
   a = (Array *) alloc_array(2, ARRAY_POINTER);
   ((void **) a->elements)[0] = s;
   ((void **) a->elements)[1] = u;
-//  printf("\n%s", (char *) ((String *) ((void **) a->elements)[0])->elements);
-//  printf("\n%d", ((User *) ((void **) a->elements)[1])->id);
 
   ADD_ROOT(s);
   ADD_ROOT(u);
@@ -113,10 +108,8 @@ void test_gc_string()
   GC_SAVE_RP;
   gc();
 
-  a = alloc_String(4);
+  a = new_String("abcd");
   old_a = &*a; 
-
-  strcpy(a->elements, "abcd");
 
   b = alloc_String(5);
   old_b = &*b;
@@ -156,14 +149,9 @@ void test_gc_user()
 
   GC_SAVE_RP;
 
-  b = alloc_String(3);
-  strcpy(b->elements, "tim");
-
-  a = (User *) alloc(&User_type);
+  b = new_String("tim");
+  a = new_User(103, b);
   old_a = &*a;
-
-  a->id = 103;
-  a->name  = b;
 
   ADD_ROOT(a);
   ADD_ROOT(b);
@@ -193,7 +181,7 @@ void test_gc_user()
   GC_RESTORE_RP;
 }
 
-void test_gc_user_single_root()
+void test_gc_walks_root_pointers()
 {
   char *expected, *result;
   void *old_a;
@@ -203,14 +191,9 @@ void test_gc_user_single_root()
 
   GC_SAVE_RP;
 
-  b = alloc_String(3);
-  strcpy(b->elements, "tim");
-
-  a = (User *) alloc(&User_type);
+  b = new_String("tim");
+  a = new_User(103, b);
   old_a = &*a;
-
-  a->id = 103;
-  a->name  = b;
  
   ADD_ROOT(a);
 
@@ -247,16 +230,11 @@ void test_gc_with_pointer_array()
 
   gc();
   GC_SAVE_RP;
-  s = alloc_String(3);
-  strcpy(s->elements, "tim");
-
-  u = (User *) alloc(&User_type);
-  u->id = 102;
-  u->name = s;
-
-  a = alloc_array(2, ARRAY_POINTER);
-  ((void **) a->elements)[0] = s;
-  ((void **) a->elements)[1] = u;
+  s = new_String("tim");
+  u = new_User(102, s);
+  a = new_Array(2, ARRAY_POINTER);
+  add_to(a, 0, s);
+  add_to(a, 1, u);
 
   ADD_ROOT(a);
 
@@ -271,8 +249,7 @@ void test_gc_with_pointer_array()
 
   gc();
 
-  t = (User *) alloc(&User_type);
-  t->name = NULL;
+  t = new_User(102, NULL);
   ADD_ROOT(t);
 
   expected = "heap2[148,1000]\n"
@@ -297,13 +274,10 @@ void test_gc_with_cycle()
   GC_SAVE_RP;
   gc();
 
-  a = (Node *) alloc(&Node_type);
-  b = (Node *) alloc(&Node_type);
-  a->payload = "a";
-  b->payload = "b";
+  a = new_Node("a", NULL);
+  b = new_Node("b", a);
   a->neighbor = b;
-  b->neighbor = a;
- 
+
   ADD_ROOT(a);
   ADD_ROOT(b);
 
@@ -334,10 +308,8 @@ void test_big_loop_doesnt_run_out_of_memory() {
 
    int i = 0;
    while (i < 10000000) {
-       tombu = (User *) alloc(&User_type);
-       String *s = alloc_String(3);
-       strcpy(s->elements, "Tom");
-       tombu->name = s;
+       String *s = new_String("Tom");
+       tombu = new_User(101, s);
        i++;
 //       if ( i % 1000000 == 0 ) {
 //           char *dump = calloc(500, sizeof(char));
@@ -381,7 +353,7 @@ int main()
   test_heap_dump();
   test_gc_string();
   test_gc_user();
-  test_gc_user_single_root();
+  test_gc_walks_root_pointers();
   test_gc_with_pointer_array();
   test_gc_with_cycle();
   test_big_loop_doesnt_run_out_of_memory();

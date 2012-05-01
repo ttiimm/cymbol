@@ -8,7 +8,7 @@ typedef struct User {
 } User;
 
 TypeDescriptor User_type;
-
+User *new_User(int id, String *name);
 
 /* Used for testing cycles */
 typedef struct Node {

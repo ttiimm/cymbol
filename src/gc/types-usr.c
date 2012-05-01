@@ -13,6 +13,17 @@ TypeDescriptor User_type = {
 };
 
 
+User *new_User(int id, String *name)
+{
+  User *u;
+  u = (User *) alloc(&User_type);
+  u->id = 103;
+  u->name = name;
+
+  return u;
+}
+
+
 int node_field_offsets[1] = {offsetof(Node, neighbor)};
 
 TypeDescriptor Node_type = {
@@ -21,3 +32,12 @@ TypeDescriptor Node_type = {
   1,
   node_field_offsets
 };
+
+Node *new_Node(char *payload, Node *neighbor)
+{
+  Node *node;
+  node = (Node *) alloc(&Node_type);
+  node->payload = payload;
+  node->neighbor = neighbor;
+  return node;
+}

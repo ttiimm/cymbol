@@ -11,6 +11,17 @@ typedef struct TypeDescriptor {
 } TypeDescriptor;
 
 
+typedef struct Object {
+  TypeDescriptor *type;
+  /* address of obj after copy */
+  byte *forward;
+} Object;
+
+
+/**
+ * Array
+ */
+
 #define ARRAY_CHAR    0
 #define ARRAY_INT     1
 #define ARRAY_FLOAT   2
@@ -30,9 +41,15 @@ typedef struct Array {
 } Array;
 
 TypeDescriptor Array_type;
+Array *new_Array();
 
+
+/**
+ * String
+ */
 
 /* Like in C, a string is just an array of chars */
 typedef Array String;
 /* String_type set to Array_type in gc_init() */
 TypeDescriptor String_type;
+String *new_String();
