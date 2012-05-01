@@ -6,6 +6,7 @@ import java.util.List;
 import org.antlr.v4.codegen.model.ModelElement;
 import org.antlr.v4.codegen.model.OutputModelObject;
 
+import cymbol.model.Literals.Literal;
 import cymbol.symtab.Symbol;
 
 public class SourceFile extends OutputModelObject {
@@ -14,6 +15,8 @@ public class SourceFile extends OutputModelObject {
     
     public List<Struct> structs = new ArrayList<Struct>();
     public List<VariableDeclaration> vars = new ArrayList<VariableDeclaration>();
+    
+    public List<Literal> stringLiterals = new ArrayList<Literal>();
     
     @ModelElement public List<FunctionDeclarations> functionDeclarations = new ArrayList<FunctionDeclarations>();
     @ModelElement public List<FunctionDefinitions> functionDefinitions = new ArrayList<FunctionDefinitions>();
@@ -42,6 +45,10 @@ public class SourceFile extends OutputModelObject {
     public void add(MethodFunction func) {
         functionDeclarations.add(new FunctionDeclarations(func.symbol, func.block));
         functionDefinitions.add(new FunctionDefinitions(func.symbol, func.block));
+    }
+    
+    public int getStringLiteralSize() {
+        return stringLiterals.size();
     }
     
     public class FunctionDeclarations extends MethodFunction {

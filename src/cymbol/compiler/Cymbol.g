@@ -91,13 +91,13 @@ expr
   ;
 
 primary
-	: ID      
-	| INT     
-	| FLOAT   
-	| CHAR    
-	| 'true'
-	| 'false'                  
-	| STRING
+	: ID      -> prim
+	| INT     -> prim
+	| FLOAT   -> prim
+	| CHAR    -> prim
+	| 'true'  -> prim
+	| 'false' -> prim                
+	| STRING  -> prim_String
 	;
 
 // LEXER RULES

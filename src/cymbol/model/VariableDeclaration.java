@@ -10,7 +10,7 @@ public class VariableDeclaration extends OutputModelObject {
     public Type type;
     public String name;
     public boolean isArray = false;
-    public OutputModelObject expr;
+    public Expression expr;
     
     public VariableDeclaration(Type type, String name) {
         this.type = type;
@@ -23,7 +23,7 @@ public class VariableDeclaration extends OutputModelObject {
         this.isArray = symbol.isArray;
     }
     
-    public void add(OutputModelObject expr) {
+    public void add(Expression expr) {
         this.expr = expr;
     }
 
@@ -31,7 +31,7 @@ public class VariableDeclaration extends OutputModelObject {
     public String toString() {
         String left = type.getName() + " " + name;
         if(isArray) { left += "[]"; }
-        String right = expr != null ? " = " + expr : "";
+        String right = expr != null ? " = " + expr.getExpr() : "";
         return left + right + ";";
     }
 }

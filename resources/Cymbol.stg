@@ -1,6 +1,8 @@
 SourceFile(file, functionDeclarations, functionDefinitions) ::= <<
-// Cymbol generated C
-// <file.name>
+/**
+ * Cymbol generated C
+ * <file.name>
+ */
 
 #include \<stdio.h\>
 #include \<stdlib.h\>
@@ -11,9 +13,12 @@ SourceFile(file, functionDeclarations, functionDefinitions) ::= <<
 <file.structs:struct(); separator="\n">
 void _main();
 <functionDeclarations>
+String *_string_literals[<file.stringLiteralSize>];
+
 <file.vars:variableDeclaration(); separator="\n">
 void _main() {
-    gc_init(256 * 1000000);
+    gc_init(256 * 1000);
+    <file.stringLiterals:initStringLiterals()>
 }
 
 <functionDefinitions>
@@ -29,6 +34,11 @@ struct <struct.name> {
     <struct.nested:struct(); separator="\n">
     <struct.vars:variableDeclaration(); separator="\n">
 }>>
+
+
+initStringLiterals(lits) ::= <<
+<lits: {lit |_string_literals[<lit.id>] = new_String(<lit.text>);}>
+>>
 
 
 FunctionDeclarations(funcs) ::= <<

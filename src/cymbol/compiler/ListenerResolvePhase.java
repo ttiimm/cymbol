@@ -14,7 +14,8 @@ import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.Expr_UnaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
 import cymbol.compiler.CymbolParser.ParameterContext;
-import cymbol.compiler.CymbolParser.PrimaryContext;
+import cymbol.compiler.CymbolParser.PrimContext;
+import cymbol.compiler.CymbolParser.Prim_StringContext;
 import cymbol.compiler.CymbolParser.PrimitiveTypeContext;
 import cymbol.compiler.CymbolParser.StructMemberContext;
 import cymbol.compiler.CymbolParser.VarDeclarationContext;
@@ -135,7 +136,12 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void enterPrimary(PrimaryContext ctx) {
+    public void enterPrim_String(Prim_StringContext ctx) {
+        setType(ctx);
+    }
+
+    @Override
+    public void enterPrim(PrimContext ctx) {
         setType(ctx);
     }
 

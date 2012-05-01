@@ -24,6 +24,14 @@ public class TestBuildPhase {
     }
 
     @Test
+    public void stringLiteral() {
+        String source = "String s = \"hi\";";
+        SourceFile src = runCompilerOn(source);
+        assertEquals("_string_literals[0]", src.stringLiterals.get(0).getLiteral());
+        assertEquals("_string_literals[0]->elements", src.stringLiterals.get(0).underlying());
+    }
+
+    @Test
     public void var() {
         String source = "int x;";
         SourceFile src = runCompilerOn(source);
