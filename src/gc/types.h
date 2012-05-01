@@ -36,24 +36,3 @@ TypeDescriptor Array_type;
 typedef Array String;
 /* String_type set to Array_type in gc_init() */
 TypeDescriptor String_type;
-
-
-typedef struct User {
-  TypeDescriptor *type;
-  byte *forward;
-  int id;
-  String *name;
-} User;
-
-TypeDescriptor User_type;
-
-
-/* Used for testing cycles */ 
-typedef struct Node {
-  TypeDescriptor *type;
-  byte *forward;
-  char *payload;
-  struct Node *neighbor;
-} Node;
-
-TypeDescriptor Node_type;
