@@ -52,4 +52,16 @@ Array *new_Array();
 typedef Array String;
 /* String_type set to Array_type in gc_init() */
 TypeDescriptor String_type;
-String *new_String();
+String *new_String(char *str);
+
+
+
+/**
+ * Allocation
+ */
+Object *alloc(TypeDescriptor *type);
+Array  *alloc_Array(int len, int type);
+String *alloc_String(int len);
+int align(int size);
+int sizeof_array(int len, int type);
+

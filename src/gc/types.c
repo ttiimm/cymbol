@@ -14,7 +14,7 @@ TypeDescriptor Array_type = {
 
 Array *new_Array(int len, int array_type)
 {
-  return alloc_array(len, array_type);
+  return alloc_Array(len, array_type);
 }
 
 void add_to(Array *array, int index, Object *obj)

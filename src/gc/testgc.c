@@ -76,7 +76,7 @@ void test_heap_dump()
 
   s = new_String("tim");
   u = new_User(103, s);
-  a = (Array *) alloc_array(2, ARRAY_POINTER);
+  a = (Array *) alloc_Array(2, ARRAY_POINTER);
   ((void **) a->elements)[0] = s;
   ((void **) a->elements)[1] = u;
 
@@ -342,7 +342,7 @@ void test_alloc_outofmemory()
   GC_RESTORE_RP;
 }
 
-int main()
+int main1()
 {
   if(!gc_init(1000))
     return EXIT_FAILURE;

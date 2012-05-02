@@ -1,3 +1,4 @@
+
 #include "types-usr.h"
 
 /**
@@ -19,16 +20,6 @@ byte *heap_address();
 int heap_free();
 int heap_allocated();
 void heap_dump(char *buf);
-
-
-/**
- * Allocation
- */
-Object *alloc(TypeDescriptor *type);
-Array  *alloc_array(int len, int type);
-String *alloc_String(int len);
-int align(int size);
-int sizeof_array(int len, int type);
 
 
 /**

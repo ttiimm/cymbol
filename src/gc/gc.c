@@ -319,7 +319,7 @@ Object *alloc(TypeDescriptor *type)
 
 /* len
        length of the array to alloc */
-Array *alloc_array(int len, int type)
+Array *alloc_Array(int len, int type)
 {
   Array *array;
   array = alloc_space(sizeof_array(len, type));
@@ -342,7 +342,7 @@ Array *alloc_array(int len, int type)
 String *alloc_String(int len)
 {
   String *s;
-  s = alloc_array(len, ARRAY_CHAR);
+  s = alloc_Array(len, ARRAY_CHAR);
 
   if(s == NULL)
     return NULL;
@@ -387,7 +387,7 @@ void copy_array(Array **old)
   void *new_elements;
 
   old_array = *old;
-  new = alloc_array(old_array->length, old_array->array_type);
+  new = alloc_Array(old_array->length, old_array->array_type);
   new_elements = new->elements;
   (*old)->forward = (byte *) new;
   memcpy(new, *old, sizeof(Array));
