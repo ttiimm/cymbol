@@ -17,8 +17,11 @@ String *_string_literals[<file.stringLiteralSize>];
 
 <file.vars:variableDeclaration(); separator="\n">
 void _main() {
+    int i;
     gc_init(256 * 1000);
     <file.stringLiterals:initStringLiterals()>
+    for(i = 0; i \< <file.stringLiteralSize>; i++)
+        ADD_ROOT(_string_literals[i]);
 }
 
 <functionDefinitions>
