@@ -25,19 +25,6 @@ typedef struct User {
   String *name;
 } User;
 
-TypeDescriptor User_type;
-User *new_User(int id, String *name);
-
-/* Used for testing cycles */
-typedef struct Node {
-  TypeDescriptor *type;
-  byte *forward;
-  char *payload;
-  struct Node *neighbor;
-} Node;
-
-TypeDescriptor Node_type;
-
 int user_field_offsets[1] = { offsetof(User, name) };
 
 /* sample def of User object (id, name) */
@@ -59,6 +46,13 @@ User *new_User(int id, String *name)
   return u;
 }
 
+/* Used for testing cycles */
+typedef struct Node {
+  TypeDescriptor *type;
+  byte *forward;
+  char *payload;
+  struct Node *neighbor;
+} Node;
 
 int node_field_offsets[1] = {offsetof(Node, neighbor)};
 
@@ -404,7 +398,7 @@ void test_alloc_outofmemory()
   GC_RESTORE_RP;
 }
 
-int main1()
+int main()
 {
   if(!gc_init(1000))
     return EXIT_FAILURE;

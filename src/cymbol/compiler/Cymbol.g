@@ -86,6 +86,7 @@ expr
   | expr o=('*' | '/') expr                             -> expr_Binary
   | expr o=('+' | '-') expr                             -> expr_Binary
   | expr o=('!=' | '==' | '<' | '>' | '<=' | '>=') expr -> expr_Binary
+  | 'new' expr '(' (expr (',' expr)* )? ')'             -> expr_New
   | primary                                             -> expr_Primary 
   | '(' expr ')'                                        -> expr_Group
   ;

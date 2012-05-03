@@ -52,6 +52,14 @@ public class TestParser {
         assertEquals(expect, t);
     }
 
+    @Test
+    public void newExpr() {
+        String source = "Integer i = new Integer();";
+        String t = runTest(source);
+        String expect = "(compilationUnit (varDeclaration (type Integer) i = (expr new (expr (primary Integer)) ( )) ;))";
+        assertEquals(expect, t);
+    }
+
     public String runTest(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);
         Compiler c = new Compiler(in);

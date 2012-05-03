@@ -26,12 +26,23 @@ public class VariableDeclaration extends OutputModelObject {
     public void add(Expression expr) {
         this.expr = expr;
     }
+    
+    public String getTypeName() {
+        return capitalize(type.getName());
+    }
 
     @Override
     public String toString() {
-        String left = type.getName() + " " + name;
+        String typeName = capitalize(type.getName());
+        String left = typeName + " " + name;
         if(isArray) { left += "[]"; }
         String right = expr != null ? " = " + expr.getExpr() : "";
         return left + right + ";";
+    }
+
+    private String capitalize(String str) {
+        String firstLetter = str.substring(0, 1);
+        String rest = str.substring(1);
+        return firstLetter.toUpperCase() + rest;
     }
 }

@@ -11,9 +11,10 @@ SourceFile(file, functionDeclarations, functionDefinitions) ::= <<
 #include "gc.h"
 
 <file.structs:struct(); separator="\n">
+
 void _main();
 <functionDeclarations>
-String *_string_literals[<file.stringLiteralSize>];
+String *_String_literals[<file.stringLiteralSize>];
 
 <file.vars:variableDeclaration(); separator="\n">
 void _main() {
@@ -29,18 +30,47 @@ void _main() {
 
 
 variableDeclaration(var) ::= <<
-<var.type.name> <var.name><if(var.expr)> = <var.expr><endif>;>>
+<var.typeName> *<var.name><if(var.expr)> = <var.expr><endif>;>>
 
 
 struct(struct) ::= <<
-struct <struct.name> {
-    <struct.nested:struct(); separator="\n">
-    <struct.vars:variableDeclaration(); separator="\n">
-}>>
+<structDecl(struct)>
 
+<structTypeDescription(struct)>
+
+<structConstructor(struct)>
+>>
+
+structDecl(struct) ::= <<
+typedef struct <struct.name> {
+    <struct.nested:struct(); separator="\n">
+    TypeDescriptor *type;
+    byte *forward;
+    <struct.vars:variableDeclaration(); separator="\n">
+} <struct.name>;
+>>
+
+structTypeDescription(struct) ::= <<
+int <struct.name>_field_offsets[<struct.numVars>] = {
+    <struct.vars: {var | offsetof(<struct.name>, <var.name>)}; separator=",\n">
+}
+
+TypeDescriptor <struct.name>_type = {
+    "<struct.name>",
+    sizeof(<struct.name>),
+    <struct.numVars>,
+    <struct.name>_field_offsets
+}
+>>
+
+structConstructor(struct) ::= <<
+<struct.name> *new_<struct.name>() {
+    return alloc(&<struct.name>_type);
+}
+>>
 
 initStringLiterals(lits) ::= <<
-<lits: {lit |_string_literals[<lit.id>] = new_String(<lit.text>);}>
+<lits: {lit |_String_literals[<lit.id>] = new_String(<lit.text>);}>
 >>
 
 

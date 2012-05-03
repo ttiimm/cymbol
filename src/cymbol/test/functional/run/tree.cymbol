@@ -1,0 +1,11 @@
+
+struct Tree {
+  Tree left;
+  Tree right;
+  int value;
+}
+
+void main() {
+  Tree fifty = new Tree();
+  fifty.value = 50;
+}

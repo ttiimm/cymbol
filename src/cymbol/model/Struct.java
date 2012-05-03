@@ -28,6 +28,10 @@ public class Struct extends OutputModelObject {
            }
        }
     }
+    
+    public int getNumVars() {
+        return vars.size();
+    }
 
     @Override
     public String toString() {
