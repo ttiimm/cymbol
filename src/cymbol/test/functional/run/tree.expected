@@ -1,0 +1,63 @@
+/**
+ * Cymbol generated C
+ * src/cymbol/test/functional/run/tree.cymbol
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
+
+#include "gc.h"
+
+typedef struct Tree {
+    TypeDescriptor *type;
+    byte *forward;
+    struct Tree *left;
+    struct Tree *right;
+    Int *value;
+} Tree;
+
+int Tree_field_offsets[3] = {
+    offsetof(Tree, left),
+    offsetof(Tree, right),
+    offsetof(Tree, value)
+};
+
+TypeDescriptor Tree_type = {
+    "Tree",
+    sizeof(Tree),
+    3,
+    Tree_field_offsets
+};
+
+Tree *new_Tree() {
+    return (Tree *) alloc(&Tree_type);
+}
+
+void _main();
+void main();
+
+String *_String_literals[0];
+Int *_Int_literals[1];
+
+void _main() {
+    int i;
+    gc_init(256 * 1000);
+
+    for(i = 0; i < 0; i++)
+        ADD_ROOT(_String_literals[i]);
+
+    _Int_literals[0] = new_Int(50);
+    for(i = 0; i < 1; i++)
+        ADD_ROOT(_Int_literals[i]);
+}
+
+void main() {
+    GC_SAVE_RP;
+    _main();
+    Tree *fifty = new_Tree();
+    ADD_ROOT(fifty);
+    fifty->value = _Int_literals[0];
+    GC_RESTORE_RP;
+}
