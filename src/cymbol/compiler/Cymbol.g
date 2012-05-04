@@ -93,7 +93,7 @@ expr
 
 primary
 	: ID      -> prim
-	| INT     -> prim
+	| INT     -> prim_Int
 	| FLOAT   -> prim
 	| CHAR    -> prim
 	| 'true'  -> prim

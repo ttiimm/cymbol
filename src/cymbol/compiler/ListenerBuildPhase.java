@@ -16,9 +16,11 @@ import cymbol.compiler.CymbolParser.Expr_BinaryContext;
 import cymbol.compiler.CymbolParser.Expr_CallContext;
 import cymbol.compiler.CymbolParser.Expr_GroupContext;
 import cymbol.compiler.CymbolParser.Expr_MemberContext;
+import cymbol.compiler.CymbolParser.Expr_NewContext;
 import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.Expr_UnaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
+import cymbol.compiler.CymbolParser.Prim_IntContext;
 import cymbol.compiler.CymbolParser.Prim_StringContext;
 import cymbol.compiler.CymbolParser.StatContext;
 import cymbol.compiler.CymbolParser.Stat_AssignContext;
@@ -49,6 +51,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     private ScopeUtil scopes;
     public ParseTreeProperty<OutputModelObject> models;
     public List<Literal> stringLiterals = new ArrayList<Literal>();
+    public List<Literal> intLiterals = new ArrayList<Literal>();
     private String sourceName;
     
     public ListenerBuildPhase(ScopeUtil scopes, ParseTreeProperty<OutputModelObject> models, String sourceName) {
@@ -65,6 +68,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         src.addAll(getAll(ctx.getRuleContexts(StructDeclarationContext.class)));
         src.addAll(getAll(ctx.getRuleContexts(MethodDeclarationContext.class)));
         src.stringLiterals = stringLiterals;
+        src.intLiterals = intLiterals;
         
         models.put(ctx, src);
     }
@@ -231,11 +235,24 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     }
 
     @Override
+    public void exitExpr_New(Expr_NewContext ctx) {
+        System.out.println(ctx);
+    }
+
+    @Override
     public void exitExpr_Primary(Expr_PrimaryContext ctx) {
         ParserRuleContext<Token> sl = ctx.getChild(Prim_StringContext.class, 0);
         OutputModelObject literal = models.get(sl);
         Expression primary = literal != null ? new Expression(literal) : new Expression(ctx.getStart().getText());
         models.put(ctx, primary);
+    }
+
+    @Override
+    public void exitPrim_Int(Prim_IntContext ctx) {
+        int id = intLiterals.size();
+        Literal literal = new Literals.IntLiteral(ctx.getStart().getText(), id);
+        intLiterals.add(literal);
+        models.put(ctx, literal);
     }
 
     @Override

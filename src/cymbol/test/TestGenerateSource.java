@@ -32,13 +32,18 @@ public class TestGenerateSource {
                           "void main();\n" + 
                           "\n" + 
                           "String *_String_literals[1];\n" + 
+                          "Int *_Int_literals[0];\n" + 
                           "\n" + 
                           "void _main() {\n" +
                           "    int i;\n" + 
                           "    gc_init(256 * 1000);\n" +
+                          "\n" +
                           "    _String_literals[0] = new_String(\"hello world\\n\");\n" +
                           "    for(i = 0; i < 1; i++)\n" +
-                          "        ADD_ROOT(_string_literals[i]);\n" +
+                          "        ADD_ROOT(_String_literals[i]);\n" +
+                          "\n" +
+                          "    for(i = 0; i < 0; i++)\n" +
+                          "        ADD_ROOT(_Int_literals[i]);\n" +
                           "}\n" +
                           "\n" +
                           "void main() {\n" + 
@@ -115,7 +120,8 @@ public class TestGenerateSource {
                           "\n" +
                           "void main() {\n" + 
                           "    GC_SAVE_RP;\n" +
-                          "    Tree fifty = new_Tree();\n" +
+                          "    Tree *fifty = new_Tree();\n" +
+                          "    ADD_ROOT(fifty);\n" +
                           "    fifty->value = _Int_literals[1]->value;\n" +
                           "    GC_RESTORE_RP;\n" +
                           "}\n";

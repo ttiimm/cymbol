@@ -17,6 +17,7 @@ public class SourceFile extends OutputModelObject {
     public List<VariableDeclaration> vars = new ArrayList<VariableDeclaration>();
     
     public List<Literal> stringLiterals = new ArrayList<Literal>();
+    public List<Literal> intLiterals = new ArrayList<Literal>();
     
     @ModelElement public List<FunctionDeclarations> functionDeclarations = new ArrayList<FunctionDeclarations>();
     @ModelElement public List<FunctionDefinitions> functionDefinitions = new ArrayList<FunctionDefinitions>();
@@ -49,6 +50,10 @@ public class SourceFile extends OutputModelObject {
     
     public int getStringLiteralSize() {
         return stringLiterals.size();
+    }
+    
+    public int getIntLiteralSize() {
+        return intLiterals.size();
     }
     
     public class FunctionDeclarations extends MethodFunction {
