@@ -120,9 +120,10 @@ public class TestGenerateSource {
                           "\n" +
                           "void main() {\n" + 
                           "    GC_SAVE_RP;\n" +
+                          "    _main();\n" +
                           "    Tree *fifty = new_Tree();\n" +
                           "    ADD_ROOT(fifty);\n" +
-                          "    fifty->value = _Int_literals[1]->value;\n" +
+                          "    fifty->value = _Int_literals[0]->value;\n" +
                           "    GC_RESTORE_RP;\n" +
                           "}\n";
         

@@ -23,7 +23,8 @@ public class Block extends OutputModelObject {
         if(omo instanceof Struct) {
             structs.add((Struct) omo);
         } else if(omo instanceof VariableDeclaration) {
-            vars.add((VariableDeclaration) omo);
+            statements.add((VariableDeclaration) omo);
+            statements.add(new AddRoot((VariableDeclaration) omo));
         } else {
             statements.add(omo);
         }

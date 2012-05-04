@@ -2,6 +2,7 @@ package cymbol.model;
 
 import org.antlr.v4.codegen.model.OutputModelObject;
 
+import cymbol.model.Expressions.Expression;
 import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
@@ -34,7 +35,7 @@ public class VariableDeclaration extends OutputModelObject {
     @Override
     public String toString() {
         String typeName = capitalize(type.getName());
-        String left = typeName + " " + name;
+        String left = typeName + " *" + name;
         if(isArray) { left += "[]"; }
         String right = expr != null ? " = " + expr.getExpr() : "";
         return left + right + ";";

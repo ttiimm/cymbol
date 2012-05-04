@@ -33,7 +33,9 @@ import cymbol.compiler.CymbolParser.StatementContext;
 import cymbol.compiler.CymbolParser.StructDeclarationContext;
 import cymbol.compiler.CymbolParser.VarDeclarationContext;
 import cymbol.model.Block;
-import cymbol.model.Expression;
+import cymbol.model.Expressions.ConstructorExpression;
+import cymbol.model.Expressions.Expression;
+import cymbol.model.Expressions.GenericExpression;
 import cymbol.model.Literals;
 import cymbol.model.Literals.Literal;
 import cymbol.model.MethodFunction;
@@ -107,13 +109,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     @Override
     public void exitBlock(BlockContext ctx) {
         Block block = new Block();
-        List<OutputModelObject> vars = getAll(ctx.getRuleContexts(Stat_VarDeclContext.class));
-        block.addAll(vars);
-        List<OutputModelObject> structs = getAll(ctx.getRuleContexts(Stat_StructDeclContext.class));
-        block.addAll(structs);
         List<OutputModelObject> all = getAll(ctx.getRuleContexts(StatementContext.class));
-        all.removeAll(vars);
-        all.removeAll(structs);
         block.addAll(all);
         models.put(ctx, block);
     }
@@ -160,7 +156,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     public void exitStat_Assign(Stat_AssignContext ctx) {
         Expression left = (Expression) models.get(ctx.expr(0));
         Expression right = (Expression) models.get(ctx.expr(1));
-        Statement assign = new Statement(left.getExpr() + " = " + right.getExpr() + ";");
+        Statement assign = new Statement(left.getExpr() + " = " + right.getLiteralExpr() + ";");
         models.put(ctx, assign);
     }
     
@@ -173,32 +169,15 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     
     @Override
     public void exitExpr_Call(Expr_CallContext ctx) {
-        StringBuilder sb = new StringBuilder();
-        Expression method = (Expression) models.get(ctx.expr(0));
-        String funcName = method.getExpr();
-        sb.append(funcName + "(");
-        List<? extends ExprContext> args = ctx.expr();
-        
-        for(int i = 1; i < args.size(); i++) {
-            Expression arg = (Expression) models.get(args.get(i));
-            sb.append(arg.getLiteralExpr() + ", ");
-        }
-        
-        if(args.size() > 1) {
-            sb.setLength(sb.length() - 2);
-            sb.append(")");
-        } else {
-            sb.append(")");            
-        }
-        
-        models.put(ctx, new Expression(sb.toString()));
+        String call_expr = buildCallString(ctx);
+        models.put(ctx, new GenericExpression(call_expr));
     }
 
     @Override
     public void exitExpr_Array(Expr_ArrayContext ctx) {
         Expression array = (Expression) models.get(ctx.expr(0));
         Expression index = (Expression) models.get(ctx.expr(1));
-        OutputModelObject access = new Expression(array.getExpr() + "[" + index.getExpr() + "]");
+        OutputModelObject access = new GenericExpression(array.getExpr() + "[" + index.getExpr() + "]");
         models.put(ctx, access);
     }
 
@@ -206,15 +185,15 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     public void exitExpr_Member(Expr_MemberContext ctx) {
         Expression struct = (Expression) models.get(ctx.expr(0));
         Expression member = (Expression) models.get(ctx.getChild(2));
-        String accessOp = ctx.o.getText();
-        OutputModelObject memberAccess = new Expression(struct.getExpr() + accessOp + member.getExpr());
+        String accessOp = "->";
+        OutputModelObject memberAccess = new GenericExpression(struct.getExpr() + accessOp + member.getExpr());
         models.put(ctx, memberAccess);
     }
 
     @Override
     public void exitExpr_Unary(Expr_UnaryContext ctx) {
         Expression expr = (Expression) models.get(ctx.expr());
-        OutputModelObject unary = new Expression(ctx.start.getText() + expr.getExpr());
+        OutputModelObject unary = new GenericExpression(ctx.start.getText() + expr.getExpr());
         models.put(ctx, unary);
     }
 
@@ -223,27 +202,30 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         Expression left = (Expression) models.get(ctx.expr(0));
         Expression right = (Expression) models.get(ctx.expr(1));
         String theExpression = left.getExpr() + " " + ctx.o.getText() + " " + right.getExpr();
-        OutputModelObject binary = new Expression(theExpression);
+        OutputModelObject binary = new GenericExpression(theExpression);
         models.put(ctx, binary );
     }
 
     @Override
     public void exitExpr_Group(Expr_GroupContext ctx) {
         Expression expr = (Expression) models.get(ctx.expr());
-        Expression group = new Expression("(" + expr.getExpr() + ")");
+        GenericExpression group = new GenericExpression("(" + expr.getExpr() + ")");
         models.put(ctx, group);
     }
 
     @Override
     public void exitExpr_New(Expr_NewContext ctx) {
-        System.out.println(ctx);
+        String constructorCall = buildCallString(ctx);
+        models.put(ctx, new ConstructorExpression(constructorCall));
     }
 
     @Override
     public void exitExpr_Primary(Expr_PrimaryContext ctx) {
         ParserRuleContext<Token> sl = ctx.getChild(Prim_StringContext.class, 0);
+        ParserRuleContext<Token> il = ctx.getChild(Prim_IntContext.class, 0);
         OutputModelObject literal = models.get(sl);
-        Expression primary = literal != null ? new Expression(literal) : new Expression(ctx.getStart().getText());
+        if(literal == null){ literal = models.get(il); }
+        GenericExpression primary = literal != null ? new GenericExpression(literal) : new GenericExpression(ctx.getStart().getText());
         models.put(ctx, primary);
     }
 
@@ -261,6 +243,29 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         Literal literal = new Literals.StringLiteral(ctx.getStart().getText(), id);
         stringLiterals.add(literal);
         models.put(ctx, literal);
+    }
+    
+    
+    private String buildCallString(ParserRuleContext<Token> ctx) {
+        StringBuilder sb = new StringBuilder();
+        Expression method = (Expression) models.get(ctx.getRuleContext(ExprContext.class, 0));
+        String funcName = method.getExpr();
+        sb.append(funcName + "(");
+        List<? extends ExprContext> args = ctx.getRuleContexts(ExprContext.class);
+        
+        for(int i = 1; i < args.size(); i++) {
+            Expression arg = (Expression) models.get(args.get(i));
+            sb.append(arg.getLiteralExpr() + ", ");
+        }
+        
+        if(args.size() > 1) {
+            sb.setLength(sb.length() - 2);
+            sb.append(")");
+        } else {
+            sb.append(")");            
+        }
+        
+        return sb.toString();
     }
 
     private List<OutputModelObject> getAll(List<? extends ParserRuleContext<Token>> ctxs) {
