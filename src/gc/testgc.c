@@ -398,7 +398,7 @@ void test_alloc_outofmemory()
   GC_RESTORE_RP;
 }
 
-int main()
+int main2()
 {
   if(!gc_init(1000))
     return EXIT_FAILURE;

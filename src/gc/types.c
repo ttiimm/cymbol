@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-int array_field_offsets[1] = { offsetof(Array, elements)};
+int array_field_offsets[1] = { offsetof(Array, elements) };
 
 TypeDescriptor Array_type = {
   "Array",
@@ -31,4 +31,21 @@ String *new_String(char *str)
   s = alloc_String(len);
   strcpy(s->elements, str);
   return s;
+}
+
+
+TypeDescriptor Int_type = {
+  "Int",
+  sizeof(Int),
+  0,
+  NULL
+};
+
+Int *new_Int(int value)
+{
+  Int *i;
+  i = (Int *) alloc(&Int_type);
+  i->value = value;
+
+  return i;
 }

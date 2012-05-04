@@ -27,9 +27,10 @@ typedef struct Object {
 #define ARRAY_FLOAT   2
 #define ARRAY_POINTER 3
 
-/* An array of ints, floats, chars, or pointers.
-
-   All pointers must be to objects in the heap.  */
+/**
+ * An array of ints, floats, chars, or pointers.
+ * All pointers must be to objects in the heap.
+ */
 typedef struct Array {
   TypeDescriptor *type;
   byte *forward;
@@ -54,7 +55,14 @@ typedef Array String;
 TypeDescriptor String_type;
 String *new_String(char *str);
 
+typedef struct Int {
+  TypeDescriptor *type;
+  byte *forward;
+  int value;
+} Int;
 
+TypeDescriptor Int_type;
+Int *new_Int();
 
 /**
  * Allocation
