@@ -162,7 +162,7 @@ public class TestBuildPhase {
                 "    1 == 2;" +
                 "}";
         String block = "{\n" +
-                "    _Int_literals[0] == _Int_literals[1];\n" +
+                "    _Int_literals[0]->value == _Int_literals[1]->value;\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -176,7 +176,7 @@ public class TestBuildPhase {
                 "    1 + 2;" +
                 "}";
         String block = "{\n" +
-                "    _Int_literals[0] + _Int_literals[1];\n" +
+                "    _Int_literals[0]->value + _Int_literals[1]->value;\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -190,7 +190,7 @@ public class TestBuildPhase {
                 "    1 * 2;" +
                 "}";
         String block = "{\n" +
-                "    _Int_literals[0] * _Int_literals[1];\n" +
+                "    _Int_literals[0]->value * _Int_literals[1]->value;\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -204,7 +204,7 @@ public class TestBuildPhase {
                 "    -(1 + 2);" +
                 "}";
         String block = "{\n" +
-                "    -(_Int_literals[0] + _Int_literals[1]);\n" +
+                "    -(_Int_literals[0]->value + _Int_literals[1]->value);\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);

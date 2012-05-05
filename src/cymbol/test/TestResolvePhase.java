@@ -30,7 +30,7 @@ public class TestResolvePhase {
         		        "char b;" +
         		        "float c;" +
         		        "struct D { int x; }" +
-        		        "D d;" +
+        		        "D d = null;" +
         		        "boolean e;" +
         		        "int f[];";
         SymbolTable t = runCompilerOn(source).table;

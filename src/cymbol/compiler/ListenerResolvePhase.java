@@ -181,6 +181,8 @@ public class ListenerResolvePhase extends CymbolBaseListener {
             stashType(ctx, SymbolTable.BOOLEAN);            
         } else if (tokenName.equals("void")) {
             stashType(ctx, SymbolTable.VOID);
+        } else if (tokenName.equals("null")) {
+            stashType(ctx, SymbolTable.NULL);
         }
     }
 

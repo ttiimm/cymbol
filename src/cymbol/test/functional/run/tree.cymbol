@@ -5,12 +5,55 @@ struct Tree {
   int payload;
 }
 
-void print(Tree tree) {
-    printf("%d\n", tree.payload);
+Tree insert(Tree parent, Tree in) {
+    if(parent == null)  {
+        return in;
+    } else if(in.payload < parent.payload) {
+        parent.left = insert(parent.left, in);
+    } else if(in.payload > parent.payload) {
+        parent.right = insert(parent.right, in);
+    }
+    
+    return parent;
+}
+
+void print_inorder(Tree tree) {
+    if(tree == null) {
+        return;
+    } else {
+        print_inorder(tree.left);
+        printf("%d ", tree.payload);
+        print_inorder(tree.right);
+    }
 }
 
 void main() {
-  Tree fifty = new Tree();
-  fifty.payload = 50;
-  print(fifty);
+    Tree root = new Tree();
+    root.payload = 50;
+    Tree sixty = new Tree();
+    sixty.payload = 60;
+    Tree seventy = new Tree();
+    seventy.payload = 70;
+    Tree ninety = new Tree();
+    ninety.payload = 90;
+    Tree eighty = new Tree();
+    eighty.payload = 80;
+    Tree fourty = new Tree();
+    fourty.payload = 40;
+    Tree thirty = new Tree();
+    thirty.payload = 30;
+    Tree ten = new Tree();
+    ten.payload = 10;
+    Tree twenty = new Tree();
+    twenty.payload = 20;
+      
+    insert(root, sixty);
+    insert(root, seventy);
+    insert(root, ninety);
+    insert(root, eighty);
+    insert(root, fourty);
+    insert(root, thirty);
+    insert(root, ten);
+    insert(root, twenty);
+    print_inorder(root);
 }

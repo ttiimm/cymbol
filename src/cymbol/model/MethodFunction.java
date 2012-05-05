@@ -8,6 +8,7 @@ import org.antlr.v4.codegen.model.OutputModelObject;
 
 import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Symbol;
+import cymbol.symtab.SymbolTable;
 import cymbol.symtab.Type;
 
 public class MethodFunction extends OutputModelObject {
@@ -40,6 +41,10 @@ public class MethodFunction extends OutputModelObject {
         }
     }
 
+    public String getReturnPointer() {
+        return type == SymbolTable.VOID ? "" : "*";
+    }
+    
     @Override
     public String toString() {
         return type.getName() + " " + name + args;

@@ -78,10 +78,12 @@ structConstructor(struct) ::= <<
 
 initStringLiterals(lits) ::= <<
 <lits: {lit |_String_literals[<lit.id>] = new_String(<lit.text>);}>
+
 >>
 
 initIntLiterals(lits) ::= <<
 <lits: {lit |_Int_literals[<lit.id>] = new_Int(<lit.text>);}>
+
 >>
 
 
@@ -98,7 +100,7 @@ FunctionDefinitions(funcs) ::= <<
 
 
 signature(func) ::= <<
-<func.type.name> <func.name>(<func.args: {arg | <arg.type.name> *<arg.name>}; separator=", ">)>>
+<func.type.name> <func.returnPointer><func.name>(<func.args: {arg | <arg.type.name> *<arg.name>}; separator=", ">)>>
 
 
 Block(block) ::= <<

@@ -45,6 +45,7 @@ public class TestGenerateSource {
                           "    gc_init(256 * 1000);\n" +
                           "\n" +
                           "    _String_literals[0] = new_String(\"hello world\\n\");\n" +
+                          "\n" +
                           "    for(i = 0; i < 1; i++)\n" +
                           "        ADD_ROOT(_String_literals[i]);\n" +
                           "\n" +

@@ -199,7 +199,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     @Override
     public void exitExpr_Unary(Expr_UnaryContext ctx) {
         Expression expr = (Expression) models.get(ctx.expr());
-        OutputModelObject unary = new GenericExpression(ctx.start.getText() + expr.getExpr());
+        OutputModelObject unary = new GenericExpression(ctx.start.getText() + expr.getPrimitiveExpr());
         models.put(ctx, unary);
     }
 
@@ -207,7 +207,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
     public void exitExpr_Binary(Expr_BinaryContext ctx) {
         Expression left = (Expression) models.get(ctx.expr(0));
         Expression right = (Expression) models.get(ctx.expr(1));
-        String theExpression = left.getExpr() + " " + ctx.o.getText() + " " + right.getExpr();
+        String theExpression = left.getPrimitiveExpr() + " " + ctx.o.getText() + " " + right.getPrimitiveExpr();
         OutputModelObject binary = new GenericExpression(theExpression);
         models.put(ctx, binary );
     }

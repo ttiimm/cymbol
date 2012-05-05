@@ -97,13 +97,14 @@ primary
 	| FLOAT   -> prim
 	| CHAR    -> prim
 	| 'true'  -> prim
-	| 'false' -> prim                
+	| 'false' -> prim
+	| 'null'  -> prim                
 	| STRING  -> prim_String
 	;
 
 // LEXER RULES
 
-ID: LETTER (LETTER | '0'..'9')* ;
+ID: LETTER (LETTER | '0'..'9' | '_')* ;
 
 fragment
 LETTER: ('a'..'z' | 'A'..'Z') ;
