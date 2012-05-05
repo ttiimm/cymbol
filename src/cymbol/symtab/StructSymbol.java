@@ -33,6 +33,11 @@ public class StructSymbol extends ScopedSymbol implements Type, Scope {
     }
 
     @Override
+    public boolean isPrimitive() {
+        return false;
+    }
+    
+    @Override
     public String toString() {
         return "struct " + name + ":{"
                 + stripBrackets(fields.keySet().toString()) + "}";

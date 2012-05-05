@@ -6,7 +6,7 @@ import java.util.List;
 import org.antlr.v4.codegen.model.ModelElement;
 import org.antlr.v4.codegen.model.OutputModelObject;
 
-import cymbol.model.Literals.Literal;
+import cymbol.model.Primitives.Primitive;
 import cymbol.symtab.Symbol;
 
 public class SourceFile extends OutputModelObject {
@@ -16,8 +16,8 @@ public class SourceFile extends OutputModelObject {
     public List<Struct> structs = new ArrayList<Struct>();
     public List<VariableDeclaration> vars = new ArrayList<VariableDeclaration>();
     
-    public List<Literal> stringLiterals = new ArrayList<Literal>();
-    public List<Literal> intLiterals = new ArrayList<Literal>();
+    public List<Primitive> stringLiterals = new ArrayList<Primitive>();
+    public List<Primitive> intLiterals = new ArrayList<Primitive>();
     
     @ModelElement public List<FunctionDeclarations> functionDeclarations = new ArrayList<FunctionDeclarations>();
     @ModelElement public List<FunctionDefinitions> functionDefinitions = new ArrayList<FunctionDefinitions>();

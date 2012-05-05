@@ -13,6 +13,7 @@ import cymbol.model.SourceFile;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
 import cymbol.symtab.Scope;
+import cymbol.symtab.Type;
 
 public class TestBuildPhase {
 
@@ -27,8 +28,8 @@ public class TestBuildPhase {
     public void stringLiteral() {
         String source = "String s = \"hi\";";
         SourceFile src = runCompilerOn(source);
-        assertEquals("_String_literals[0]", src.stringLiterals.get(0).getLiteral());
-        assertEquals("_String_literals[0]->elements", src.stringLiterals.get(0).underlying());
+        assertEquals("_String_literals[0]", src.stringLiterals.get(0).getObj());
+        assertEquals("_String_literals[0]->elements", src.stringLiterals.get(0).getPrimitive());
     }
 
     @Test
@@ -253,7 +254,7 @@ public class TestBuildPhase {
         String block = "{\n" +
                        "    Int *a[];\n" +
                        "    ADD_ROOT(a);\n" +
-                       "    a[_Int_literals[0]];\n" +
+                       "    a[_Int_literals[0]->value];\n" +
                        "}\n";
         
         SourceFile src = runCompilerOn(source);
@@ -357,8 +358,8 @@ public class TestBuildPhase {
         in.name = "<String>";
         Compiler c = new Compiler(in);
         ParseTreeProperty<Scope> scopes = c.define();
-        c.resolve(scopes);
-        SourceFile src = c.build(scopes);
+        ParseTreeProperty<Type> types = c.resolve(scopes);
+        SourceFile src = c.build(scopes, types);
         
         return src;
     }

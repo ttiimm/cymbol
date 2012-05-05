@@ -60,6 +60,14 @@ public class TestParser {
         assertEquals(expect, t);
     }
 
+    @Test
+    public void memberAccess() {
+        String source = "void foo() { tree.child = 5; }";
+        String t = runTest(source);
+        String expect = "(compilationUnit (methodDeclaration (type (primitiveType void)) foo ( ) (block { (statement (expr (expr (primary tree)) . (expr (primary child))) = (expr (primary 5)) ;) })))";
+        assertEquals(expect, t);
+    }
+
     public String runTest(String source) {
         ANTLRInputStream in = new ANTLRInputStream(source);
         Compiler c = new Compiler(in);

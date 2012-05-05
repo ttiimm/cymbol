@@ -2,10 +2,11 @@
 struct Tree {
   Tree left;
   Tree right;
-  int value;
+  int payload;
 }
 
 void main() {
   Tree fifty = new Tree();
-  fifty.value = 50;
+  fifty.payload = 50;
+  printf("%d\n", fifty.payload);
 }

@@ -15,6 +15,7 @@ import cymbol.compiler.Compiler;
 import cymbol.model.ModelTemplateWalker;
 import cymbol.model.SourceFile;
 import cymbol.symtab.Scope;
+import cymbol.symtab.Type;
 
 public class TestGenerateSource {
 
@@ -78,9 +79,7 @@ public class TestGenerateSource {
     }
     
     /**
-     * 
      * http://stackoverflow.com/questions/326390/how-to-create-a-java-string-from-the-contents-of-a-file
-     * 
      */
     private String readFile(String pathname) throws IOException {
         File file = new File(pathname);
@@ -105,8 +104,8 @@ public class TestGenerateSource {
         in.name = "<Test>";
         Compiler c = new Compiler(in);
         ParseTreeProperty<Scope> scopes = c.define();
-        c.resolve(scopes);
-        SourceFile src = c.build(scopes);
+        ParseTreeProperty<Type> types = c.resolve(scopes);
+        SourceFile src = c.build(scopes, types);
         ModelTemplateWalker walker = new ModelTemplateWalker(c);
         return walker.walk(src);
     }

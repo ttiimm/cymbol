@@ -37,7 +37,7 @@ public class VariableDeclaration extends OutputModelObject {
         String typeName = capitalize(type.getName());
         String left = typeName + " *" + name;
         if(isArray) { left += "[]"; }
-        String right = expr != null ? " = " + expr.getObj() : "";
+        String right = expr != null ? " = " + expr.getExpr() : "";
         return left + right + ";";
     }
 

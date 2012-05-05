@@ -65,8 +65,8 @@ public class Compiler {
 
     public SourceFile compile() {
         ParseTreeProperty<Scope> scopes = define();
-        resolve(scopes);
-        SourceFile src = build(scopes);
+        ParseTreeProperty<Type> types = resolve(scopes);
+        SourceFile src = build(scopes, types);
         
         if(errors.size() > 0) { return null; }
         else { return src; }
@@ -86,10 +86,11 @@ public class Compiler {
         return refl.types;
     }
     
-    public SourceFile build(ParseTreeProperty<Scope> scopes) {
+    public SourceFile build(ParseTreeProperty<Scope> scopes, ParseTreeProperty<Type> types) {
         ParseTreeWalker walker = new ParseTreeWalker();
         ParseTreeProperty<OutputModelObject> models = new ParseTreeProperty<OutputModelObject>();
-        ListenerBuildPhase builder = new ListenerBuildPhase(new ScopeUtil(this, scopes), models, sourceName);
+        ScopeUtil scopeUtil = new ScopeUtil(this, scopes);
+        ListenerBuildPhase builder = new ListenerBuildPhase(scopeUtil, types, models, sourceName);
         walker.walk(builder, tree);
         return (SourceFile) models.get(tree);
     }
