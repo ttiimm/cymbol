@@ -27,6 +27,7 @@ public class TestGenerateSource {
                           "\n" +
                           "#include <stdio.h>\n" + 
                           "#include <stdlib.h>\n" + 
+                          "#include <stddef.h>\n" + 
                           "#include <string.h>\n" + 
                           "\n" + 
                           "#include \"gc.h\"\n" + 

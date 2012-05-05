@@ -1,6 +1,6 @@
 /**
  * Cymbol generated C
- * src/cymbol/test/functional/run/tree.cymbol
+ * <Test>
  */
 
 #include <stdio.h>
@@ -15,7 +15,7 @@ typedef struct Tree {
     byte *forward;
     struct Tree *left;
     struct Tree *right;
-    Int *value;
+    struct Int *value;
 } Tree;
 
 int Tree_field_offsets[3] = {
