@@ -27,8 +27,8 @@ public class TestBuildPhase {
     public void stringLiteral() {
         String source = "String s = \"hi\";";
         SourceFile src = runCompilerOn(source);
-        assertEquals("_string_literals[0]", src.stringLiterals.get(0).getLiteral());
-        assertEquals("_string_literals[0]->elements", src.stringLiterals.get(0).underlying());
+        assertEquals("_String_literals[0]", src.stringLiterals.get(0).getLiteral());
+        assertEquals("_String_literals[0]->elements", src.stringLiterals.get(0).underlying());
     }
 
     @Test
@@ -36,7 +36,7 @@ public class TestBuildPhase {
         String source = "int x;";
         SourceFile src = runCompilerOn(source);
         VariableDeclaration var = src.vars.get(0);
-        assertEquals("int x;", var.toString());
+        assertEquals("Int *x;", var.toString());
     }
 
     @Test
@@ -44,7 +44,7 @@ public class TestBuildPhase {
         String source = "int x = 1;";
         SourceFile src = runCompilerOn(source);
         VariableDeclaration var = src.vars.get(0);
-        assertEquals("int x = 1;", var.toString());
+        assertEquals("Int *x = _Int_literals[0];", var.toString());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class TestBuildPhase {
         String source = "int x[];";
         SourceFile src = runCompilerOn(source);
         VariableDeclaration var = src.vars.get(0);
-        assertEquals("int x[];", var.toString());
+        assertEquals("Int *x[];", var.toString());
     }
 
     @Test
@@ -60,9 +60,9 @@ public class TestBuildPhase {
         String source = "int x; int y;";
         SourceFile src = runCompilerOn(source);
         VariableDeclaration x = src.vars.get(0);
-        assertEquals("int x;", x.toString());
+        assertEquals("Int *x;", x.toString());
         VariableDeclaration y = src.vars.get(1);
-        assertEquals("int y;", y.toString());
+        assertEquals("Int *y;", y.toString());
     }
 
     
@@ -72,7 +72,7 @@ public class TestBuildPhase {
         SourceFile src = runCompilerOn(source);
         Struct struct = src.structs.get(0);
         assertEquals("A", struct.name);
-        assertEquals("int x;", struct.vars.get(0).toString());
+        assertEquals("Int *x;", struct.vars.get(0).toString());
     }
     
     @Test
@@ -83,7 +83,7 @@ public class TestBuildPhase {
         assertEquals("A", struct.name);
         Struct nested = struct.nested.get(0);
         assertEquals("B", nested.name);
-        assertEquals("int x;", nested.vars.get(0).toString());
+        assertEquals("Int *x;", nested.vars.get(0).toString());
     }
     
     @Test
@@ -101,7 +101,7 @@ public class TestBuildPhase {
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
         assertEquals("void foo[float y]", f.toString());
-        assertEquals("int x;", f.block.vars.get(0).toString());
+        assertEquals("Int *x;", f.block.statements.get(0).toString());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class TestBuildPhase {
         		        "}";
         String struct = "struct A {\n" +
         		        "    []\n" +
-        		        "    [int x;]\n" +
+        		        "    [Int *x;]\n" +
         		        "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -130,7 +130,8 @@ public class TestBuildPhase {
                         "}";
         String block = "{\n" +
         		       "    {\n" +
-                       "    int x;\n" +
+                       "    Int *x;\n" +
+                       "    ADD_ROOT(x);\n" +
                        "}\n" +
                        "\n" +
                        "}\n";
@@ -146,7 +147,7 @@ public class TestBuildPhase {
         		        "    (1);" +
         		        "}";
         String block = "{\n" +
-        		        "    (1);\n" +
+        		        "    (_Int_literals[0]);\n" +
         		        "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -160,7 +161,7 @@ public class TestBuildPhase {
                 "    1 == 2;" +
                 "}";
         String block = "{\n" +
-                "    1 == 2;\n" +
+                "    _Int_literals[0] == _Int_literals[1];\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -174,7 +175,7 @@ public class TestBuildPhase {
                 "    1 + 2;" +
                 "}";
         String block = "{\n" +
-                "    1 + 2;\n" +
+                "    _Int_literals[0] + _Int_literals[1];\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -188,7 +189,7 @@ public class TestBuildPhase {
                 "    1 * 2;" +
                 "}";
         String block = "{\n" +
-                "    1 * 2;\n" +
+                "    _Int_literals[0] * _Int_literals[1];\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -202,7 +203,7 @@ public class TestBuildPhase {
                 "    -(1 + 2);" +
                 "}";
         String block = "{\n" +
-                "    -(1 + 2);\n" +
+                "    -(_Int_literals[0] + _Int_literals[1]);\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -232,8 +233,9 @@ public class TestBuildPhase {
                         "    a.x;" +
                         "}";
         String block = "{\n" +
-                	   "    A a;\n" +
-                       "    a.x;\n" +
+                	   "    A *a;\n" +
+                	   "    ADD_ROOT(a);\n" +
+                       "    a->x;\n" +
                        "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -249,8 +251,9 @@ public class TestBuildPhase {
                         "}";
         
         String block = "{\n" +
-                       "    int a[];\n" +
-                       "    a[0];\n" +
+                       "    Int *a[];\n" +
+                       "    ADD_ROOT(a);\n" +
+                       "    a[_Int_literals[0]];\n" +
                        "}\n";
         
         SourceFile src = runCompilerOn(source);
@@ -281,8 +284,10 @@ public class TestBuildPhase {
                         "    x = y;" +
                         "}";
         String block = "{\n" +
-                       "    int y = 0;\n" +
-                       "    int x;\n" +
+                       "    Int *y = _Int_literals[0];\n" +
+                       "    ADD_ROOT(y);\n" +
+                       "    Int *x;\n" +
+                       "    ADD_ROOT(x);\n" +
                        "    x = y;\n" +
                        "}\n";
         SourceFile src = runCompilerOn(source);
@@ -297,7 +302,7 @@ public class TestBuildPhase {
                 "    if(true) 1;" +
                 "}";
         String block = "{\n" +
-                "    if(true) 1;\n" +
+                "    if(true) _Int_literals[0];\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -311,7 +316,7 @@ public class TestBuildPhase {
                 "    if(true) 1; else 2;" +
                 "}";
         String block = "{\n" +
-                "    if(true) 1; else 2;\n" +
+                "    if(true) _Int_literals[0]; else _Int_literals[1];\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);
@@ -339,7 +344,7 @@ public class TestBuildPhase {
                         "    return 42;" +
                         "}";
         String block = "{\n" +
-                       "    return 42;\n" +
+                       "    return _Int_literals[0];\n" +
                        "}\n";
         SourceFile src = runCompilerOn(source);
         MethodFunction f = src.functionDefinitions.get(0);

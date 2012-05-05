@@ -44,7 +44,9 @@ public class Block extends OutputModelObject {
         if(vars.size() > 0) { 
             for(VariableDeclaration var : vars){ sb.append("    "); sb.append(var.toString() + "\n");} 
         }
-        if(statements.size() > 0) { sb.append("    " + Symbol.stripBrackets(statements.toString()) + "\n"); } 
+        if(statements.size() > 0) { 
+            for(OutputModelObject stat: statements) { sb.append("    " + stat.toString() + "\n"); } 
+        } 
         sb.append("}\n");
             
         return sb.toString();
