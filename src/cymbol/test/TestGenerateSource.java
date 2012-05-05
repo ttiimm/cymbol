@@ -69,19 +69,8 @@ public class TestGenerateSource {
     
     @Test
     public void testBinTree() throws IOException {
+        String src = readFile("src/cymbol/test/functional/run/tree.cymbol");
         String expected = readFile("src/cymbol/test/functional/run/tree.expected");
-        
-        String src = "\n" +
-        		     "struct Tree {\n" +
-        		     "    Tree left;\n" +
-        		     "    Tree right;\n" +
-        		     "    int value;\n" +
-        		     "}\n" +
-        		     "\n" +
-        		     "void main() {\n" +
-                     "    Tree fifty = new Tree();\n" +
-                     "    fifty.value = 50;\n" +
-                     "}";
 //        System.out.println(src);
 //        System.out.println(expected);
         ST result = run(src);
