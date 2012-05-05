@@ -36,6 +36,7 @@ Tree *new_Tree() {
 }
 
 void _main();
+void print(Tree *tree);
 void main();
 
 String *_String_literals[1];
@@ -54,12 +55,18 @@ void _main() {
         ADD_ROOT(_Int_literals[i]);
 }
 
+void print(Tree *tree) {
+    GC_SAVE_RP;
+    printf(_String_literals[0]->elements, tree->payload->value);
+    GC_RESTORE_RP;
+}
+
 void main() {
     GC_SAVE_RP;
     _main();
     Tree *fifty = new_Tree();
     ADD_ROOT(fifty);
     fifty->payload = _Int_literals[0];
-    printf(_String_literals[0]->elements, fifty->payload->value);
+    print(fifty);
     GC_RESTORE_RP;
 }

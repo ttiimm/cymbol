@@ -5,8 +5,12 @@ struct Tree {
   int payload;
 }
 
+void print(Tree tree) {
+    printf("%d\n", tree.payload);
+}
+
 void main() {
   Tree fifty = new Tree();
   fifty.payload = 50;
-  printf("%d\n", fifty.payload);
+  print(fifty);
 }

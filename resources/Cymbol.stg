@@ -98,7 +98,7 @@ FunctionDefinitions(funcs) ::= <<
 
 
 signature(func) ::= <<
-<func.type.name> <func.name>(<func.args: {arg | <arg.type.name> <arg.name>}; separator=", ">)>>
+<func.type.name> <func.name>(<func.args: {arg | <arg.type.name> *<arg.name>}; separator=", ">)>>
 
 
 Block(block) ::= <<

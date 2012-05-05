@@ -99,11 +99,6 @@ public class ListenerDefinePhase extends CymbolBaseListener {
         stashScope(ctx);
     }
 
-//    @Override
-//    public void enterPrim_Id(Prim_IdContext ctx) {
-//        stashScope(ctx);
-//    }
-
     @Override
     public void enterPrim_Int(Prim_IntContext ctx) {
         stashScope(ctx);

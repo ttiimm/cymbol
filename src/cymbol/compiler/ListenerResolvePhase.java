@@ -147,10 +147,6 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         setType(ctx);
     }
 
-//    @Override
-//    public void enterPrim_Id(Prim_IdContext ctx) {
-//        setType(ctx);
-//    }
 
     @Override
     public void enterPrim(PrimContext ctx) {
