@@ -9,6 +9,9 @@ package cymbol.tools;
  * Visit http://www.pragmaticprogrammer.com/titles/tpdsl for more book information.
  ***/
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -44,11 +47,23 @@ public class Runner {
             System.exit(-1);
         }
     }
-
-    private static void writeOut(String compiled) {
+    
+    private static String mkPath() {
         String fileSeparator = System.getProperty("file.separator");
-        String path = System.getProperty("java.io.tmpdir") + "cymbol" + fileSeparator + "cymbolgen.c";
-        System.out.println(path);
+        String path = System.getProperty("java.io.tmpdir") + fileSeparator + "cymbol" + fileSeparator;
+        new File(path).mkdirs();
+        return path;
+    }
+
+    private static void writeOut(String path, String compiled) throws IOException {
+        BufferedWriter out = null;
+        try {
+            out = new BufferedWriter(new FileWriter(path + "cymbolgen.c"));
+            out.write(compiled);
+        } finally {
+            if(out != null) out.close();
+        }
+
     }
 
     public static void main(String[] args) throws IOException {
@@ -62,6 +77,6 @@ public class Runner {
         ST st = walker.walk(src);
         checkErrors(c);
 
-        writeOut(st.render());
+        System.out.println(st.render());
     }
 }

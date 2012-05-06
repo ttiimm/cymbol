@@ -24,7 +24,7 @@ public class ScopeUtil {
         Type type= scope.lookup(name);
         if(type == null) { 
             String msg = "unknown type: " + name;
-            compiler.reportError(ctx, msg);
+//            compiler.reportError(ctx, msg);
         }
         return type;
     }
@@ -35,7 +35,7 @@ public class ScopeUtil {
         Symbol symbol = scope.resolve(name);
         if(symbol == null) { 
             String msg = "unknown symbol: " + name;
-            compiler.reportError(ctx, msg);
+//            compiler.reportError(ctx, msg);
         }
         return symbol;
     }
