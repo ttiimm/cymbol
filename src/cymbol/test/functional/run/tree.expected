@@ -36,20 +36,23 @@ Tree *new_Tree() {
 }
 
 void _main();
-Tree *insert(Tree *parent, Tree *in);
+Tree *insert(Tree *parent, Int *payload);
 void print_inorder(Tree *tree);
 void main();
 
-String *_String_literals[1];
+String *_String_literals[4];
 Int *_Int_literals[9];
 
 void _main() {
     int i;
     gc_init(256 * 1000);
 
-    _String_literals[0] = new_String("%d ");
+    _String_literals[0] = new_String("%d\n");
+    _String_literals[1] = new_String("In Order Traversal\n");
+    _String_literals[2] = new_String("\nGC\n");
+    _String_literals[3] = new_String("In Order Traversal\n");
 
-    for(i = 0; i < 1; i++)
+    for(i = 0; i < 4; i++)
         ADD_ROOT(_String_literals[i]);
 
     _Int_literals[0] = new_Int(50);
@@ -66,18 +69,23 @@ void _main() {
         ADD_ROOT(_Int_literals[i]);
 }
 
-Tree *insert(Tree *parent, Tree *in) {
+Tree *insert(Tree *parent, Int *payload) {
     GC_SAVE_RP;
     if(parent == NULL) {
-        return in;
+        Tree *t = new_Tree();
+        ADD_ROOT(t);
+        t->payload = payload;
+        GC_RESTORE_RP;
+        return t;
     }
-     else if(in->payload->value < parent->payload->value) {
-        parent->left = insert(parent->left, in);
+     else if(payload->value < parent->payload->value) {
+        parent->left = insert(parent->left, payload);
     }
-     else if(in->payload->value > parent->payload->value) {
-        parent->right = insert(parent->right, in);
+     else if(payload->value > parent->payload->value) {
+        parent->right = insert(parent->right, payload);
     }
 
+    GC_RESTORE_RP;
     return parent;
     GC_RESTORE_RP;
 }
@@ -85,6 +93,7 @@ Tree *insert(Tree *parent, Tree *in) {
 void print_inorder(Tree *tree) {
     GC_SAVE_RP;
     if(tree == NULL) {
+        GC_RESTORE_RP;
         return;
     }
      else {
@@ -99,41 +108,29 @@ void print_inorder(Tree *tree) {
 void main() {
     GC_SAVE_RP;
     _main();
-    Tree *root = new_Tree();
+    Tree *root = insert(NULL, _Int_literals[0]);
     ADD_ROOT(root);
-    root->payload = _Int_literals[0];
-    Tree *sixty = new_Tree();
+    Tree *sixty = insert(root, _Int_literals[1]);
     ADD_ROOT(sixty);
-    sixty->payload = _Int_literals[1];
-    Tree *seventy = new_Tree();
+    Tree *seventy = insert(root, _Int_literals[2]);
     ADD_ROOT(seventy);
-    seventy->payload = _Int_literals[2];
-    Tree *ninety = new_Tree();
+    Tree *ninety = insert(root, _Int_literals[3]);
     ADD_ROOT(ninety);
-    ninety->payload = _Int_literals[3];
-    Tree *eighty = new_Tree();
+    Tree *eighty = insert(root, _Int_literals[4]);
     ADD_ROOT(eighty);
-    eighty->payload = _Int_literals[4];
-    Tree *fourty = new_Tree();
-    ADD_ROOT(fourty);
-    fourty->payload = _Int_literals[5];
-    Tree *thirty = new_Tree();
+    Tree *forty = insert(root, _Int_literals[5]);
+    ADD_ROOT(forty);
+    Tree *thirty = insert(root, _Int_literals[6]);
     ADD_ROOT(thirty);
-    thirty->payload = _Int_literals[6];
-    Tree *ten = new_Tree();
+    Tree *ten = insert(root, _Int_literals[7]);
     ADD_ROOT(ten);
-    ten->payload = _Int_literals[7];
-    Tree *twenty = new_Tree();
+    Tree *twenty = insert(root, _Int_literals[8]);
     ADD_ROOT(twenty);
-    twenty->payload = _Int_literals[8];
-    insert(root, sixty);
-    insert(root, seventy);
-    insert(root, ninety);
-    insert(root, eighty);
-    insert(root, fourty);
-    insert(root, thirty);
-    insert(root, ten);
-    insert(root, twenty);
+    printf(_String_literals[1]->elements);
+    print_inorder(root);
+    printf(_String_literals[2]->elements);
+    gc();
+    printf(_String_literals[3]->elements);
     print_inorder(root);
     GC_RESTORE_RP;
 }

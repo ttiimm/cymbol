@@ -41,6 +41,10 @@ public class MethodFunction extends OutputModelObject {
         }
     }
 
+    public String getTypeName() {
+        return type == SymbolTable.VOID ? type.getName() : Util.capitalize(type.getName());
+    }
+    
     public String getReturnPointer() {
         return type == SymbolTable.VOID ? "" : "*";
     }
@@ -60,6 +64,10 @@ public class MethodFunction extends OutputModelObject {
             this.name = s.getName();
         }
 
+        public String getTypeName() {
+            return Util.capitalize(type.getName());
+        }
+        
         @Override
         public String toString() {
             return type.getName() + " " + name;

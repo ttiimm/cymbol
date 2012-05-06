@@ -5,13 +5,15 @@ struct Tree {
   int payload;
 }
 
-Tree insert(Tree parent, Tree in) {
+Tree insert(Tree parent, int payload) {
     if(parent == null)  {
-        return in;
-    } else if(in.payload < parent.payload) {
-        parent.left = insert(parent.left, in);
-    } else if(in.payload > parent.payload) {
-        parent.right = insert(parent.right, in);
+        Tree t = new Tree();
+        t.payload = payload;
+        return t;
+    } else if(payload < parent.payload) {
+        parent.left = insert(parent.left, payload);
+    } else if(payload > parent.payload) {
+        parent.right = insert(parent.right, payload);
     }
     
     return parent;
@@ -22,38 +24,28 @@ void print_inorder(Tree tree) {
         return;
     } else {
         print_inorder(tree.left);
-        printf("%d ", tree.payload);
+        printf("%d\n", tree.payload);
         print_inorder(tree.right);
     }
 }
 
 void main() {
-    Tree root = new Tree();
-    root.payload = 50;
-    Tree sixty = new Tree();
-    sixty.payload = 60;
-    Tree seventy = new Tree();
-    seventy.payload = 70;
-    Tree ninety = new Tree();
-    ninety.payload = 90;
-    Tree eighty = new Tree();
-    eighty.payload = 80;
-    Tree fourty = new Tree();
-    fourty.payload = 40;
-    Tree thirty = new Tree();
-    thirty.payload = 30;
-    Tree ten = new Tree();
-    ten.payload = 10;
-    Tree twenty = new Tree();
-    twenty.payload = 20;
-      
-    insert(root, sixty);
-    insert(root, seventy);
-    insert(root, ninety);
-    insert(root, eighty);
-    insert(root, fourty);
-    insert(root, thirty);
-    insert(root, ten);
-    insert(root, twenty);
+    Tree root    = insert(null, 50);
+    Tree sixty   = insert(root, 60);
+    Tree seventy = insert(root, 70);
+    Tree ninety  = insert(root, 90);
+    Tree eighty  = insert(root, 80);
+    Tree forty   = insert(root, 40);
+    Tree thirty  = insert(root, 30);
+    Tree ten     = insert(root, 10);
+    Tree twenty  = insert(root, 20);
+    
+    printf("In Order Traversal\n");
+    print_inorder(root);
+    
+    printf("\nGC\n");
+    gc();
+    
+    printf("In Order Traversal\n");
     print_inorder(root);
 }

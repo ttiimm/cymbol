@@ -100,7 +100,7 @@ FunctionDefinitions(funcs) ::= <<
 
 
 signature(func) ::= <<
-<func.type.name> <func.returnPointer><func.name>(<func.args: {arg | <arg.type.name> *<arg.name>}; separator=", ">)>>
+<func.typeName> <func.returnPointer><func.name>(<func.args: {arg | <arg.typeName> *<arg.name>}; separator=", ">)>>
 
 
 Block(block) ::= <<

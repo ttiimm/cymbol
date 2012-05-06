@@ -32,7 +32,11 @@ public class SymbolTable {
         globals.define(UNDEFINED);
         
         MethodSymbol PRINTF = new MethodSymbol("printf", globals, null); 
+        PRINTF.builtin = true;
         globals.define(PRINTF);
+        MethodSymbol GC = new MethodSymbol("gc", globals, null); 
+        GC.builtin = true;
+        globals.define(GC);
     }
 
     public String toString() {

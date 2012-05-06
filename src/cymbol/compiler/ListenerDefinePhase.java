@@ -9,6 +9,7 @@ import cymbol.compiler.CymbolParser.CompilationUnitContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
 import cymbol.compiler.CymbolParser.ParameterContext;
 import cymbol.compiler.CymbolParser.PrimContext;
+import cymbol.compiler.CymbolParser.Prim_IdContext;
 import cymbol.compiler.CymbolParser.Prim_IntContext;
 import cymbol.compiler.CymbolParser.Prim_StringContext;
 import cymbol.compiler.CymbolParser.StructDeclarationContext;
@@ -94,6 +95,11 @@ public class ListenerDefinePhase extends CymbolBaseListener {
         popScope();
     }
     
+    @Override
+    public void enterPrim_Id(Prim_IdContext ctx) {
+        stashScope(ctx);
+    }
+
     @Override
     public void enterPrim_String(Prim_StringContext ctx) {
         stashScope(ctx);

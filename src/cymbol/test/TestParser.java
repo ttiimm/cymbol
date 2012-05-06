@@ -52,6 +52,15 @@ public class TestParser {
         assertEquals(expect, t);
     }
 
+//    @Test
+//    public void twoStrings() {
+//        String source = "String s = \"hello world\";\n" +
+//        		        "printf(\"hello world\");\n";
+//        String t = runTest(source);
+//        String expect = "(compilationUnit (varDeclaration (type (primitiveType String)) s = (expr (primary \"hello world\")) ;))";
+//        assertEquals(expect, t);
+//    }
+
     @Test
     public void newExpr() {
         String source = "Integer i = new Integer();";

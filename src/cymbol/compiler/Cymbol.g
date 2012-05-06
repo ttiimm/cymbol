@@ -92,7 +92,7 @@ expr
   ;
 
 primary
-	: ID      -> prim
+	: ID      -> prim_Id
 	| INT     -> prim_Int
 	| FLOAT   -> prim
 	| CHAR    -> prim
@@ -118,7 +118,7 @@ FLOAT
   | '.' INT+
   ;
   
-STRING: '\"' ('\"' | ~('"'))* '\"'; 
+STRING: '"' ~( '"' | '\r' | '\n' )* '"'; 
 
 WS  
   : (' '|'\r'|'\t'|'\n') {$channel=HIDDEN;}

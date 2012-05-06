@@ -16,6 +16,7 @@ import org.antlr.v4.runtime.Token;
 
 public class MethodSymbol extends ScopedSymbol {
     Map<String, Symbol> orderedArgs = new LinkedHashMap<String, Symbol>();
+    public boolean builtin = false;
 
     public MethodSymbol(String name, Type retType, Scope parent,
             ParserRuleContext<Token> token) {

@@ -21,6 +21,7 @@ import cymbol.compiler.CymbolParser.Expr_PrimaryContext;
 import cymbol.compiler.CymbolParser.Expr_UnaryContext;
 import cymbol.compiler.CymbolParser.MethodDeclarationContext;
 import cymbol.compiler.CymbolParser.PrimContext;
+import cymbol.compiler.CymbolParser.Prim_IdContext;
 import cymbol.compiler.CymbolParser.Prim_IntContext;
 import cymbol.compiler.CymbolParser.Prim_StringContext;
 import cymbol.compiler.CymbolParser.StatContext;
@@ -39,21 +40,23 @@ import cymbol.model.Expressions.ConstructorExpression;
 import cymbol.model.Expressions.Expression;
 import cymbol.model.Expressions.GenericExpression;
 import cymbol.model.Expressions.PrimaryExpression;
+import cymbol.model.MethodFunction;
 import cymbol.model.Primitives;
 import cymbol.model.Primitives.GenericPrimitive;
+import cymbol.model.Primitives.MethodPrimitive;
 import cymbol.model.Primitives.Primitive;
-import cymbol.model.MethodFunction;
 import cymbol.model.SourceFile;
 import cymbol.model.Statement;
 import cymbol.model.Struct;
 import cymbol.model.VariableDeclaration;
+import cymbol.symtab.MethodSymbol;
 import cymbol.symtab.Symbol;
 import cymbol.symtab.Type;
 import cymbol.symtab.VariableSymbol;
 
 public class ListenerBuildPhase extends CymbolBaseListener {
 
-    private static final Statement CALL_CYMBOL_MAIN_STATEMENT = new Statement("_main();");
+    private static final Statement CALL_CYMBOL_MAIN_STATEMENT = new Statement("_main();", false);
     
     private ScopeUtil scopes;
     public ParseTreeProperty<OutputModelObject> models;
@@ -149,28 +152,29 @@ public class ListenerBuildPhase extends CymbolBaseListener {
             sb.append(" else " + models.get(elseStatement).toString());
         }
         
-        models.put(ctx, new Statement(sb.toString()));
+        models.put(ctx, new Statement(sb.toString(), false));
     }
     
     @Override
     public void exitStat_Return(Stat_ReturnContext ctx) {
         Expression expr = (Expression) models.get(ctx.expr());
         String optional = expr != null ? " " + expr.getExpr() : "";
-        models.put(ctx, new Statement("return" + optional + ";"));
+        Statement statement = new Statement("return" + optional + ";", true);
+        models.put(ctx, statement);
     }
 
     @Override
     public void exitStat_Assign(Stat_AssignContext ctx) {
         Expression left = (Expression) models.get(ctx.expr(0));
         Expression right = (Expression) models.get(ctx.expr(1));
-        Statement assign = new Statement(left.getExpr() + " = " + right.getExpr() + ";");
+        Statement assign = new Statement(left.getExpr() + " = " + right.getExpr() + ";", false);
         models.put(ctx, assign);
     }
     
     @Override
     public void exitStat(StatContext ctx) {
         Expression expr = (Expression) models.get(ctx.expr());
-        Statement statement = new Statement(expr.getExpr() + ";");
+        Statement statement = new Statement(expr.getExpr() + ";", false);
         models.put(ctx, statement);
     }
     
@@ -255,17 +259,30 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         models.put(ctx, literal);
     }
     
-    
+    @Override
+    public void exitPrim_Id(Prim_IdContext ctx) {
+       Symbol symbol = scopes.resolve(ctx);
+       if(symbol != null && symbol instanceof MethodSymbol) {
+           Primitive method = new MethodPrimitive(ctx.getStart().getText(), ((MethodSymbol) symbol).builtin);
+           models.put(ctx, method);
+       } else {
+           Type type = types.get(ctx);
+           Primitive literal = new GenericPrimitive(type, ctx.getStart().getText());
+           models.put(ctx, literal);
+       }
+    }
+
     private String buildCallString(ParserRuleContext<Token> ctx) {
         StringBuilder sb = new StringBuilder();
-        Expression method = (Expression) models.get(ctx.getRuleContext(ExprContext.class, 0));
+        PrimaryExpression method = (PrimaryExpression) models.get(ctx.getRuleContext(ExprContext.class, 0));
         String funcName = method.getExpr();
         sb.append(funcName + "(");
         List<? extends ExprContext> args = ctx.getRuleContexts(ExprContext.class);
         
         for(int i = 1; i < args.size(); i++) {
             Expression arg = (Expression) models.get(args.get(i));
-            sb.append(arg.getPrimitiveExpr() + ", ");
+            String expr = method.isBuiltin() ? arg.getPrimitiveExpr() : arg.getExpr();
+            sb.append(expr + ", ");
         }
         
         if(args.size() > 1) {

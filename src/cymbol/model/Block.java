@@ -26,6 +26,9 @@ public class Block extends OutputModelObject {
             statements.add((VariableDeclaration) omo);
             statements.add(new AddRoot((VariableDeclaration) omo));
         } else {
+            if(omo instanceof Statement && ((Statement) omo).isReturn) {
+                statements.add(new Statement("GC_RESTORE_RP;", false));
+            }
             statements.add(omo);
         }
     }
