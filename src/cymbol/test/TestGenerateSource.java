@@ -105,7 +105,6 @@ public class TestGenerateSource {
         in.name = "<Test>";
         Compiler c = new Compiler(in);
         SourceFile src = c.compile();
-        System.out.println(c.errors);
         ModelTemplateWalker walker = new ModelTemplateWalker(c);
         return walker.walk(src);
     }
