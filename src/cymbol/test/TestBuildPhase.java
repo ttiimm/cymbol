@@ -331,6 +331,7 @@ public class TestBuildPhase {
                 "    return;" +
                 "}";
         String block = "{\n" +
+                "    GC_RESTORE_RP;\n" +
                 "    return;\n" +
                 "}\n";
         SourceFile src = runCompilerOn(source);
@@ -345,6 +346,7 @@ public class TestBuildPhase {
                         "    return 42;" +
                         "}";
         String block = "{\n" +
+                       "    GC_RESTORE_RP;\n" +
                        "    return _Int_literals[0];\n" +
                        "}\n";
         SourceFile src = runCompilerOn(source);

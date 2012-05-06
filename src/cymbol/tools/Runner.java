@@ -45,6 +45,12 @@ public class Runner {
         }
     }
 
+    private static void writeOut(String compiled) {
+        String fileSeparator = System.getProperty("file.separator");
+        String path = System.getProperty("java.io.tmpdir") + "cymbol" + fileSeparator + "cymbolgen.c";
+        System.out.println(path);
+    }
+
     public static void main(String[] args) throws IOException {
         CharStream in = determineInput(args);
         Compiler c = new Compiler(in);
@@ -56,7 +62,6 @@ public class Runner {
         ST st = walker.walk(src);
         checkErrors(c);
 
-        System.out.println(st.render());
+        writeOut(st.render());
     }
-
 }

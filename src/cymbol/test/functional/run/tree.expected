@@ -49,7 +49,7 @@ void _main() {
 
     _String_literals[0] = new_String("%d\n");
     _String_literals[1] = new_String("In Order Traversal\n");
-    _String_literals[2] = new_String("\nGC\n");
+    _String_literals[2] = new_String("\nGC\n\n");
     _String_literals[3] = new_String("In Order Traversal\n");
 
     for(i = 0; i < 4; i++)

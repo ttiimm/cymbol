@@ -43,7 +43,7 @@ void main() {
     printf("In Order Traversal\n");
     print_inorder(root);
     
-    printf("\nGC\n");
+    printf("\nGC\n\n");
     gc();
     
     printf("In Order Traversal\n");

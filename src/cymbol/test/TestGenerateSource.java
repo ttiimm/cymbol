@@ -104,9 +104,8 @@ public class TestGenerateSource {
         ANTLRInputStream in = new ANTLRInputStream(source);
         in.name = "<Test>";
         Compiler c = new Compiler(in);
-        ParseTreeProperty<Scope> scopes = c.define();
-        ParseTreeProperty<Type> types = c.resolve(scopes);
-        SourceFile src = c.build(scopes, types);
+        SourceFile src = c.compile();
+        System.out.println(c.errors);
         ModelTemplateWalker walker = new ModelTemplateWalker(c);
         return walker.walk(src);
     }
