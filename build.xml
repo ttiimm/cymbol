@@ -2,12 +2,17 @@
 <project name="Cymbol" default="jar" basedir=".">
 
     <property name="build.dir" value="${basedir}/build" />
-    <property name="antlr4.jar" value="/home/tlikarish/Projects/lang/antlr4/dist/antlr-4.0ea-complete.jar" />
+    <property name="antlr4.jar" value="${basedir}/lib/antlr-4.8-complete.jar" />
 	
 	<path id="classpath">
         <pathelement location="${antlr4.jar}"/>
     </path>
-	
+	<target name="gen">
+        <java jar="${antlr4.jar}" fork="true">
+            <arg line="${basedir}/src/cymbol/compiler/Cymbol.g4"/>
+            <arg line="-listener"/>
+         </java>
+    </target>
 	<target name="jar" depends="clean, compile">
 	    <mkdir dir="${build.dir}"/>
     
@@ -30,8 +35,9 @@
         <javac
         	srcdir="${basedir}/src"
             destdir="${build.dir}/classes"
-        	source="1.5"
-            target="1.5"
+            source="8"
+            target="8"
+            includeantruntime="true"
             debug="true"
             excludes="cymbol/test/**">
                     <classpath refid="classpath"/>

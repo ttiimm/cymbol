@@ -18,7 +18,7 @@ public class ScopeUtil {
         this.scopes = scopes;
     }
 
-    public Type lookup(ParserRuleContext<Token> ctx) {
+    public Type lookup(ParserRuleContext ctx) {
         String name = Util.name(ctx);
         Scope scope = get(ctx);
         Type type= scope.lookup(name);
@@ -29,7 +29,7 @@ public class ScopeUtil {
         return type;
     }
     
-    public Symbol resolve(ParserRuleContext<Token> ctx) {
+    public Symbol resolve(ParserRuleContext ctx) {
         String name = Util.name(ctx);
         Scope scope = get(ctx);
         Symbol symbol = scope.resolve(name);
@@ -40,7 +40,7 @@ public class ScopeUtil {
         return symbol;
     }
 
-    public Scope get(ParserRuleContext<Token> ctx) {
+    public Scope get(ParserRuleContext ctx) {
         return scopes.get(ctx);
     }
 }

@@ -120,7 +120,7 @@ public class ListenerDefinePhase extends CymbolBaseListener {
         stashScope(ctx);
     }
     
-    private void stashScope(ParserRuleContext<Token> ctx) {
+    private void stashScope(ParserRuleContext ctx) {
         scopes.put(ctx, theScope);
     }
 

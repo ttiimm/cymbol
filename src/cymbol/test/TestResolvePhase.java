@@ -152,7 +152,7 @@ public class TestResolvePhase {
         		        "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.INT, types.get(block.getChild(1).getChild(0)));
     }
 
@@ -163,7 +163,7 @@ public class TestResolvePhase {
                         "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.FLOAT, types.get(block.getChild(1).getChild(0)));
     }
 
@@ -174,7 +174,7 @@ public class TestResolvePhase {
                         "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.CHAR, types.get(block.getChild(1).getChild(0)));
     }
     
@@ -185,7 +185,7 @@ public class TestResolvePhase {
                         "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.BOOLEAN, types.get(block.getChild(1).getChild(0)));
     }
 
@@ -197,7 +197,7 @@ public class TestResolvePhase {
                         "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(0)));
     }
 
@@ -208,7 +208,7 @@ public class TestResolvePhase {
                         "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.VOID, types.get(block.getChild(1).getChild(0)));
     }
     
@@ -220,7 +220,7 @@ public class TestResolvePhase {
                         "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.INT, types.get(block.getChild(1).getChild(0)));
     }
 
@@ -232,7 +232,7 @@ public class TestResolvePhase {
                         "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.CHAR, types.get(block.getChild(2).getChild(0)));
      }
     
@@ -246,7 +246,7 @@ public class TestResolvePhase {
         Compiler c = runCompilerOn(source);
         Type A = (Type) c.table.globals.resolve("A");
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(A, types.get(block.getChild(2).getChild(0).getChild(0)));
         assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(0).getChild(2)));
     }
@@ -267,7 +267,7 @@ public class TestResolvePhase {
         StructSymbol A = (StructSymbol) c.table.globals.resolve("A");
         Type B = (Type) A.resolveMember("B");
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(A, types.get(block.getChild(2).getChild(0).getChild(0).getChild(0)));
         assertEquals(B, types.get(block.getChild(2).getChild(0).getChild(0).getChild(2).getChild(0)));
         assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(0).getChild(2)));
@@ -281,7 +281,7 @@ public class TestResolvePhase {
                         "}";
         Compiler c = runCompilerOn(source);
         MethodSymbol m = (MethodSymbol) c.table.globals.resolve("foo");
-        ParserRuleContext<Token> block = getBlock(m);
+        ParserRuleContext block = getBlock(m);
         assertEquals(SymbolTable.INT, types.get(block.getChild(2).getChild(0)));
     }
     
@@ -295,8 +295,8 @@ public class TestResolvePhase {
         return c;
     }
     
-    private ParserRuleContext<Token> getBlock(MethodSymbol m) {
+    private ParserRuleContext getBlock(MethodSymbol m) {
         ParseTree blockCtx = m.tree.getChild(4);
-        return (ParserRuleContext<Token>) blockCtx;
+        return (ParserRuleContext) blockCtx;
     }
 }

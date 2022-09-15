@@ -2,7 +2,7 @@ package cymbol.compiler;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import cymbol.compiler.CymbolParser.Expr_ArrayContext;
@@ -101,11 +101,11 @@ public class ListenerResolvePhase extends CymbolBaseListener {
     }
 
     @Override
-    public void visitTerminal(TerminalNode<Token> node) {
+    public void visitTerminal(TerminalNode node) {
         if(node.getSymbol().getText().equals(".")) {
-            ParserRuleContext<Token> parent = (ParserRuleContext<Token>) node.getParent();
+            ParserRuleContext parent = (ParserRuleContext) node.getParent();
             StructSymbol struct = (StructSymbol) types.get(parent.getChild(STRUCT));
-            ParserRuleContext<Token> member = (ParserRuleContext<Token>) parent.getChild(MEMBER_PARENT).getChild(MEMBER);
+            ParserRuleContext member = (ParserRuleContext) parent.getChild(MEMBER_PARENT).getChild(MEMBER);
             String name = member.start.getText();
             Type memberType = struct.resolveMember(name).type;
             stashType(member, memberType);
@@ -160,7 +160,7 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         setType(ctx);
     }
 
-    private void setType(ParserRuleContext<Token> ctx) {
+    private void setType(ParserRuleContext ctx) {
         // already defined type as in the case of struct members
         if(types.get(ctx) != null) { return; }
         
@@ -193,11 +193,11 @@ public class ListenerResolvePhase extends CymbolBaseListener {
         }
     }
 
-    private void stashType(ParserRuleContext<Token> ctx, Type type) {
+    private void stashType(ParserRuleContext ctx, Type type) {
         types.put(ctx, type);
     }
     
-    private void copyType(ParserRuleContext<Token> from, ParserRuleContext<Token> to) {
+    private void copyType(ParserRuleContext from, ParserRuleContext to) {
         Type type = types.get(from);
         types.put(to, type);
     }
