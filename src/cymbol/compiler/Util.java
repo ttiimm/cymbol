@@ -4,13 +4,13 @@ import java.lang.reflect.Field;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Util {
 
-    public static String name(ParserRuleContext<Token> ctx) {
+    public static String name(ParserRuleContext ctx) {
         try {
-            TerminalNode<Token> id = (TerminalNode<Token>) ctx.getClass().getMethod("ID", new Class[0])
+            TerminalNode id = (TerminalNode) ctx.getClass().getMethod("ID", new Class[0])
                     .invoke(ctx, new Object[0]);
             if(id != null) { return id.getSymbol().getText(); }
             else { return ctx.start.getText(); }
@@ -20,7 +20,7 @@ public class Util {
         }
     }
     
-    public static boolean isArrayDeclaration(ParserRuleContext<Token> ctx) {
+    public static boolean isArrayDeclaration(ParserRuleContext ctx) {
         try {
             Field array = ctx.getClass().getField("array");
             return array.get(ctx) != null;

@@ -95,7 +95,7 @@ public class Compiler {
         return (SourceFile) models.get(tree);
     }
 
-    public void reportError(ParserRuleContext<Token> ctx, String msg) {
+    public void reportError(ParserRuleContext ctx, String msg) {
         Token start = ctx.getStart();
         int line = start.getLine();
         int pos = start.getCharPositionInLine();

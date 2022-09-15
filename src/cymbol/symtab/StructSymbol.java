@@ -18,7 +18,7 @@ public class StructSymbol extends ScopedSymbol implements Type, Scope {
     Map<String, Symbol> fields = new LinkedHashMap<String, Symbol>();
 
     public StructSymbol(String name, Scope parent,
-            ParserRuleContext<Token> tree) {
+            ParserRuleContext tree) {
         super(name, parent, tree);
     }
 
