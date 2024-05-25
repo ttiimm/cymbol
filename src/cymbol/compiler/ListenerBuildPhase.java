@@ -231,7 +231,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
 
     @Override
     public void exitExpr_Primary(Expr_PrimaryContext ctx) {
-        ParserRuleContext<Token> primary = ctx.primary();
+        ParserRuleContext primary = ctx.primary();
         Primitive literal = (Primitive) models.get(primary);
         models.put(ctx, new PrimaryExpression(literal));
     }
@@ -272,7 +272,7 @@ public class ListenerBuildPhase extends CymbolBaseListener {
        }
     }
 
-    private String buildCallString(ParserRuleContext<Token> ctx) {
+    private String buildCallString(ParserRuleContext ctx) {
         StringBuilder sb = new StringBuilder();
         PrimaryExpression method = (PrimaryExpression) models.get(ctx.getRuleContext(ExprContext.class, 0));
         String funcName = method.getExpr();
@@ -295,13 +295,13 @@ public class ListenerBuildPhase extends CymbolBaseListener {
         return sb.toString();
     }
 
-    private List<OutputModelObject> getAll(List<? extends ParserRuleContext<Token>> ctxs) {
+    private List<OutputModelObject> getAll(List<? extends ParserRuleContext> ctxs) {
         List<OutputModelObject> ms = new ArrayList<OutputModelObject>();
-        for(ParserRuleContext<Token> ctx : ctxs) { ms.add(models.get(ctx)); }
+        for(ParserRuleContext ctx : ctxs) { ms.add(models.get(ctx)); }
         return ms;
     }
     
-    private void copyModel(ParserRuleContext<Token> from, ParserRuleContext<Token> to) {
+    private void copyModel(ParserRuleContext from, ParserRuleContext to) {
        OutputModelObject model = models.get(from);
        models.put(to, model);
     }

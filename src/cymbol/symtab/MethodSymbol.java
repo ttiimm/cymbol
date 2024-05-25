@@ -19,12 +19,12 @@ public class MethodSymbol extends ScopedSymbol {
     public boolean builtin = false;
 
     public MethodSymbol(String name, Type retType, Scope parent,
-            ParserRuleContext<Token> token) {
+            ParserRuleContext token) {
         super(name, retType, parent);
     }
 
     public MethodSymbol(String name, Scope parent,
-            ParserRuleContext<Token> tree) {
+            ParserRuleContext tree) {
         super(name, parent, tree);
     }
 

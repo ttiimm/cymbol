@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.Token;
 public abstract class ScopedSymbol extends Symbol implements Scope {
     
     Scope enclosingScope;
-    public ParserRuleContext<Token> tree;
+    public ParserRuleContext tree;
 
     public ScopedSymbol(String name, Type type, Scope enclosingScope) {
         super(name, type);
@@ -24,7 +24,7 @@ public abstract class ScopedSymbol extends Symbol implements Scope {
     }
 
     public ScopedSymbol(String name, Scope enclosingScope,
-            ParserRuleContext<Token> tree) {
+            ParserRuleContext tree) {
         super(name);
         this.enclosingScope = enclosingScope;
         this.tree = tree;

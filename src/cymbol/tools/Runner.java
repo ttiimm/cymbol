@@ -11,12 +11,13 @@ package cymbol.tools;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.stringtemplate.v4.ST;
 
 import cymbol.compiler.Compiler;
@@ -26,13 +27,14 @@ import cymbol.model.SourceFile;
 public class Runner {
 
     private static CharStream determineInput(String[] args) throws IOException {
+        InputStream is = null;
         if (args.length > 0) {
-            return new ANTLRFileStream(args[0]);
+            is = new FileInputStream(args[0]);
         } else {
-            ANTLRInputStream in = new ANTLRInputStream(System.in);
-            in.name = "<System.in>";
-            return in;
+            is = System.in;
         }
+
+        return CharStreams.fromStream(is);
     }
 
     /**
