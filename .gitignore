@@ -5,3 +5,8 @@ build/
 *Parser.java
 *Listener.java
 .antlr/
+*.jar
+
+# IntelliJ
+*.iml
+.idea/
